@@ -29,6 +29,7 @@ export default function RecordDetailScreen() {
   const stationName = useStationStore((s) => s.stationName);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
   const cardRef = useRef<ViewShot>(null);
   const isMountedRef = useRef(true);
 
@@ -75,9 +76,14 @@ export default function RecordDetailScreen() {
 
   const handleShare = useCallback(async () => {
     if (!cardRef.current?.capture) return;
-    const uri = await cardRef.current.capture();
-    if (await Sharing.isAvailableAsync()) {
-      await Sharing.shareAsync(uri, { mimeType: 'image/png' });
+    setShareError(null);
+    try {
+      const uri = await cardRef.current.capture();
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: 'image/png' });
+      }
+    } catch {
+      setShareError('Could not share sighting. Please try again.');
     }
   }, []);
 
@@ -139,6 +145,9 @@ export default function RecordDetailScreen() {
         >
           <Text className="text-base font-semibold text-gray-700">Share sighting</Text>
         </Pressable>
+        {shareError ? (
+          <Text className="text-center text-sm text-red-600">{shareError}</Text>
+        ) : null}
       </View>
     </ScrollView>
   );
