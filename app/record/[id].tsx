@@ -29,6 +29,8 @@ export default function RecordDetailScreen() {
   const stationName = useStationStore((s) => s.stationName);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [audioLoading, setAudioLoading] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
   const [shareError, setShareError] = useState<string | null>(null);
   const cardRef = useRef<ViewShot>(null);
   const isMountedRef = useRef(true);
@@ -59,24 +61,30 @@ export default function RecordDetailScreen() {
       }
       return;
     }
-    const { sound: newSound } = await Audio.Sound.createAsync(
-      { uri: record.soundscapeUrl },
-      { shouldPlay: true },
-    );
-    if (!isMountedRef.current) {
-      await newSound.unloadAsync();
-      return;
+    setAudioLoading(true);
+    try {
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: record.soundscapeUrl },
+        { shouldPlay: true },
+      );
+      if (!isMountedRef.current) {
+        await newSound.unloadAsync();
+        return;
+      }
+      newSound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinish) setPlaying(false);
+      });
+      setSound(newSound);
+      setPlaying(true);
+    } finally {
+      setAudioLoading(false);
     }
-    newSound.setOnPlaybackStatusUpdate((status) => {
-      if (status.isLoaded && status.didJustFinish) setPlaying(false);
-    });
-    setSound(newSound);
-    setPlaying(true);
   }, [sound, playing, record]);
 
   const handleShare = useCallback(async () => {
     if (!cardRef.current?.capture) return;
     setShareError(null);
+    setShareLoading(true);
     try {
       const uri = await cardRef.current.capture();
       if (await Sharing.isAvailableAsync()) {
@@ -84,6 +92,8 @@ export default function RecordDetailScreen() {
       }
     } catch {
       setShareError('Could not share sighting. Please try again.');
+    } finally {
+      setShareLoading(false);
     }
   }, []);
 
@@ -131,19 +141,29 @@ export default function RecordDetailScreen() {
       <View className="px-5 pb-6 gap-3">
         {record.soundscapeUrl ? (
           <Pressable
-            className="flex-row items-center justify-center gap-2 rounded-xl bg-green-700 py-3 active:opacity-75"
+            className="flex-row items-center justify-center gap-2 rounded-xl bg-green-700 py-3 active:opacity-75 disabled:opacity-50"
             onPress={togglePlay}
+            disabled={audioLoading}
           >
-            <Text className="text-base font-semibold text-white">
-              {playing ? '⏸ Pause' : '▶ Play recording'}
-            </Text>
+            {audioLoading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text className="text-base font-semibold text-white">
+                {playing ? '⏸ Pause' : '▶ Play recording'}
+              </Text>
+            )}
           </Pressable>
         ) : null}
         <Pressable
-          className="flex-row items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 active:opacity-75"
+          className="flex-row items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 active:opacity-75 disabled:opacity-50"
           onPress={handleShare}
+          disabled={shareLoading}
         >
-          <Text className="text-base font-semibold text-gray-700">Share sighting</Text>
+          {shareLoading ? (
+            <ActivityIndicator color="#4b5563" size="small" />
+          ) : (
+            <Text className="text-base font-semibold text-gray-700">Share sighting</Text>
+          )}
         </Pressable>
         {shareError ? (
           <Text className="text-center text-sm text-red-600">{shareError}</Text>
