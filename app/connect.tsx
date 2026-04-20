@@ -11,8 +11,19 @@ export default function ConnectScreen() {
   const [error, setError] = useState<string | null>(null);
   const connect = useStationStore((s) => s.connect);
 
+  function validate(): string | null {
+    if (!token.trim()) return 'Token is required.';
+    if (!stationId.trim()) return 'Station ID is required.';
+    if (!/^\d+$/.test(stationId.trim())) return 'Station ID must be a number (e.g. 12345).';
+    return null;
+  }
+
   async function handleConnect() {
-    if (!token.trim() || !stationId.trim()) return;
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
