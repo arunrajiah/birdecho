@@ -95,11 +95,12 @@ Press `i` for iOS simulator, `a` for Android emulator, or scan the QR code with 
 
 ### Environment variables
 
-| Variable | Description |
-|---|---|
-| `EXPO_PUBLIC_SENTRY_DSN` | Optional. Enables Sentry error tracking when set. |
+| Variable | Default | Description |
+|---|---|---|
+| `EXPO_PUBLIC_SENTRY_DSN` | _(unset)_ | Optional. Enables Sentry error and performance tracking when set. |
+| `EXPO_PUBLIC_SENTRY_TRACES_SAMPLE_RATE` | `0.2` | Optional. Sentry performance traces sample rate (0.0–1.0). |
 
-Create a `.env.local` file at the project root.
+Copy `.env.example` to `.env.local` at the project root and fill in the values you need. `.env.local` is git-ignored and never committed.
 
 ---
 
