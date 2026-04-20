@@ -13,15 +13,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -41,8 +32,20 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Build APK locally (preview profile)
-        run: eas build --platform android --profile preview --non-interactive --local --output ./perch.apk
+      - name: Build APK via EAS cloud and download
+        id: eas
+        run: |
+          BUILD_JSON=$(eas build \
+            --platform android \
+            --profile preview \
+            --non-interactive \
+            --wait \
+            --json \
+            2>/dev/null)
+          BUILD_URL=$(echo "$BUILD_JSON" | python3 -c \
+            "import sys,json; b=json.load(sys.stdin); print(b[0]['artifacts']['buildUrl'])")
+          echo "url=$BUILD_URL" >> "$GITHUB_OUTPUT"
+          curl -L "$BUILD_URL" -o perch.apk
 
       - name: Extract changelog for this tag
         id: changelog
