@@ -23,9 +23,9 @@ export default function RootLayout() {
   useEffect(() => {
     if (hydrated.current) return;
     hydrated.current = true;
-    hydrateStation();
-    hydrateFavorites();
-    hydrateTheme();
+    hydrateStation().catch(console.error);
+    hydrateFavorites().catch(console.error);
+    hydrateTheme().catch(console.error);
   }, [hydrateStation, hydrateFavorites, hydrateTheme]);
 
   useEffect(() => {
