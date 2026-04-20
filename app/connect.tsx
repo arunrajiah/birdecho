@@ -20,7 +20,19 @@ export default function ConnectScreen() {
       await connect(token.trim(), stationId.trim(), station.name);
       router.replace('/');
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not connect. Check your token and station ID.');
+      if (e instanceof Error) {
+        if (/API error 40[13]/.test(e.message)) {
+          setError('Invalid token — check your BirdWeather API token and try again.');
+        } else if (/API error 404/.test(e.message)) {
+          setError('Station not found — check your station ID and try again.');
+        } else if (e.message.startsWith('API error')) {
+          setError('The station returned an error. Please try again later.');
+        } else {
+          setError('Network error — check your internet connection and try again.');
+        }
+      } else {
+        setError('Could not connect. Check your token and station ID.');
+      }
     } finally {
       setLoading(false);
     }
