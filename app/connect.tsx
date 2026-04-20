@@ -3,7 +3,6 @@ import { View, Text, TextInput, Pressable, ActivityIndicator } from 'react-nativ
 import { router } from 'expo-router';
 import { useStationStore } from '../src/stores/stationStore';
 import { fetchStation } from '../src/api/station';
-import { setToken } from '../src/lib/secureStorage';
 
 export default function ConnectScreen() {
   const [token, setTokenValue] = useState('');
@@ -17,8 +16,7 @@ export default function ConnectScreen() {
     setLoading(true);
     setError(null);
     try {
-      await setToken(token.trim());
-      const station = await fetchStation(stationId.trim());
+      const station = await fetchStation(stationId.trim(), token.trim());
       await connect(token.trim(), stationId.trim(), station.name);
       router.replace('/');
     } catch (e) {
