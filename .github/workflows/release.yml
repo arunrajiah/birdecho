@@ -13,6 +13,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -26,27 +32,28 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Setup EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Generate native Android project
+        run: npx expo prebuild --platform android --clean --no-install
 
-      - name: Build APK via EAS cloud
-        run: eas build --platform android --profile preview --non-interactive --wait
-
-      - name: Download APK from EAS
-        id: eas
+      - name: Decode keystore
         run: |
-          BUILD_URL=$(eas build:list \
-            --platform android \
-            --limit 1 \
-            --non-interactive \
-            --json \
-            2>/dev/null | python3 -c \
-            "import sys,json; b=json.load(sys.stdin); print(b[0]['artifacts']['buildUrl'])")
-          echo "url=$BUILD_URL" >> "$GITHUB_OUTPUT"
-          curl -L "$BUILD_URL" -o perch.apk
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/perch-release.keystore
+
+      - name: Build signed release APK
+        working-directory: android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/android/app/perch-release.keystore" \
+            -Pandroid.injected.signing.store.password="$ANDROID_KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias="$ANDROID_KEY_ALIAS" \
+            -Pandroid.injected.signing.key.password="$ANDROID_KEY_PASSWORD"
+
+      - name: Rename APK
+        run: mv android/app/build/outputs/apk/release/app-release.apk perch.apk
 
       - name: Extract changelog for this tag
         id: changelog
