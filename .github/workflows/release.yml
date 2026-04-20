@@ -39,6 +39,9 @@ jobs:
         run: |
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/perch-release.keystore
 
+      - name: Verify JS bundle (surface Metro errors early)
+        run: npx expo export:embed --eager --platform android --dev false
+
       - name: Build signed release APK
         working-directory: android
         env:
