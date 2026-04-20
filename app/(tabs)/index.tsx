@@ -17,6 +17,10 @@ export default function FeedScreen() {
   const favSpeciesIds = useFavoritesStore((s) => s.speciesIds);
   const lastNotifiedRef = useRef<Record<string, number>>({});
 
+  useEffect(() => {
+    lastNotifiedRef.current = {};
+  }, [stationId]);
+
   const {
     data,
     fetchNextPage,
