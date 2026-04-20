@@ -41,6 +41,9 @@ yarn-error.*
 # npm lockfile (project uses pnpm)
 package-lock.json
 
+# Android signing keystore (stored in GitHub secrets, never committed)
+*.keystore
+
 # generated native folders
 /ios
 /android
