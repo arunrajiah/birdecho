@@ -13,6 +13,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -32,8 +41,8 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Build APK (preview profile)
-        run: eas build --platform android --profile preview --non-interactive --output ./perch.apk
+      - name: Build APK locally (preview profile)
+        run: eas build --platform android --profile preview --non-interactive --local --output ./perch.apk
 
       - name: Extract changelog for this tag
         id: changelog
