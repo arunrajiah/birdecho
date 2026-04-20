@@ -23,11 +23,9 @@ Perch is **not** a bird-identification app. It does not listen to audio or ident
 
 ## Screenshots
 
-| Feed | Species | Stats |
-|------|---------|-------|
-| _(coming soon)_ | _(coming soon)_ | _(coming soon)_ |
+Screenshots from a live station are coming once early users submit them.
 
-> Want to contribute screenshots? See [docs/media/README.md](docs/media/README.md).
+If you're running Perch against your station, contributions are very welcome — see [docs/media/README.md](docs/media/README.md) for the capture checklist and how to submit a PR.
 
 ---
 
