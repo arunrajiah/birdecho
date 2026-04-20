@@ -30,6 +30,7 @@ export default function RecordDetailScreen() {
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [playing, setPlaying] = useState(false);
   const cardRef = useRef<ViewShot>(null);
+  const isMountedRef = useRef(true);
 
   const { data: record, isLoading, isError } = useQuery({
     queryKey: ['record', id],
@@ -38,7 +39,9 @@ export default function RecordDetailScreen() {
   });
 
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
       sound?.unloadAsync();
     };
   }, [sound]);
@@ -59,6 +62,10 @@ export default function RecordDetailScreen() {
       { uri: record.soundscapeUrl },
       { shouldPlay: true },
     );
+    if (!isMountedRef.current) {
+      await newSound.unloadAsync();
+      return;
+    }
     newSound.setOnPlaybackStatusUpdate((status) => {
       if (status.isLoaded && status.didJustFinish) setPlaying(false);
     });
