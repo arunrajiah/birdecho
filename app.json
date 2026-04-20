@@ -3,6 +3,7 @@
     "name": "birdnetpi-mobile",
     "slug": "birdnetpi-mobile",
     "version": "1.0.0",
+    "scheme": "perch",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -25,6 +26,10 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ]
   }
 }

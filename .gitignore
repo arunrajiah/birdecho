@@ -31,10 +31,15 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
+.env.local
 .env*.local
 
 # typescript
 *.tsbuildinfo
+
+# npm lockfile (project uses pnpm)
+package-lock.json
 
 # generated native folders
 /ios
