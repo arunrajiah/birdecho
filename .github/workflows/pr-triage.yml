@@ -1,0 +1,110 @@
+name: PR Triage
+
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+
+jobs:
+  # ── 1. Auto-assign maintainer as reviewer ──────────────────────────────────
+  assign-reviewer:
+    name: Request maintainer review
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Request review from @arunrajiah
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Don't request review if the PR author is the maintainer
+            if (context.payload.pull_request.user.login === 'arunrajiah') return;
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              reviewers: ['arunrajiah'],
+            });
+
+  # ── 2. Auto-label by branch name prefix ───────────────────────────────────
+  auto-label:
+    name: Label by branch prefix
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Apply label from branch name
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = context.payload.pull_request.head.ref;
+            const labelMap = {
+              'feat/':  'feature',
+              'fix/':   'bug',
+              'docs/':  'documentation',
+              'chore/': 'chore',
+              'refactor/': 'refactor',
+              'test/':  'test',
+              'perf/':  'performance',
+            };
+
+            // Ensure labels exist, then apply the matching one
+            for (const [prefix, label] of Object.entries(labelMap)) {
+              if (!branch.startsWith(prefix)) continue;
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label,
+                });
+              } catch {
+                // Label doesn't exist yet — create it
+                const colors = {
+                  feature: '0075ca', bug: 'd73a4a', documentation: '0075ca',
+                  chore: 'e4e669', refactor: 'cfd3d7', test: '0e8a16', performance: 'f9d0c4',
+                };
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label,
+                  color: colors[label] ?? 'ededed',
+                });
+              }
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                labels: [label],
+              });
+              break;
+            }
+
+  # ── 3. Welcome first-time contributors ────────────────────────────────────
+  welcome:
+    name: Welcome first-time contributors
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Post welcome comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const author = context.payload.pull_request.user.login;
+            if (author === 'arunrajiah') return;
+
+            // Check if this is their first PR to the repo
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              per_page: 100,
+            });
+            const authorPRs = prs.filter(pr => pr.user.login === author);
+            if (authorPRs.length !== 1) return; // Not their first
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: `👋 Thanks for your first contribution to Perch, @${author}!\n\nThe CI checks (lint + type-check) will run automatically. Once they pass, @arunrajiah will review and merge.\n\nIf you have questions while you wait, feel free to leave a comment here.`,
+            });
