@@ -1,4 +1,4 @@
-# Contributing to Perch
+# Contributing to BirdEcho
 
 ## Run locally
 

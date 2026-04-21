@@ -35,7 +35,7 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <Stack>
-        <Stack.Screen name="index" options={{ title: 'Perch', headerShown: false }} />
+        <Stack.Screen name="index" options={{ title: 'BirdEcho', headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="connect" options={{ title: 'Connect station', presentation: 'modal' }} />
         <Stack.Screen name="record/[id]" options={{ title: 'Sighting' }} />

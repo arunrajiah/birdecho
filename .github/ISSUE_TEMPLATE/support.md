@@ -16,7 +16,7 @@ assignees: ''
 
 **Environment**
 
-- Perch version (from Settings or release tag):
+- BirdEcho version (from Settings or release tag):
 - Device OS and version (e.g. Android 14, iOS 17.4):
 - Station type (BirdNET-Pi / BirdNET-Go / BirdWeather cloud station):
 

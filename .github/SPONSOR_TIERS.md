@@ -1,6 +1,6 @@
 # Sponsor tiers
 
-Thank you for considering supporting Perch. Every contribution goes directly toward keeping the project maintained, improving the app, and covering build infrastructure costs.
+Thank you for considering supporting BirdEcho. Every contribution goes directly toward keeping the project maintained, improving the app, and covering build infrastructure costs.
 
 ## Tiers
 
@@ -14,7 +14,7 @@ You help new features ship. Your name and a link appear in [docs/supporters.md](
 You make a real difference. Name + link in `supporters.md`, release shout-out, and priority issue labelling (your bug reports and feature requests get triaged first).
 
 ### Flock ($100 / month)
-Reserved for organisations or individuals who depend on Perch in a meaningful way. Name + link + logo in `supporters.md` and the README sponsors section. Direct line for questions via GitHub Discussions.
+Reserved for organisations or individuals who depend on BirdEcho in a meaningful way. Name + link + logo in `supporters.md` and the README sponsors section. Direct line for questions via GitHub Discussions.
 
 ## How to sponsor
 

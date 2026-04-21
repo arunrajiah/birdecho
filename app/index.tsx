@@ -9,7 +9,7 @@ export default function HomeScreen() {
 
   return (
     <View className="flex-1 items-center justify-center bg-white px-6">
-      <Text className="text-4xl font-bold text-gray-900">Perch</Text>
+      <Text className="text-4xl font-bold text-gray-900">BirdEcho</Text>
       <Text className="mt-2 text-base text-gray-500 text-center">
         A companion for your backyard bird station.
       </Text>
