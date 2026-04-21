@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "Perch",
-    "slug": "perch",
+    "name": "BirdEcho",
+    "slug": "birdecho",
     "version": "0.1.0",
-    "scheme": "perch",
+    "scheme": "birdecho",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -14,7 +14,7 @@
       "backgroundColor": "#ffffff"
     },
     "android": {
-      "package": "dev.arunrajiah.perch",
+      "package": "dev.arunrajiah.birdecho",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -23,7 +23,7 @@
       "predictiveBackGestureEnabled": false
     },
     "ios": {
-      "bundleIdentifier": "dev.arunrajiah.perch",
+      "bundleIdentifier": "dev.arunrajiah.birdecho",
       "supportsTablet": true
     },
     "web": {

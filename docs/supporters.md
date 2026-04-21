@@ -1,6 +1,6 @@
 # Supporters
 
-Thank you to everyone who has sponsored Perch development.
+Thank you to everyone who has sponsored BirdEcho development.
 
 ## Current sponsors
 

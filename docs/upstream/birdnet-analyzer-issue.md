@@ -12,7 +12,7 @@
 
 Hi,
 
-I maintain [Perch](https://github.com/arunrajiah/perch), an open-source mobile companion app for BirdNET-Pi and BirdNET-Go stations. Currently Perch connects via the BirdWeather hosted API, which means users need BirdWeather integration enabled.
+I maintain [BirdEcho](https://github.com/arunrajiah/birdecho), an open-source mobile companion app for BirdNET-Pi and BirdNET-Go stations. Currently BirdEcho connects via the BirdWeather hosted API, which means users need BirdWeather integration enabled.
 
 A longer-term goal is to support direct connections to self-hosted instances without requiring BirdWeather. To do that reliably, it would help to have a documented, stable HTTP API contract from BirdNET-Analyzer (or the Pi/Go wrappers).
 
@@ -27,7 +27,7 @@ Happy to contribute documentation or an OpenAPI spec if that would be useful.
 Thanks for the incredible work on BirdNET.
 
 — Arun  
-https://github.com/arunrajiah/perch
+https://github.com/arunrajiah/birdecho
 
 ---
 

@@ -106,5 +106,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.payload.pull_request.number,
-              body: `👋 Thanks for your first contribution to Perch, @${author}!\n\nThe CI checks (lint + type-check) will run automatically. Once they pass, @arunrajiah will review and merge.\n\nIf you have questions while you wait, feel free to leave a comment here.`,
+              body: `👋 Thanks for your first contribution to BirdEcho, @${author}!\n\nThe CI checks (lint + type-check) will run automatically. Once they pass, @arunrajiah will review and merge.\n\nIf you have questions while you wait, feel free to leave a comment here.`,
             });

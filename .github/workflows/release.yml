@@ -39,7 +39,7 @@ jobs:
 
       - name: Decode keystore
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/perch-release.keystore
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/birdecho-release.keystore
 
       - name: Verify JS bundle (surface Metro errors early)
         run: npx expo export:embed --eager --platform android --dev false
@@ -52,13 +52,13 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           ./gradlew assembleRelease \
-            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/android/app/perch-release.keystore" \
+            -Pandroid.injected.signing.store.file="$GITHUB_WORKSPACE/android/app/birdecho-release.keystore" \
             -Pandroid.injected.signing.store.password="$ANDROID_KEYSTORE_PASSWORD" \
             -Pandroid.injected.signing.key.alias="$ANDROID_KEY_ALIAS" \
             -Pandroid.injected.signing.key.password="$ANDROID_KEY_PASSWORD"
 
       - name: Rename APK
-        run: mv android/app/build/outputs/apk/release/app-release.apk perch.apk
+        run: mv android/app/build/outputs/apk/release/app-release.apk birdecho.apk
 
       - name: Extract changelog for this tag
         id: changelog
@@ -74,8 +74,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: Perch ${{ github.ref_name }}
+          name: BirdEcho ${{ github.ref_name }}
           body: ${{ steps.changelog.outputs.notes }}
-          files: perch.apk
+          files: birdecho.apk
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}

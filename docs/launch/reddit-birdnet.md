@@ -5,11 +5,11 @@
 
 ---
 
-**Title:** Perch — open-source mobile companion for BirdNET-Pi / BirdNET-Go / BirdWeather stations
+**Title:** BirdEcho — open-source mobile companion for BirdNET-Pi / BirdNET-Go / BirdWeather stations
 
 ---
 
-I built a small open-source Android (and community-built iOS) app called **Perch** for anyone running a self-hosted BirdNET-Pi, BirdNET-Go, or BirdWeather station.
+I built a small open-source Android (and community-built iOS) app called **BirdEcho** for anyone running a self-hosted BirdNET-Pi, BirdNET-Go, or BirdWeather station.
 
 It connects to your station via the BirdWeather API and gives you:
 
@@ -22,7 +22,7 @@ It connects to your station via the BirdWeather API and gives you:
 
 **It is not a bird-ID app** — it doesn't listen to audio or run any model. It just shows what your station already detected.
 
-Android APK: https://github.com/arunrajiah/perch/releases  
-Source (MIT): https://github.com/arunrajiah/perch
+Android APK: https://github.com/arunrajiah/birdecho/releases  
+Source (MIT): https://github.com/arunrajiah/birdecho
 
 Happy to answer questions. Bug reports and PRs welcome.

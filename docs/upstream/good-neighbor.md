@@ -5,7 +5,7 @@ Things to do before and after posting or opening PRs in upstream communities.
 ## Before posting anywhere
 
 - [ ] Read the community's CONTRIBUTING guide and CODE_OF_CONDUCT
-- [ ] Check recent posts/issues to make sure no one else has already posted about Perch
+- [ ] Check recent posts/issues to make sure no one else has already posted about BirdEcho
 - [ ] Make sure the GitHub release is live and the APK link works
 - [ ] Make sure the README accurately reflects current features
 
@@ -29,7 +29,7 @@ Things to do before and after posting or opening PRs in upstream communities.
 
 ## General rules
 
-- Never describe Perch as "official", "recommended by", or "endorsed by" any upstream project
+- Never describe BirdEcho as "official", "recommended by", or "endorsed by" any upstream project
 - Always include the GitHub link so people can inspect the source
 - Respond to every question in a thread, even if it's critical
 - If someone reports a bug in a community thread, direct them to GitHub Issues rather than debugging in comments
