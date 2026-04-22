@@ -75,6 +75,34 @@ BirdEcho stores your token in the device's secure enclave (iOS Keychain / Androi
 
 ---
 
+## FAQ & Troubleshooting
+
+**Where do I find my API token and Station ID?**
+Log in to [app.birdweather.com](https://app.birdweather.com). Your **API token** is under account settings (top-right menu → Account). Your **Station ID** is the number at the end of your station's URL — e.g. `app.birdweather.com/stations/12345` → Station ID is `12345`.
+
+**BirdEcho says "No detections found" but my station is running.**
+Check that BirdWeather integration is enabled on your station. BirdEcho pulls data from the BirdWeather API — it cannot read directly from a BirdNET-Pi or BirdNET-Go instance that hasn't pushed to BirdWeather. On BirdNET-Pi, enable it under Tools → Settings → BirdWeather. On BirdNET-Go, enable it in `config.yaml` under `birdweather`.
+
+**The app says "Invalid token or station" on connect.**
+Double-check both values — the token is case-sensitive and the Station ID must be a number, not the station name. Try copying the token fresh from BirdWeather; some browsers add a trailing space.
+
+**I connected successfully but the feed is empty.**
+Your station may not have any detections yet, or detections may be older than the default page. Pull down to refresh. If your station has detections on the BirdWeather website but not in BirdEcho, please [open an issue](https://github.com/arunrajiah/birdecho/issues).
+
+**Notifications aren't arriving.**
+On first use, BirdEcho asks for notification permission — check that you approved it. On Android, also check that battery optimisation isn't killing the app in the background. You can re-enable notifications any time from the Settings tab.
+
+**Does BirdEcho work without BirdWeather?**
+Not yet. Direct BirdNET-Pi and BirdNET-Go HTTP API support (no BirdWeather required) is on the [roadmap](ROADMAP.md). Contributions welcome.
+
+**Is my token stored securely?**
+Yes. BirdEcho uses `expo-secure-store`, which maps to iOS Keychain and Android Keystore. Your token is never logged, cached to disk in plain text, or sent anywhere other than the BirdWeather API.
+
+**Can I use BirdEcho with multiple stations?**
+One station at a time currently. Tap **Disconnect** in the Settings tab to switch to a different station. Multi-station support is on the [roadmap](ROADMAP.md).
+
+---
+
 ## Quickstart (development)
 
 ```bash
