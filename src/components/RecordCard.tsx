@@ -3,7 +3,8 @@ import { router } from 'expo-router';
 import type { Detection } from '../types/birdweather';
 import { formatTime } from '../lib/formatDate';
 
-const PLACEHOLDER = 'https://placehold.co/56x56/e5e7eb/6b7280?text=🐦';
+// M-5: Use a bundled local asset instead of fetching from placehold.co (third-party, leaks IP).
+const PLACEHOLDER = require('../../assets/icon.png') as number;
 
 function confidenceColor(confidence: number): string {
   if (confidence >= 0.8) return 'bg-green-500';
@@ -24,7 +25,7 @@ export default function RecordCard({ record, timezone }: Props) {
       onPress={() => router.push(`/record/${record.id}`)}
     >
       <Image
-        source={{ uri: record.imageUrl ?? PLACEHOLDER }}
+        source={record.imageUrl ? { uri: record.imageUrl } : PLACEHOLDER}
         className="h-14 w-14 rounded-lg bg-gray-100"
         resizeMode="cover"
       />

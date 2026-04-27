@@ -6,7 +6,7 @@ import { useColorScheme } from 'nativewind';
 import { useStationStore } from '../src/stores/stationStore';
 import { useFavoritesStore } from '../src/stores/favoritesStore';
 import { useThemeStore } from '../src/stores/themeStore';
-import { initSentry } from '../src/lib/sentry';
+import { initSentry, captureException } from '../src/lib/sentry';
 
 initSentry();
 
@@ -23,9 +23,9 @@ export default function RootLayout() {
   useEffect(() => {
     if (hydrated.current) return;
     hydrated.current = true;
-    hydrateStation().catch(console.error);
-    hydrateFavorites().catch(console.error);
-    hydrateTheme().catch(console.error);
+    hydrateStation().catch(captureException);
+    hydrateFavorites().catch(captureException);
+    hydrateTheme().catch(captureException);
   }, [hydrateStation, hydrateFavorites, hydrateTheme]);
 
   useEffect(() => {

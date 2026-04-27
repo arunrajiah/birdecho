@@ -10,5 +10,13 @@ Email [arunrajiah@gmail.com](mailto:arunrajiah@gmail.com) with:
 - Steps to reproduce
 - Potential impact
 
-You will receive a response within 48 hours. Once confirmed, a fix will be prioritised and a
-patched release issued as soon as possible.
+## Response timeline
+
+| Milestone | Target |
+|---|---|
+| Initial acknowledgement | Within 48 hours |
+| Confirmed or declined | Within 7 days |
+| Patch released (confirmed vulnerabilities) | Within 14 days of confirmation |
+| Public disclosure | 90 days after initial report, or after patch — whichever is sooner |
+
+If a fix cannot be shipped within 90 days, we will coordinate public disclosure with the reporter before the deadline.

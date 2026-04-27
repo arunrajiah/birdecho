@@ -2,7 +2,8 @@ import { View, Text, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import type { Species } from '../types/birdweather';
 
-const PLACEHOLDER = 'https://placehold.co/48x48/e5e7eb/6b7280?text=🐦';
+// M-5: Bundled local asset — no external network call for placeholder images.
+const PLACEHOLDER = require('../../assets/icon.png') as number;
 
 export default function SpeciesRow({ species }: { species: Species }) {
   return (
@@ -11,7 +12,7 @@ export default function SpeciesRow({ species }: { species: Species }) {
       onPress={() => router.push(`/species/${species.id}`)}
     >
       <Image
-        source={{ uri: species.imageUrl ?? PLACEHOLDER }}
+        source={species.imageUrl ? { uri: species.imageUrl } : PLACEHOLDER}
         className="h-12 w-12 rounded-lg bg-gray-100"
         resizeMode="cover"
       />

@@ -119,7 +119,7 @@ export default function RecordDetailScreen() {
     <ScrollView className="flex-1 bg-white">
       <ViewShot ref={cardRef} options={{ format: 'png', quality: 1 }}>
         <Image
-          source={{ uri: record.imageUrl ?? `https://placehold.co/${Math.round(width)}x240/e5e7eb/6b7280?text=Bird` }}
+          source={record.imageUrl ? { uri: record.imageUrl } : require('../../assets/icon.png')}
           style={{ width, height: 240 }}
           resizeMode="cover"
         />

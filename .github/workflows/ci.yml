@@ -1,22 +1,30 @@
 name: CI
 
+# M-1 (security): All action references are pinned to exact commit SHAs.
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
 
+# L-6: Deny all permissions globally; jobs declare only what they need.
+permissions: {}
+
 jobs:
   ci:
+    name: Lint & type-check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa  # v4
         with:
           version: 10
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020  # v4
         with:
           node-version: 20
           cache: pnpm
