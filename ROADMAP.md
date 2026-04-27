@@ -19,19 +19,22 @@ Want to help ship something? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick up
 
 ---
 
-## 🔜 v0.2 — Near-term
+## ✅ v0.2.0 — Shipped
 
-- **F-Droid submission** — get BirdEcho listed on F-Droid for users who prefer not to sideload APKs
-- **Screenshots in README and release notes** — real device captures to help new users know what they're installing
-- **Connection error UX** — clearer messages when token is wrong, station is offline, or BirdWeather is unreachable
-- **Sighting timestamp localisation** — show detection times in the device's local timezone rather than UTC
+- **Connection error UX** — structured error states with auth-recovery flow; tapping "Reconnect station" returns to the connect screen instead of showing a blank feed
+- **Station timezone localisation** — detection times displayed in the station's IANA timezone (e.g. `America/New_York`) rather than UTC
+- **Direct BirdNET-Go HTTP API** — connect to a local BirdNET-Go instance over your home network; no BirdWeather account required. Covers feed, species, stats, audio, and species-image endpoints via `/api/v2`
+- **Security hardening** — BirdWeather API token moved to `X-Auth-Token` header (never in the URL), GitHub Actions SHA-pinned, Sentry strips credentials before sending, Content-Type validated before JSON parsing, keystore auto-deleted after CI builds
+- **Storage fix** — favorites migrated from `expo-secure-store` (2 KB limit) to `AsyncStorage` to support large favourites lists
+- **Notifications UX** — settings toggle now honestly reflects the current state (OS permission grant + local confirmation); removes misleading Expo push-token collection that implied server-side push was already working
 
 ---
 
-## 🗓 v0.3 — Medium-term
+## 🔜 v0.3 — Near-term
 
+- **F-Droid submission** — get BirdEcho listed on F-Droid for users who prefer not to sideload APKs
+- **Screenshots in README and release notes** — real device captures to help new users know what they're installing
 - **Direct BirdNET-Pi HTTP API support** — connect to a local BirdNET-Pi instance without needing BirdWeather integration
-- **Direct BirdNET-Go HTTP API support** — same, for BirdNET-Go stations
 - **Home screen widget** — today's detection count and last detected species, glanceable without opening the app
 - **Offline cache** — persist the last N detections so the feed is readable without a network connection
 
@@ -41,6 +44,7 @@ Want to help ship something? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick up
 
 - **iOS App Store / TestFlight** — a signed iOS build distributed through the App Store
 - **Multi-station support** — monitor more than one station from the same app, switch with a swipe
+- **Rare-species push alerts** — server-side push notifications when a starred or regionally unusual species is detected
 - **Map view** — show your station on a map alongside nearby public BirdWeather stations
 - **Apple Watch / Wear OS glance** — last detection and daily count on your wrist
 

@@ -35,6 +35,7 @@ If you're running BirdEcho against your station, contributions are very welcome 
 - Live-updating list of detections, auto-refreshed every 60 seconds
 - Pull-to-refresh and infinite scroll pagination
 - Tap any sighting to hear the recording and share a card
+- Detection times shown in your station's local timezone
 
 **Species tab**
 - Browse every species your station has ever detected
@@ -50,7 +51,7 @@ If you're running BirdEcho against your station, contributions are very welcome 
 
 **Settings tab**
 - Light / Dark / System theme
-- Notification opt-in with Expo push token registration
+- Notification permission opt-in (push alerts coming in a future release)
 - Disconnect and reconnect to a different station
 
 ---
@@ -67,21 +68,35 @@ If you're running BirdEcho against your station, contributions are very welcome 
 
 ## Connecting your station
 
+### BirdNET-Go (direct, no cloud required)
+
+1. Make sure your BirdNET-Go instance is reachable from your phone — either on the same Wi-Fi network or via VPN.
+2. Open BirdEcho → **Connect your station** → choose **BirdNET-Go**.
+3. Enter the host URL, e.g. `http://192.168.1.100:8080`. BirdEcho will ping the station to verify the connection before saving.
+
+No token or account needed. BirdNET-Go's `/api/v2` endpoints are public by default.
+
+### BirdWeather (cloud)
+
 1. Log in to [app.birdweather.com](https://app.birdweather.com) and copy your **API token** from account settings.
 2. Find your **Station ID** on the station dashboard URL: `.../stations/12345`.
-3. Open BirdEcho → **Connect your station** → paste both values → tap **Connect**.
+3. Open BirdEcho → **Connect your station** → choose **BirdWeather** → paste both values → tap **Connect**.
 
-BirdEcho stores your token in the device's secure enclave (iOS Keychain / Android Keystore) via `expo-secure-store`. It is never sent anywhere except the BirdWeather API.
+Your token is stored in the device's secure enclave (iOS Keychain / Android Keystore) via `expo-secure-store`. It is sent only to the BirdWeather API, never logged or cached in plain text.
 
 ---
 
 ## FAQ & Troubleshooting
 
-**Where do I find my API token and Station ID?**
+**Which connection mode should I use?**
+If your BirdNET-Go instance is on your home network (or reachable via VPN), use **BirdNET-Go** — it's direct and requires no third-party account. If you use BirdWeather to share detections publicly or you're on a BirdNET-Pi, use **BirdWeather**.
+
+**Where do I find my BirdWeather API token and Station ID?**
 Log in to [app.birdweather.com](https://app.birdweather.com). Your **API token** is under account settings (top-right menu → Account). Your **Station ID** is the number at the end of your station's URL — e.g. `app.birdweather.com/stations/12345` → Station ID is `12345`.
 
 **BirdEcho says "No detections found" but my station is running.**
-Check that BirdWeather integration is enabled on your station. BirdEcho pulls data from the BirdWeather API — it cannot read directly from a BirdNET-Pi or BirdNET-Go instance that hasn't pushed to BirdWeather. On BirdNET-Pi, enable it under Tools → Settings → BirdWeather. On BirdNET-Go, enable it in `config.yaml` under `birdweather`.
+- *BirdNET-Go*: check that your phone can reach the host URL. Try opening it in your phone's browser — if you see a response, BirdEcho should work too. Make sure BirdNET-Go v2.x is running (the app uses `/api/v2`).
+- *BirdWeather*: check that BirdWeather integration is enabled on your station. On BirdNET-Pi enable it under Tools → Settings → BirdWeather. On BirdNET-Go enable it in `config.yaml` under `birdweather`. Pull down to refresh after enabling.
 
 **The app says "Invalid token or station" on connect.**
 Double-check both values — the token is case-sensitive and the Station ID must be a number, not the station name. Try copying the token fresh from BirdWeather; some browsers add a trailing space.
@@ -90,10 +105,10 @@ Double-check both values — the token is case-sensitive and the Station ID must
 Your station may not have any detections yet, or detections may be older than the default page. Pull down to refresh. If your station has detections on the BirdWeather website but not in BirdEcho, please [open an issue](https://github.com/arunrajiah/birdecho/issues).
 
 **Notifications aren't arriving.**
-On first use, BirdEcho asks for notification permission — check that you approved it. On Android, also check that battery optimisation isn't killing the app in the background. You can re-enable notifications any time from the Settings tab.
+On first use, BirdEcho asks for notification permission — check that you approved it. On Android, also check that battery optimisation isn't killing the app in the background. You can re-enable notifications any time from the Settings tab. Note: server-side push alerts are a future feature; today's alerts are local-only.
 
 **Does BirdEcho work without BirdWeather?**
-Not yet. Direct BirdNET-Pi and BirdNET-Go HTTP API support (no BirdWeather required) is on the [roadmap](ROADMAP.md). Contributions welcome.
+Yes — connect directly to a **BirdNET-Go** instance over your local network with no BirdWeather account needed. Direct BirdNET-Pi HTTP API support is on the [roadmap](ROADMAP.md).
 
 **Is my token stored securely?**
 Yes. BirdEcho uses `expo-secure-store`, which maps to iOS Keychain and Android Keystore. Your token is never logged, cached to disk in plain text, or sent anywhere other than the BirdWeather API.
@@ -110,7 +125,7 @@ One station at a time currently. Tap **Disconnect** in the Settings tab to switc
 git clone https://github.com/arunrajiah/birdecho.git
 cd birdecho
 
-# install
+# install (project uses pnpm)
 pnpm install
 
 # start dev server
