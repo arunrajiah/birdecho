@@ -3,6 +3,8 @@ import * as SecureStore from 'expo-secure-store';
 const TOKEN_KEY = 'birdweather_token';
 const STATION_ID_KEY = 'birdweather_station_id';
 const TIMEZONE_KEY = 'birdweather_timezone';
+const CONNECTION_TYPE_KEY = 'connection_type';
+const HOST_URL_KEY = 'birdnetgo_host_url';
 
 export async function getToken(): Promise<string | null> {
   return SecureStore.getItemAsync(TOKEN_KEY);
@@ -38,4 +40,28 @@ export async function setTimezone(timezone: string): Promise<void> {
 
 export async function clearTimezone(): Promise<void> {
   await SecureStore.deleteItemAsync(TIMEZONE_KEY);
+}
+
+export async function getConnectionType(): Promise<string | null> {
+  return SecureStore.getItemAsync(CONNECTION_TYPE_KEY);
+}
+
+export async function setConnectionType(type: string): Promise<void> {
+  await SecureStore.setItemAsync(CONNECTION_TYPE_KEY, type);
+}
+
+export async function getHostUrl(): Promise<string | null> {
+  return SecureStore.getItemAsync(HOST_URL_KEY);
+}
+
+export async function setHostUrl(url: string): Promise<void> {
+  await SecureStore.setItemAsync(HOST_URL_KEY, url);
+}
+
+export async function clearHostUrl(): Promise<void> {
+  await SecureStore.deleteItemAsync(HOST_URL_KEY);
+}
+
+export async function clearConnectionType(): Promise<void> {
+  await SecureStore.deleteItemAsync(CONNECTION_TYPE_KEY);
 }

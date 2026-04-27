@@ -1,18 +1,19 @@
 import { View, Text, ActivityIndicator } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
-import { fetchTopSpecies } from '../../src/api/species';
 import { useStationStore } from '../../src/stores/stationStore';
+import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import SpeciesRow from '../../src/components/SpeciesRow';
 import ErrorState from '../../src/components/ErrorState';
 
 export default function SpeciesScreen() {
-  const stationId = useStationStore((s) => s.stationId) ?? '';
+  const isConnected = useStationStore((s) => s.isConnected);
+  const adapter = useApiAdapter();
 
   const { data: species, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['topSpecies', stationId, 200],
-    queryFn: () => fetchTopSpecies(stationId, 200),
-    enabled: !!stationId,
+    queryKey: ['topSpecies', adapter?.cacheKey, 200],
+    queryFn: () => adapter!.fetchTopSpecies(200),
+    enabled: !!adapter && isConnected,
   });
 
   if (isLoading) {

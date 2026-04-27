@@ -1,9 +1,8 @@
 import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { VictoryBar, VictoryChart, VictoryAxis } from 'victory-native';
-import { fetchStats, fetchDailyCounts } from '../../src/api/stats';
-import { fetchTopSpecies } from '../../src/api/species';
 import { useStationStore } from '../../src/stores/stationStore';
+import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import ErrorState from '../../src/components/ErrorState';
 
 function StatCard({ label, value }: { label: string; value: number | string }) {
@@ -16,24 +15,25 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
 }
 
 export default function StatsScreen() {
-  const stationId = useStationStore((s) => s.stationId) ?? '';
+  const isConnected = useStationStore((s) => s.isConnected);
+  const adapter = useApiAdapter();
 
   const { data: stats, isLoading: statsLoading, isError: statsError, error: statsQueryError, refetch } = useQuery({
-    queryKey: ['stats', stationId],
-    queryFn: () => fetchStats(stationId),
-    enabled: !!stationId,
+    queryKey: ['stats', adapter?.cacheKey],
+    queryFn: () => adapter!.fetchStats(),
+    enabled: !!adapter && isConnected,
   });
 
   const { data: daily } = useQuery({
-    queryKey: ['daily', stationId],
-    queryFn: () => fetchDailyCounts(stationId, 14),
-    enabled: !!stationId,
+    queryKey: ['daily', adapter?.cacheKey],
+    queryFn: () => adapter!.fetchDailyCounts(14),
+    enabled: !!adapter && isConnected,
   });
 
   const { data: topSpecies } = useQuery({
-    queryKey: ['topSpecies', stationId, 10],
-    queryFn: () => fetchTopSpecies(stationId, 10),
-    enabled: !!stationId,
+    queryKey: ['topSpecies', adapter?.cacheKey, 10],
+    queryFn: () => adapter!.fetchTopSpecies(10),
+    enabled: !!adapter && isConnected,
   });
 
   if (statsLoading) {

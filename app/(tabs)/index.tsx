@@ -4,24 +4,25 @@ import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import RecordCard from '../../src/components/RecordCard';
 import ErrorState from '../../src/components/ErrorState';
-import { fetchRecentRecords } from '../../src/api/records';
 import { useStationStore } from '../../src/stores/stationStore';
 import { useFavoritesStore } from '../../src/stores/favoritesStore';
+import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import { scheduleLocalNotification } from '../../src/lib/notifications';
 import type { Detection } from '../../src/types/birdweather';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export default function FeedScreen() {
-  const stationId = useStationStore((s) => s.stationId) ?? '';
+  const isConnected = useStationStore((s) => s.isConnected);
   const stationTimezone = useStationStore((s) => s.stationTimezone) ?? undefined;
   const queryClient = useQueryClient();
   const favSpeciesIds = useFavoritesStore((s) => s.speciesIds);
   const lastNotifiedRef = useRef<Record<string, number>>({});
+  const adapter = useApiAdapter();
 
   useEffect(() => {
     lastNotifiedRef.current = {};
-  }, [stationId]);
+  }, [adapter?.cacheKey]);
 
   const {
     data,
@@ -34,12 +35,11 @@ export default function FeedScreen() {
     refetch,
     isRefetching,
   } = useInfiniteQuery({
-    queryKey: ['records', stationId],
-    queryFn: ({ pageParam }) =>
-      fetchRecentRecords(stationId, pageParam as string | undefined),
+    queryKey: ['records', adapter?.cacheKey],
+    queryFn: ({ pageParam }) => adapter!.fetchRecentRecords(pageParam as string | undefined),
     getNextPageParam: (lastPage) => lastPage.cursor,
     initialPageParam: undefined as string | undefined,
-    enabled: !!stationId,
+    enabled: !!adapter && isConnected,
     refetchInterval: 60_000,
     refetchOnWindowFocus: true,
   });
@@ -62,8 +62,8 @@ export default function FeedScreen() {
   }, [records, favSpeciesIds]);
 
   const onRefresh = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['records', stationId] });
-  }, [queryClient, stationId]);
+    queryClient.invalidateQueries({ queryKey: ['records', adapter?.cacheKey] });
+  }, [queryClient, adapter?.cacheKey]);
 
   if (isLoading) {
     return (
