@@ -15,6 +15,7 @@ import * as Sharing from 'expo-sharing';
 import ViewShot from 'react-native-view-shot';
 import { fetchRecord } from '../../src/api/records';
 import { useStationStore } from '../../src/stores/stationStore';
+import { formatDateTime } from '../../src/lib/formatDate';
 
 const { width } = Dimensions.get('window');
 
@@ -27,6 +28,7 @@ function confidenceColor(confidence: number): string {
 export default function RecordDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const stationName = useStationStore((s) => s.stationName);
+  const stationTimezone = useStationStore((s) => s.stationTimezone) ?? undefined;
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [playing, setPlaying] = useState(false);
   const [audioLoading, setAudioLoading] = useState(false);
@@ -132,7 +134,7 @@ export default function RecordDetailScreen() {
             </View>
           </View>
           <Text className="mt-2 text-sm text-gray-400">
-            {new Date(record.timestamp).toLocaleString()}
+            {formatDateTime(record.timestamp, stationTimezone)}
           </Text>
           {stationName ? <Text className="text-sm text-gray-400">{stationName}</Text> : null}
         </View>

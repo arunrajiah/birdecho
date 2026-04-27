@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { View, Text, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import RecordCard from '../../src/components/RecordCard';
+import ErrorState from '../../src/components/ErrorState';
 import { fetchRecentRecords } from '../../src/api/records';
 import { useStationStore } from '../../src/stores/stationStore';
 import { useFavoritesStore } from '../../src/stores/favoritesStore';
@@ -13,6 +14,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 export default function FeedScreen() {
   const stationId = useStationStore((s) => s.stationId) ?? '';
+  const stationTimezone = useStationStore((s) => s.stationTimezone) ?? undefined;
   const queryClient = useQueryClient();
   const favSpeciesIds = useFavoritesStore((s) => s.speciesIds);
   const lastNotifiedRef = useRef<Record<string, number>>({});
@@ -28,6 +30,7 @@ export default function FeedScreen() {
     isFetchingNextPage,
     isLoading,
     isError,
+    error,
     refetch,
     isRefetching,
   } = useInfiniteQuery({
@@ -54,10 +57,7 @@ export default function FeedScreen() {
       const last = lastNotifiedRef.current[r.speciesId] ?? 0;
       if (now - last < DAY_MS) return;
       lastNotifiedRef.current[r.speciesId] = now;
-      scheduleLocalNotification(
-        r.commonName,
-        'Seen at your station just now.',
-      );
+      scheduleLocalNotification(r.commonName, 'Seen at your station just now.');
     });
   }, [records, favSpeciesIds]);
 
@@ -75,17 +75,11 @@ export default function FeedScreen() {
 
   if (isError) {
     return (
-      <View className="flex-1 items-center justify-center bg-white gap-4 px-6">
-        <Text className="text-center text-base text-gray-600">
-          Could not load sightings. Check your connection and station settings.
-        </Text>
-        <Pressable
-          className="rounded-xl bg-green-700 px-6 py-3 active:opacity-75"
-          onPress={() => refetch()}
-        >
-          <Text className="font-semibold text-white">Retry</Text>
-        </Pressable>
-      </View>
+      <ErrorState
+        error={error instanceof Error ? error : null}
+        onRetry={refetch}
+        subject="sightings"
+      />
     );
   }
 
@@ -94,7 +88,7 @@ export default function FeedScreen() {
       <FlashList
         data={records}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <RecordCard record={item} />}
+        renderItem={({ item }) => <RecordCard record={item} timezone={stationTimezone} />}
         overrideItemLayout={(_layout, _item, _index) => ({ size: 80 })}
         onRefresh={onRefresh}
         refreshing={isRefetching}

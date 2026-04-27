@@ -1,6 +1,7 @@
 import { View, Text, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import type { Detection } from '../types/birdweather';
+import { formatTime } from '../lib/formatDate';
 
 const PLACEHOLDER = 'https://placehold.co/56x56/e5e7eb/6b7280?text=🐦';
 
@@ -12,9 +13,11 @@ function confidenceColor(confidence: number): string {
 
 interface Props {
   record: Detection;
+  /** IANA timezone string from the connected station, e.g. "America/New_York" */
+  timezone?: string;
 }
 
-export default function RecordCard({ record }: Props) {
+export default function RecordCard({ record, timezone }: Props) {
   return (
     <Pressable
       className="flex-row items-center gap-3 bg-white px-4 py-3 active:bg-gray-50"
@@ -35,7 +38,7 @@ export default function RecordCard({ record }: Props) {
       </View>
       <View className="items-end gap-1">
         <Text className="text-xs text-gray-400">
-          {new Date(record.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {formatTime(record.timestamp, timezone)}
         </Text>
         <View className={`rounded-full px-2 py-0.5 ${confidenceColor(record.confidence)}`}>
           <Text className="text-xs font-medium text-white">

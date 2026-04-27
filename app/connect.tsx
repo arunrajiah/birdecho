@@ -28,7 +28,7 @@ export default function ConnectScreen() {
     setError(null);
     try {
       const station = await fetchStation(stationId.trim(), token.trim());
-      await connect(token.trim(), stationId.trim(), station.name);
+      await connect(token.trim(), stationId.trim(), station.name, station.timezone);
       router.replace('/');
     } catch (e) {
       if (e instanceof Error) {

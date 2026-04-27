@@ -1,9 +1,10 @@
-import { View, Text, ScrollView, ActivityIndicator, Pressable } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { VictoryBar, VictoryChart, VictoryAxis } from 'victory-native';
 import { fetchStats, fetchDailyCounts } from '../../src/api/stats';
 import { fetchTopSpecies } from '../../src/api/species';
 import { useStationStore } from '../../src/stores/stationStore';
+import ErrorState from '../../src/components/ErrorState';
 
 function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
@@ -17,7 +18,7 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
 export default function StatsScreen() {
   const stationId = useStationStore((s) => s.stationId) ?? '';
 
-  const { data: stats, isLoading: statsLoading, isError: statsError, refetch } = useQuery({
+  const { data: stats, isLoading: statsLoading, isError: statsError, error: statsQueryError, refetch } = useQuery({
     queryKey: ['stats', stationId],
     queryFn: () => fetchStats(stationId),
     enabled: !!stationId,
@@ -45,12 +46,11 @@ export default function StatsScreen() {
 
   if (statsError || !stats) {
     return (
-      <View className="flex-1 items-center justify-center bg-white gap-4 px-6">
-        <Text className="text-center text-gray-500">Could not load station stats.</Text>
-        <Pressable className="rounded-xl bg-green-700 px-6 py-3" onPress={() => refetch()}>
-          <Text className="font-semibold text-white">Retry</Text>
-        </Pressable>
-      </View>
+      <ErrorState
+        error={statsQueryError instanceof Error ? statsQueryError : null}
+        onRetry={refetch}
+        subject="station stats"
+      />
     );
   }
 
