@@ -1,6 +1,8 @@
 import { create } from 'zustand';
-import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// M-6: Migrated from expo-secure-store (2 KB limit) to AsyncStorage — favorites
+// can grow unbounded as the user adds species.
 const STORAGE_KEY = 'favorites';
 
 interface FavoritesState {
@@ -13,14 +15,14 @@ interface FavoritesState {
 }
 
 function persist(ids: string[]) {
-  SecureStore.setItemAsync(STORAGE_KEY, JSON.stringify(ids)).catch(() => {});
+  AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(ids)).catch(() => {});
 }
 
 export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   speciesIds: [],
 
   hydrate: async () => {
-    const raw = await SecureStore.getItemAsync(STORAGE_KEY);
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
     if (raw) {
       try {
         set({ speciesIds: JSON.parse(raw) as string[] });

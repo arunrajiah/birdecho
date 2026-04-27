@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { View, Text, Pressable, Switch, Alert } from 'react-native';
 import { router } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
 import { useStationStore } from '../../src/stores/stationStore';
 import { useThemeStore } from '../../src/stores/themeStore';
-import { requestPermission, getExpoPushToken } from '../../src/lib/notifications';
+import { requestPermission, scheduleLocalNotification } from '../../src/lib/notifications';
 
 type Mode = 'light' | 'dark' | 'system';
 const MODES: Mode[] = ['light', 'dark', 'system'];
@@ -12,8 +11,14 @@ const MODES: Mode[] = ['light', 'dark', 'system'];
 export default function SettingsScreen() {
   const stationName = useStationStore((s) => s.stationName);
   const stationId = useStationStore((s) => s.stationId);
+  const hostUrl = useStationStore((s) => s.hostUrl);
+  const connectionType = useStationStore((s) => s.connectionType);
+  const isConnected = useStationStore((s) => s.isConnected);
   const disconnect = useStationStore((s) => s.disconnect);
   const { mode, setMode } = useThemeStore();
+  // M-7: Tracks whether the OS notification permission has been granted.
+  // Server-side push alerts are a future feature — we only request the OS
+  // permission here so it is ready when that feature ships.
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   async function handleNotificationsToggle(value: boolean) {
@@ -23,13 +28,13 @@ export default function SettingsScreen() {
         Alert.alert('Permission required', 'Enable notifications in your device settings.');
         return;
       }
-      const token = await getExpoPushToken();
-      if (token) {
-        await SecureStore.setItemAsync('expo_push_token', token);
-        setNotificationsEnabled(true);
-      }
+      setNotificationsEnabled(true);
+      // Confirm to the user that the permission was granted
+      await scheduleLocalNotification(
+        'BirdEcho notifications enabled',
+        'You will receive rare-species alerts once that feature ships.',
+      );
     } else {
-      await SecureStore.deleteItemAsync('expo_push_token');
       setNotificationsEnabled(false);
     }
   }
@@ -38,6 +43,13 @@ export default function SettingsScreen() {
     await disconnect();
     router.replace('/');
   }
+
+  const stationLabel =
+    stationName ?? (connectionType === 'birdnetgo' ? hostUrl : stationId) ?? '—';
+  const stationSubLabel =
+    connectionType === 'birdnetgo'
+      ? `BirdNET-Go · ${hostUrl ?? ''}`
+      : `BirdWeather · ID ${stationId ?? '—'}`;
 
   return (
     <View className="flex-1 bg-white dark:bg-gray-950 px-5 pt-6">
@@ -71,25 +83,38 @@ export default function SettingsScreen() {
       <Text className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
         Notifications
       </Text>
-      <View className="mb-6 flex-row items-center justify-between rounded-xl border border-gray-200 bg-gray-50 dark:bg-gray-900 px-4 py-3">
-        <Text className="text-sm text-gray-700 dark:text-gray-300">Rare species alerts</Text>
+      <View className="mb-1 flex-row items-center justify-between rounded-xl border border-gray-200 bg-gray-50 dark:bg-gray-900 px-4 py-3">
+        <View className="flex-1 mr-3">
+          <Text className="text-sm text-gray-700 dark:text-gray-300">Rare species alerts</Text>
+          <Text className="text-xs text-gray-400 mt-0.5">
+            Coming soon — grant permission now to opt in early
+          </Text>
+        </View>
         <Switch
           value={notificationsEnabled}
           onValueChange={handleNotificationsToggle}
           trackColor={{ true: '#15803d' }}
         />
       </View>
+      <Text className="mb-6 px-1 text-xs text-gray-400">
+        Grants OS permission for future push alerts. No data leaves your device today.
+      </Text>
 
       {/* Station */}
       <Text className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
         Station
       </Text>
-      {stationId ? (
+      {isConnected ? (
         <View className="rounded-xl border border-gray-200 bg-gray-50 dark:bg-gray-900 p-4">
-          <Text className="text-base font-semibold text-gray-900 dark:text-white">
-            {stationName ?? stationId}
+          <Text
+            className="text-base font-semibold text-gray-900 dark:text-white"
+            numberOfLines={1}
+          >
+            {stationLabel}
           </Text>
-          <Text className="text-sm text-gray-400">ID: {stationId}</Text>
+          <Text className="text-sm text-gray-400 mt-0.5" numberOfLines={1}>
+            {stationSubLabel}
+          </Text>
           <Pressable
             className="mt-4 items-center rounded-lg border border-red-200 bg-red-50 py-2.5 active:opacity-75"
             onPress={handleDisconnect}
