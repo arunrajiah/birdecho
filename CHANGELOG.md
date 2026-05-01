@@ -5,6 +5,51 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-05-01
+
+### Added
+
+**BirdNET-Go direct connection**
+- Connect to a local BirdNET-Go instance over your home network — no BirdWeather account needed
+- New connect screen with BirdWeather / BirdNET-Go mode toggle
+- BirdNET-Go adapter covers: live detection feed, audio playback, species browser, stats, 14-day chart
+- Host URL validated against `/api/v2/ping` before saving; station name auto-fetched from `/api/v2/settings/dashboard`
+- Audio served from `/api/v2/media/audio/{clipName}`; species images from `/api/v2/media/image/{scientificName}`
+- Offset→cursor pagination bridges BirdNET-Go's offset/limit API with BirdWeather's cursor model
+
+**Connection error UX**
+- Structured `ErrorState` component replaces blank screens on network and API errors
+- Auth errors (401/403) show a "Reconnect station" prompt that navigates directly to the connect screen
+- Network errors and API errors show a retry button with a subject-specific message (feed / species / stats)
+
+**Station timezone localisation**
+- Detection timestamps displayed in the station's IANA timezone (e.g. `America/New_York`), not UTC
+- `formatTime()` and `formatDateTime()` helpers using `Intl.DateTimeFormat` with timezone fallback
+
+### Changed
+
+**Settings screen**
+- Station info section now shows connection type and host URL / BirdWeather ID for BirdNET-Go connections
+- Notification toggle label updated to "Coming soon — grant permission now to opt in early"; removes misleading push-token collection
+
+### Fixed
+
+- Favorites list migrated from `expo-secure-store` (2 KB per-key limit) to `@react-native-async-storage/async-storage` — large favourites lists no longer silently truncate
+- `package-lock.json` removed from repository (project uses pnpm; npm lockfile was conflicting)
+
+### Security
+
+- BirdWeather API token moved from `?token=` URL query parameter to `X-Auth-Token` request header — prevents token appearing in server logs, referrer headers, and browser history
+- Response body capped at 200 characters in error messages to prevent sensitive data leaking through error surfaces
+- `Content-Type: application/json` validated before calling `.json()` on API responses
+- GitHub Actions workflow actions pinned to exact commit SHAs (supply-chain hardening)
+- Keystore file automatically deleted from CI runner disk immediately after signing
+- Global `permissions: {}` deny-by-default added to all workflow files; jobs declare only what they need
+- Sentry `beforeSend` hook strips `X-Auth-Token` header and `token` query parameter from captured events
+- `SECURITY.md` extended with explicit response-timeline table (48 h ack → 7 d confirm → 14 d patch → 90 d disclosure)
+
+---
+
 ## [0.1.0] — 2026-04-20
 
 ### Added
