@@ -154,7 +154,7 @@ export default function ConnectScreen() {
             keyboardType="url"
           />
           <Text className="mb-6 text-xs text-gray-400">
-            Enter the local URL of your BirdNET-Go instance. No token required — read-only API access is public by default.
+            Enter the local URL of your BirdNET-Go instance. Plain HTTP (e.g. http://192.168.1.100:8080) is supported. No token required — read-only API access is public by default.
           </Text>
         </>
       )}

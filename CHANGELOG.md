@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] — 2026-05-02
+
+### Fixed
+
+- **BirdNET-Go `http://` connections blocked on Android** (issue #14 follow-up): Android 9+ (API 28) blocks plaintext HTTP traffic in production apps by default. BirdNET-Go stations are almost always served over plain HTTP on a local network, so the `fetch()` call was rejected at the OS level before even reaching the station. Fixed by setting `android:usesCleartextTraffic="true"` in the Android manifest via `app.json`. iOS is fixed by adding `NSAllowsLocalNetworking: true` to the App Transport Security config (allows HTTP for RFC 1918 private addresses only, without opening HTTPS-bypass for the internet).
+
+---
+
 ## [0.2.1] — 2026-05-02
 
 ### Fixed
