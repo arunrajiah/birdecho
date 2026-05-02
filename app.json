@@ -2,7 +2,7 @@
   "expo": {
     "name": "BirdEcho",
     "slug": "birdecho",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "scheme": "birdecho",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,14 +15,13 @@
     },
     "android": {
       "package": "dev.arunrajiah.birdecho",
-      "versionCode": 4,
+      "versionCode": 5,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "usesCleartextTraffic": true
+      "predictiveBackGestureEnabled": false
     },
     "ios": {
       "bundleIdentifier": "dev.arunrajiah.birdecho",
@@ -39,7 +38,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "extra": {
       "router": {},
