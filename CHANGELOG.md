@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] — 2026-05-02
+
+### Fixed
+
+- **BirdNET-Go connection appeared to succeed but landed on "Connect your station" screen** (issue #14): `app/index.tsx` used `stationId` to decide whether a station was connected. `stationId` is only set for BirdWeather connections — BirdNET-Go connections set `hostUrl` and `isConnected` instead. Replaced `stationId` check with `isConnected` so the screen correctly reflects BirdNET-Go connections.
+- Home screen now shows a loading spinner while the store is hydrating on startup, preventing a flash of the "Connect your station" button before persisted connection state is loaded.
+- When the store finishes hydrating and `isConnected` is true, the app automatically navigates to the feed (`/(tabs)`) so users land directly on their detections instead of having to tap "View recent sightings" every time they open the app.
+
+---
+
 ## [0.2.3] — 2026-05-02
 
 ### Fixed

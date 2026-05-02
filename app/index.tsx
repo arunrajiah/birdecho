@@ -1,11 +1,31 @@
-import { View, Text, Pressable } from 'react-native';
+import { useEffect } from 'react';
+import { View, Text, Pressable, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { useStationStore } from '../src/stores/stationStore';
 
 export default function HomeScreen() {
-  const stationId = useStationStore((s) => s.stationId);
+  // Use isConnected (covers both BirdWeather and BirdNET-Go) instead of stationId
+  // which is only set for BirdWeather connections.
+  const isConnected = useStationStore((s) => s.isConnected);
+  const loading = useStationStore((s) => s.loading);
   const stationName = useStationStore((s) => s.stationName);
   const disconnect = useStationStore((s) => s.disconnect);
+
+  // Auto-navigate to the feed once the store has hydrated and a connection exists.
+  // This avoids the user having to tap "View recent sightings" every time they open the app.
+  useEffect(() => {
+    if (!loading && isConnected) {
+      router.replace('/(tabs)');
+    }
+  }, [loading, isConnected]);
+
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#15803d" />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 items-center justify-center bg-white px-6">
@@ -14,10 +34,10 @@ export default function HomeScreen() {
         A companion for your backyard bird station.
       </Text>
 
-      {stationId ? (
+      {isConnected ? (
         <>
           <Text className="mt-6 text-lg font-semibold text-green-700">
-            {stationName ?? stationId}
+            {stationName ?? '—'}
           </Text>
           <Pressable
             className="mt-4 rounded-xl bg-green-700 px-6 py-3 active:opacity-75"
