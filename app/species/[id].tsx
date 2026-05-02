@@ -1,27 +1,25 @@
 import { View, Text, Image, ScrollView, ActivityIndicator, Pressable } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { fetchSpecies } from '../../src/api/species';
-import { fetchRecordsForSpecies } from '../../src/api/records';
-import { useStationStore } from '../../src/stores/stationStore';
+import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import { useFavoritesStore } from '../../src/stores/favoritesStore';
 import RecordCard from '../../src/components/RecordCard';
 
 export default function SpeciesDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const stationId = useStationStore((s) => s.stationId) ?? '';
+  const adapter = useApiAdapter();
   const { has, toggle } = useFavoritesStore();
 
   const { data: species, isLoading } = useQuery({
-    queryKey: ['species', id],
-    queryFn: () => fetchSpecies(id),
-    enabled: !!id,
+    queryKey: [adapter?.cacheKey, 'species', id],
+    queryFn: () => adapter!.fetchSpecies(id!),
+    enabled: !!adapter && !!id,
   });
 
   const { data: recentRecords } = useQuery({
-    queryKey: ['speciesRecords', stationId, id],
-    queryFn: () => fetchRecordsForSpecies(stationId, id),
-    enabled: !!stationId && !!id,
+    queryKey: [adapter?.cacheKey, 'speciesRecords', id],
+    queryFn: () => adapter!.fetchRecordsForSpecies(id!),
+    enabled: !!adapter && !!id,
   });
 
   const favorited = has(id);

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] — 2026-05-02
+
+### Fixed
+
+- **Species detail screen blank for BirdNET-Go users**: `app/species/[id].tsx` used `stationId` directly from the store to gate its React Query calls — `stationId` is `null` for BirdNET-Go connections, so the queries were never enabled and the species card and recent sightings list stayed permanently empty. Replaced direct `stationId`/`fetchSpecies`/`fetchRecordsForSpecies` calls with `useApiAdapter()`, matching the pattern used by all other tab screens. Both queries now use `adapter.fetchSpecies()` and `adapter.fetchRecordsForSpecies()`, which route correctly for both BirdWeather and BirdNET-Go connections.
+
+---
+
 ## [0.2.4] — 2026-05-02
 
 ### Fixed
