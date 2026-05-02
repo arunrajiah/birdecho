@@ -170,11 +170,27 @@ export function createBirdNetGoAdapter(hostUrl: string): StationAdapter {
  * Verify a BirdNET-Go host is reachable by calling GET /api/v2/ping.
  * Resolves with the host's station name (from /api/v2/settings/dashboard) if available,
  * or undefined on success without a name.
+ *
+ * Uses a raw fetch for the liveness probe — /api/v2/ping returns plain text ("pong"),
+ * not JSON, so bngFetch (which enforces Content-Type: application/json) would throw a
+ * false "Unexpected response" error even when the station is perfectly reachable.
  */
 export async function pingBirdNetGo(hostUrl: string): Promise<string | undefined> {
   const base = hostUrl.replace(/\/$/, '');
-  await bngFetch<{ status: string }>(base, `/ping`);
-  // Best-effort: try to get an instance name from dashboard settings (public endpoint)
+  let response: Response;
+  try {
+    response = await fetch(`${base}/api/v2/ping`);
+  } catch {
+    throw new Error(
+      'Could not reach the BirdNET-Go station — check the host URL and that your phone is on the same network.',
+    );
+  }
+  if (!response.ok) {
+    throw new Error(
+      `BirdNET-Go station responded with HTTP ${response.status}. Check the URL and try again.`,
+    );
+  }
+  // Best-effort: try to get an instance name from dashboard settings (public JSON endpoint)
   try {
     const settings = await bngFetch<{ node_name?: string }>(base, `/settings/dashboard`);
     return settings.node_name ?? undefined;
