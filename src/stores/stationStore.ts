@@ -8,12 +8,12 @@ interface StationState {
   stationId: string | null;
   stationName: string | null;
   stationTimezone: string | null;
-  /** BirdNET-Go host URL e.g. "http://192.168.1.100:8080". Only set for birdnetgo connections. */
+  /** Host URL (BirdNET-Go / BirdNET-Pi). Only set for direct-connection modes. */
   hostUrl: string | null;
   connectionType: ConnectionType;
   loading: boolean;
 
-  /** True when either a BirdWeather station or BirdNET-Go host is configured. */
+  /** True when a station is configured (any connection type). */
   isConnected: boolean;
 
   hydrate: () => Promise<void>;
@@ -21,9 +21,6 @@ interface StationState {
   connectBirdNetGo: (hostUrl: string, stationName?: string) => Promise<void>;
   connectBirdNetPi: (hostUrl: string, stationName?: string) => Promise<void>;
   disconnect: () => Promise<void>;
-
-  /** @deprecated Use connectBirdWeather or connectBirdNetGo */
-  connect: (token: string, stationId: string, stationName: string, timezone?: string) => Promise<void>;
 }
 
 export const useStationStore = create<StationState>((set) => ({
@@ -92,24 +89,6 @@ export const useStationStore = create<StationState>((set) => ({
       stationId: null,
       stationTimezone: null,
       connectionType: 'birdnetpi',
-      isConnected: true,
-    });
-  },
-
-  // Keep legacy signature for existing callers (connect.tsx before refactor)
-  connect: async (token, stationId, stationName, timezone) => {
-    await Promise.all([
-      secureStorage.setToken(token),
-      secureStorage.setStationId(stationId),
-      secureStorage.setConnectionType('birdweather'),
-      ...(timezone ? [secureStorage.setTimezone(timezone)] : []),
-    ]);
-    set({
-      stationId,
-      stationName,
-      stationTimezone: timezone ?? null,
-      hostUrl: null,
-      connectionType: 'birdweather',
       isConnected: true,
     });
   },
