@@ -1,19 +1,20 @@
 import { View, Text } from 'react-native';
 import { useQueries } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
-import { fetchSpecies } from '../../src/api/species';
+import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import { useFavoritesStore } from '../../src/stores/favoritesStore';
 import SpeciesRow from '../../src/components/SpeciesRow';
 import type { Species } from '../../src/types/birdweather';
 
 export default function FavoritesScreen() {
+  const adapter = useApiAdapter();
   const speciesIds = useFavoritesStore((s) => s.speciesIds);
 
   const results = useQueries({
     queries: speciesIds.map((id) => ({
-      queryKey: ['species', id],
-      queryFn: () => fetchSpecies(id),
-      enabled: !!id,
+      queryKey: [adapter?.cacheKey, 'species', id],
+      queryFn: () => adapter!.fetchSpecies(id),
+      enabled: !!adapter && !!id,
     })),
   });
 

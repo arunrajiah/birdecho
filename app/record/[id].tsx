@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Audio } from 'expo-av';
 import * as Sharing from 'expo-sharing';
 import ViewShot from 'react-native-view-shot';
-import { fetchRecord } from '../../src/api/records';
+import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import { useStationStore } from '../../src/stores/stationStore';
 import { formatDateTime } from '../../src/lib/formatDate';
 
@@ -27,6 +27,7 @@ function confidenceColor(confidence: number): string {
 
 export default function RecordDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const adapter = useApiAdapter();
   const stationName = useStationStore((s) => s.stationName);
   const stationTimezone = useStationStore((s) => s.stationTimezone) ?? undefined;
   const [sound, setSound] = useState<Audio.Sound | null>(null);
@@ -38,9 +39,9 @@ export default function RecordDetailScreen() {
   const isMountedRef = useRef(true);
 
   const { data: record, isLoading, isError } = useQuery({
-    queryKey: ['record', id],
-    queryFn: () => fetchRecord(id),
-    enabled: !!id,
+    queryKey: [adapter?.cacheKey, 'record', id],
+    queryFn: () => adapter!.fetchRecord(id!),
+    enabled: !!adapter && !!id,
   });
 
   useEffect(() => {
