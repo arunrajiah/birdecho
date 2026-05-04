@@ -45,11 +45,15 @@ export default function SettingsScreen() {
   }
 
   const stationLabel =
-    stationName ?? (connectionType === 'birdnetgo' ? hostUrl : stationId) ?? '—';
+    stationName ??
+    (connectionType === 'birdnetgo' || connectionType === 'birdnetpi' ? hostUrl : stationId) ??
+    '—';
   const stationSubLabel =
     connectionType === 'birdnetgo'
       ? `BirdNET-Go · ${hostUrl ?? ''}`
-      : `BirdWeather · ID ${stationId ?? '—'}`;
+      : connectionType === 'birdnetpi'
+        ? `BirdNET-Pi · ${hostUrl ?? ''}`
+        : `BirdWeather · ID ${stationId ?? '—'}`;
 
   return (
     <View className="flex-1 bg-white dark:bg-gray-950 px-5 pt-6">

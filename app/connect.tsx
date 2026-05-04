@@ -4,8 +4,9 @@ import { router } from 'expo-router';
 import { useStationStore } from '../src/stores/stationStore';
 import { fetchStation } from '../src/api/station';
 import { pingBirdNetGo } from '../src/api/adapters/birdnetgo';
+import { pingBirdNetPi } from '../src/api/adapters/birdnetpi';
 
-type Mode = 'birdweather' | 'birdnetgo';
+type Mode = 'birdweather' | 'birdnetgo' | 'birdnetpi';
 
 export default function ConnectScreen() {
   const [mode, setMode] = useState<Mode>('birdweather');
@@ -14,7 +15,7 @@ export default function ConnectScreen() {
   const [token, setTokenValue] = useState('');
   const [stationId, setStationId] = useState('');
 
-  // BirdNET-Go direct fields
+  // BirdNET-Go / BirdNET-Pi direct fields (both just need a host URL)
   const [hostUrl, setHostUrl] = useState('');
 
   const [loading, setLoading] = useState(false);
@@ -22,6 +23,7 @@ export default function ConnectScreen() {
 
   const connectBirdWeather = useStationStore((s) => s.connectBirdWeather);
   const connectBirdNetGo = useStationStore((s) => s.connectBirdNetGo);
+  const connectBirdNetPi = useStationStore((s) => s.connectBirdNetPi);
 
   function validateBirdWeather(): string | null {
     if (!token.trim()) return 'Token is required.';
@@ -30,7 +32,7 @@ export default function ConnectScreen() {
     return null;
   }
 
-  function validateBirdNetGo(): string | null {
+  function validateHostUrl(): string | null {
     const url = hostUrl.trim();
     if (!url) return 'Host URL is required.';
     if (!/^https?:\/\/.+/.test(url)) return 'Host URL must start with http:// or https://';
@@ -66,7 +68,7 @@ export default function ConnectScreen() {
   }
 
   async function handleConnectBirdNetGo() {
-    const validationError = validateBirdNetGo();
+    const validationError = validateHostUrl();
     if (validationError) { setError(validationError); return; }
     setLoading(true);
     setError(null);
@@ -75,43 +77,76 @@ export default function ConnectScreen() {
       await connectBirdNetGo(hostUrl.trim(), stationName);
       router.replace('/');
     } catch (e) {
-      if (e instanceof Error) {
-        setError(e.message);
-      } else {
-        setError('Could not reach BirdNET-Go station. Check the URL and your network.');
-      }
+      setError(
+        e instanceof Error
+          ? e.message
+          : 'Could not reach BirdNET-Go station. Check the URL and your network.',
+      );
     } finally {
       setLoading(false);
     }
   }
 
-  const handleConnect = mode === 'birdweather' ? handleConnectBirdWeather : handleConnectBirdNetGo;
-  const canSubmit = mode === 'birdweather'
-    ? !!(token.trim() && stationId.trim())
-    : !!hostUrl.trim();
+  async function handleConnectBirdNetPi() {
+    const validationError = validateHostUrl();
+    if (validationError) { setError(validationError); return; }
+    setLoading(true);
+    setError(null);
+    try {
+      await pingBirdNetPi(hostUrl.trim());
+      await connectBirdNetPi(hostUrl.trim());
+      router.replace('/');
+    } catch (e) {
+      setError(
+        e instanceof Error
+          ? e.message
+          : 'Could not reach BirdNET-Pi station. Check the URL and your network.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleConnect =
+    mode === 'birdweather'
+      ? handleConnectBirdWeather
+      : mode === 'birdnetgo'
+        ? handleConnectBirdNetGo
+        : handleConnectBirdNetPi;
+
+  const canSubmit =
+    mode === 'birdweather' ? !!(token.trim() && stationId.trim()) : !!hostUrl.trim();
 
   return (
-    <ScrollView className="flex-1 bg-white" contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 40, paddingBottom: 32 }}>
+    <ScrollView
+      className="flex-1 bg-white"
+      contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 40, paddingBottom: 32 }}
+    >
       <Text className="mb-6 text-2xl font-bold text-gray-900">Connect your station</Text>
 
-      {/* Mode toggle */}
+      {/* Mode toggle — three options */}
       <View className="mb-8 flex-row rounded-xl border border-gray-200 overflow-hidden">
-        <Pressable
-          className={`flex-1 py-2.5 items-center ${mode === 'birdweather' ? 'bg-green-700' : 'bg-white'}`}
-          onPress={() => { setMode('birdweather'); setError(null); }}
-        >
-          <Text className={`text-sm font-semibold ${mode === 'birdweather' ? 'text-white' : 'text-gray-600'}`}>
-            BirdWeather
-          </Text>
-        </Pressable>
-        <Pressable
-          className={`flex-1 py-2.5 items-center ${mode === 'birdnetgo' ? 'bg-green-700' : 'bg-white'}`}
-          onPress={() => { setMode('birdnetgo'); setError(null); }}
-        >
-          <Text className={`text-sm font-semibold ${mode === 'birdnetgo' ? 'text-white' : 'text-gray-600'}`}>
-            BirdNET-Go direct
-          </Text>
-        </Pressable>
+        {(['birdweather', 'birdnetgo', 'birdnetpi'] as Mode[]).map((m) => {
+          const label =
+            m === 'birdweather' ? 'BirdWeather' : m === 'birdnetgo' ? 'BirdNET-Go' : 'BirdNET-Pi';
+          const active = mode === m;
+          return (
+            <Pressable
+              key={m}
+              className={`flex-1 py-2.5 items-center ${active ? 'bg-green-700' : 'bg-white'}`}
+              onPress={() => {
+                setMode(m);
+                setError(null);
+              }}
+            >
+              <Text
+                className={`text-xs font-semibold ${active ? 'text-white' : 'text-gray-600'}`}
+              >
+                {label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       {mode === 'birdweather' ? (
@@ -143,25 +178,29 @@ export default function ConnectScreen() {
         </>
       ) : (
         <>
-          <Text className="mb-1 text-sm font-medium text-gray-700">BirdNET-Go host URL</Text>
+          <Text className="mb-1 text-sm font-medium text-gray-700">
+            {mode === 'birdnetgo' ? 'BirdNET-Go host URL' : 'BirdNET-Pi host URL'}
+          </Text>
           <TextInput
             className="mb-2 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900"
             value={hostUrl}
             onChangeText={setHostUrl}
-            placeholder="http://192.168.1.100:8080"
+            placeholder={
+              mode === 'birdnetgo' ? 'http://192.168.1.100:8080' : 'http://birdnetpi.local'
+            }
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="url"
           />
           <Text className="mb-6 text-xs text-gray-400">
-            Enter the local URL of your BirdNET-Go instance. Plain HTTP (e.g. http://192.168.1.100:8080) is supported. No token required — read-only API access is public by default.
+            {mode === 'birdnetgo'
+              ? 'Enter the local URL of your BirdNET-Go instance. Plain HTTP is supported. No token required — read-only API access is public by default.'
+              : 'Enter the local URL of your BirdNET-Pi (usually http://birdnetpi.local or http://192.168.x.x). No token required — the detection pages are public by default.'}
           </Text>
         </>
       )}
 
-      {error ? (
-        <Text className="mb-4 text-sm text-red-600">{error}</Text>
-      ) : null}
+      {error ? <Text className="mb-4 text-sm text-red-600">{error}</Text> : null}
 
       <Pressable
         className="items-center rounded-xl bg-green-700 py-3 active:opacity-75 disabled:opacity-50"

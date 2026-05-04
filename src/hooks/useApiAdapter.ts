@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useStationStore } from '../stores/stationStore';
 import { createBirdWeatherAdapter } from '../api/adapters/birdweather';
 import { createBirdNetGoAdapter } from '../api/adapters/birdnetgo';
+import { createBirdNetPiAdapter } from '../api/adapters/birdnetpi';
 import type { StationAdapter } from '../api/adapter';
 
 /**
@@ -16,6 +17,9 @@ export function useApiAdapter(): StationAdapter | null {
   return useMemo(() => {
     if (connectionType === 'birdnetgo' && hostUrl) {
       return createBirdNetGoAdapter(hostUrl);
+    }
+    if (connectionType === 'birdnetpi' && hostUrl) {
+      return createBirdNetPiAdapter(hostUrl);
     }
     if (stationId) {
       return createBirdWeatherAdapter(stationId);

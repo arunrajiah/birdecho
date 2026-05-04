@@ -1,0 +1,140 @@
+##
+## F-Droid metadata for BirdEcho
+##
+## Place this file at metadata/dev.arunrajiah.birdecho.yml in a fork of
+## https://gitlab.com/fdroid/fdroiddata and open a Merge Request.
+##
+## See: https://f-droid.org/en/docs/Build_Metadata_Reference/
+## See also: docs/fdroid/SUBMISSION_NOTES.md for gotchas before submitting.
+##
+
+Categories:
+  - Science & Education
+  - Internet
+
+License: MIT
+AuthorName: Arun Rajiah
+AuthorWebSite: https://github.com/arunrajiah
+WebSite: https://github.com/arunrajiah/birdecho
+SourceCode: https://github.com/arunrajiah/birdecho
+IssueTracker: https://github.com/arunrajiah/birdecho/issues
+Changelog: https://github.com/arunrajiah/birdecho/blob/main/CHANGELOG.md
+
+AutoName: BirdEcho
+Summary: Companion app for BirdNET-Pi, BirdNET-Go, and BirdWeather stations
+Description: |-
+  BirdEcho connects to your backyard bird-detection station (BirdNET-Pi,
+  BirdNET-Go, or BirdWeather) and shows you live detections, species histories,
+  audio playback, and statistics — all from your phone.
+
+  Features include:
+
+  * Real-time detection feed with confidence scores
+  * Per-sighting audio playback and share cards
+  * Species browser with detection history
+  * 14-day detection bar chart and headline stats
+  * Offline cache — the last 24 hours of detections are readable without a network connection
+  * Favorites with local notifications (once per starred species per day)
+  * Dark mode, station-timezone timestamps
+  * BirdNET-Pi direct — connects over your LAN, no cloud account required
+  * BirdNET-Go direct — connects to a local BirdNET-Go instance over your LAN
+  * BirdWeather — connects via the hosted BirdWeather API
+
+  BirdEcho is not a bird-identification app. It does not access your microphone
+  or run any detection model. It surfaces what your existing station has already detected.
+
+  Optional, opt-in error reporting via Sentry (disabled unless EXPO_PUBLIC_SENTRY_DSN
+  is set at build time — it is NOT set in F-Droid builds).
+
+AntiFeatures:
+  # Sentry's native Android SDK is compiled into the APK even when the DSN env
+  # var is absent. Sentry itself is open-source and self-hostable. Declared
+  # conservatively; remove if Sentry is stripped from the F-Droid build recipe.
+  - Tracking
+
+RepoType: git
+Repo: https://github.com/arunrajiah/birdecho.git
+
+Builds:
+  - versionName: '0.3.1'
+    versionCode: 9
+    commit: HEAD  # replace with the exact tag SHA before submitting
+    # android/ is not committed; expo prebuild generates it from app.json.
+    # After prebuild, the gradle project lives at android/app — hence subdir.
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make python3 openjdk-17-jdk
+      # Download Node.js 24 LTS (update URL + hash on every Node version bump).
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
+      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v24.0.2-linux-x64/. /usr/local/
+      - npm install -g pnpm@10
+    init:
+      # Run from repo root (two levels above android/app subdir).
+      - cd ../.. && pnpm install --frozen-lockfile
+      # Strip Sentry so the Tracking anti-feature can be removed (optional).
+      # Uncomment the next line AND remove the AntiFeatures entry above if you want a clean build.
+      # - cd ../.. && sed -i '/"@sentry\/react-native"/d' package.json && pnpm install --frozen-lockfile
+      # Generate the native Android project from app.json.
+      - cd ../.. && npx expo prebuild --platform android --clean --no-install
+    prebuild:
+      # Remove signing config — F-Droid applies its own (or user verifies with AllowedAPKSigningKeys).
+      - sed -i '/signingConfig signingConfigs/d' build.gradle
+      # Strip EAS project ID (Expo cloud service, not used at runtime).
+      - sed -i '/projectId/d' ../../app.json || true
+    gradle:
+      - yes
+    rm:
+      # Remove Hermes compiler platform binaries not needed for Linux builds.
+      - node_modules/react-native/sdks/hermesc/osx-bin
+      - node_modules/react-native/sdks/hermesc/win64-bin
+      # Remove Sentry pre-built JNI libs (rebuilt from source by Gradle).
+      - node_modules/@sentry/react-native/android/src/main/jniLibs
+    scanignore:
+      # Allow Gradle build files inside node_modules — these are FLOSS package
+      # build scripts, not application-level config.
+      - android/build.gradle
+      - node_modules/react-native/android
+      - node_modules/hermes-engine
+      - node_modules/jsc-android
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@sentry/react-native/android/build.gradle
+      - node_modules/expo/android/build.gradle
+      - node_modules/expo-av/android/build.gradle
+      - node_modules/expo-build-properties/android/build.gradle
+      - node_modules/expo-modules-core/android/build.gradle
+      - node_modules/expo-router/android/build.gradle
+      - node_modules/expo-secure-store/android/build.gradle
+      - node_modules/expo-sharing/android/build.gradle
+      - node_modules/react-native-css-interop/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-view-shot/android/build.gradle
+
+# Reproducible build path (preferred). Uncomment once confirmed byte-for-byte identical.
+# To get the fingerprint: apksigner verify --print-certs birdecho.apk | grep SHA-256
+# AllowedAPKSigningKeys: <lowercase-sha256-hex>
+# Binaries: https://github.com/arunrajiah/birdecho/releases/download/v%v/birdecho.apk
+
+MaintainerNotes: |-
+  Expo SDK 54 / React Native 0.81 app. The android/ directory is NOT committed —
+  it is generated at build time by `npx expo prebuild --platform android --clean`.
+  The subdir points to android/app (created by prebuild).
+
+  Node 24 + pnpm 10 required. Node is manually downloaded in sudo: because Debian's
+  packaged Node is too old. Update the tarball URL and SHA-256 hash on every Node bump.
+
+  Sentry (@sentry/react-native) is present but is a no-op unless EXPO_PUBLIC_SENTRY_DSN
+  is set at build time (it is NOT set in this recipe). Sentry is self-hostable (AGPL).
+  Its native Android layer is compiled regardless of the env var, hence the Tracking
+  declaration. To produce a Sentry-free build, uncomment the sed line in init:.
+
+  The app sets android:usesCleartextTraffic="true" (via expo-build-properties) to allow
+  HTTP connections to local BirdNET-Pi/Go stations on the user's LAN. This is
+  intentional and documented.
+
+AutoUpdateMode: Version %v
+UpdateCheckMode: Tags
+CurrentVersion: '0.3.1'
+CurrentVersionCode: 9

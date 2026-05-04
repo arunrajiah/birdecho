@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] — 2026-05-04
+
+### Added
+
+- **BirdNET-Pi direct connection**: connect to a local BirdNET-Pi instance over your home network — no BirdWeather account needed. Enter `http://birdnetpi.local` (or your Pi's IP address) on the connect screen. BirdNET-Pi serves HTML rather than a JSON API, so the adapter parses detection tables, stats, and species lists directly from the PHP endpoints. Supports both the original mcguirepr89/BirdNET-Pi and the Nachtzuster fork (which adds species image lookup via `/api/v1/image/{Sci_Name}` and a clean JSON species-label endpoint).
+- Connect screen now has a three-way toggle: **BirdWeather** / **BirdNET-Go** / **BirdNET-Pi**.
+- Settings screen shows `BirdNET-Pi · {url}` for BirdNET-Pi connections.
+
+---
+
 ## [0.3.0] — 2026-05-04
 
 ### Added
