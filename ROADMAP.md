@@ -30,13 +30,13 @@ Want to help ship something? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick up
 
 ---
 
-## 🔜 v0.3 — Near-term
+## 🔜 v0.3 — In progress
 
 - **F-Droid submission** — get BirdEcho listed on F-Droid for users who prefer not to sideload APKs
 - **Screenshots in README and release notes** — real device captures to help new users know what they're installing
 - **Direct BirdNET-Pi HTTP API support** — connect to a local BirdNET-Pi instance without needing BirdWeather integration
 - **Home screen widget** — today's detection count and last detected species, glanceable without opening the app
-- **Offline cache** — persist the last N detections so the feed is readable without a network connection
+- ✅ **Offline cache** (v0.3.0) — last 24 hours of detections/species/stats persisted to AsyncStorage; feed is readable with no network connection
 
 ---
 
