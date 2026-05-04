@@ -5,27 +5,28 @@
 
 ---
 
-**Title:** BirdEcho — open-source mobile app companion for self-hosted BirdNET-Pi / BirdNET-Go bird detectors
+**Title:** BirdEcho — open-source mobile app for self-hosted BirdNET-Go / BirdNET-Pi bird detectors (no cloud required)
 
 ---
 
-If you're running **BirdNET-Pi** or **BirdNET-Go** — the Raspberry Pi / server-side audio bird detection systems — and you want a native mobile interface instead of juggling browser tabs, I made BirdEcho.
+If you're running **BirdNET-Go** or **BirdNET-Pi** and want a native mobile interface instead of a browser tab, I made BirdEcho.
 
-**What it is:**
-
-A React Native / Expo app (Android APK on GitHub Releases, iOS community builds) that connects to your station via the BirdWeather API. Credentials are stored on-device in the OS secure enclave (Keychain / Keystore), never sent anywhere except the BirdWeather API.
+**The key thing for the self-hosted crowd:** BirdNET-Go mode connects directly to your local instance over your LAN — no BirdWeather account, no cloud, no API key. You just point it at `http://192.168.x.x:8080` and it talks to the BirdNET-Go HTTP API directly. BirdWeather mode is also available if you already use it.
 
 **Features:**
 
 - Live detection feed, auto-refreshed every 60 seconds
 - Audio playback for each detection
-- Species browser and per-species history
+- Species browser and per-species detection history
 - 14-day detection bar chart
-- Favorites with local push notifications (once per species per day)
+- Favorites with local notifications (once per species per day)
 - Share sightings as image cards
 - Light / dark mode
+- Timestamps in your station's timezone
 
-**Self-hostable? Sort of.** The app itself is MIT-licensed and builds locally with `pnpm install && npx expo start`. The backend is the BirdWeather API (`app.birdweather.com`), which is the hosted service that BirdNET-Pi and BirdNET-Go can push data to. If you're already pushing to BirdWeather, BirdEcho works with your existing setup.
+**Privacy:** credentials (if using BirdWeather mode) are stored in the device secure enclave (iOS Keychain / Android Keystore), never sent anywhere except the BirdWeather API. BirdNET-Go mode requires no credentials at all — the API is read-only public by default.
+
+MIT licensed, Android APK on GitHub Releases. React Native / Expo so community iOS builds are possible.
 
 GitHub: https://github.com/arunrajiah/birdecho  
 Android APK: https://github.com/arunrajiah/birdecho/releases
