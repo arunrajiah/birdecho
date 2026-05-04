@@ -18,14 +18,14 @@ Adds a one-line mention of BirdEcho — an open-source mobile companion app for 
 
 ```markdown
 - **[BirdEcho](https://github.com/arunrajiah/birdecho)** — open-source Android/iOS companion app.
-  Connects to your BirdNET-Go station via the BirdWeather API. Live detection feed, audio
-  playback, species browser, 14-day chart, and local notifications for favourite species.
-  MIT licensed.
+  Connects directly to your BirdNET-Go station over your local network via the `/api/v2` REST API —
+  no BirdWeather account required. Live detection feed, audio playback, species browser, 14-day chart,
+  and local notifications for favourite species. MIT licensed.
 ```
 
 ## Notes
 
-- BirdEcho uses the BirdWeather API, so it requires the user to have BirdWeather integration enabled on their BirdNET-Go instance.
+- BirdEcho uses BirdNET-Go's public `/api/v2` endpoints directly — no cloud dependency, no BirdWeather account needed.
 - It is not affiliated with or endorsed by the BirdNET-Go project.
 - Happy to adjust wording or placement to match the project's conventions.
 
