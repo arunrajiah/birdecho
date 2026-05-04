@@ -17,9 +17,15 @@ importers:
       '@shopify/flash-list':
         specifier: ^2.0.2
         version: 2.3.1(@babel/runtime@7.29.2)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      '@tanstack/query-async-storage-persister':
+        specifier: ^5.100.9
+        version: 5.100.9
       '@tanstack/react-query':
         specifier: ^5.99.2
         version: 5.99.2(react@19.1.0)
+      '@tanstack/react-query-persist-client':
+        specifier: ^5.100.9
+        version: 5.100.9(@tanstack/react-query@5.99.2(react@19.1.0))(react@19.1.0)
       expo:
         specifier: ~54.0.33
         version: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
@@ -1366,8 +1372,23 @@ packages:
   '@sinonjs/fake-timers@10.3.0':
     resolution: {integrity: sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA==}
 
+  '@tanstack/query-async-storage-persister@5.100.9':
+    resolution: {integrity: sha512-KTWqpXIAwuR1bSIxfOnoRr7hOMxfrtLk9kxSuDfOu4sSBEFqHp9+aDp8Ig6YdHxCclNI86SizPnmKmSqNxcJxg==}
+
+  '@tanstack/query-core@5.100.9':
+    resolution: {integrity: sha512-SJSFw1S8+kQ0+knv/XGfrbocWoAlT7vDKsSImtLx3ZPQmEcR46hkDjLSvynSy25N8Ms4tIEini1FuBd5k7IscQ==}
+
   '@tanstack/query-core@5.99.2':
     resolution: {integrity: sha512-1HunU0bXVsR1ZJMZbcOPE6VtaBJxsW809RE9xPe4Gz7MlB0GWwQvuTPhMoEmQ/hIzFKJ/DWAuttIe7BOaWx0tA==}
+
+  '@tanstack/query-persist-client-core@5.100.9':
+    resolution: {integrity: sha512-sCPZZp3D9sOeqcA4SDxjUIm4wVq8PwHebH4ouFZetwjT4xvGjT/cLBQ4Sst+BFcFuk745pCPkf3T4MFliLHECQ==}
+
+  '@tanstack/react-query-persist-client@5.100.9':
+    resolution: {integrity: sha512-qO7j+3VUZm4YH4T3dWszDqgvO+5+6NB1kSY+QmF7JD6+IONfeNmGyOzyobjmrX+6CYLPQtQ+sjM9vFYaSOAv6A==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.100.9
+      react: ^18 || ^19
 
   '@tanstack/react-query@5.99.2':
     resolution: {integrity: sha512-vM91UEe45QUS9ED6OklsVL15i8qKcRqNwpWzPTVWvRPRSEgDudDgHpvyTjcdlwHcrKNa80T+xXYcchT2noPnZA==}
@@ -6555,7 +6576,24 @@ snapshots:
     dependencies:
       '@sinonjs/commons': 3.0.1
 
+  '@tanstack/query-async-storage-persister@5.100.9':
+    dependencies:
+      '@tanstack/query-core': 5.100.9
+      '@tanstack/query-persist-client-core': 5.100.9
+
+  '@tanstack/query-core@5.100.9': {}
+
   '@tanstack/query-core@5.99.2': {}
+
+  '@tanstack/query-persist-client-core@5.100.9':
+    dependencies:
+      '@tanstack/query-core': 5.100.9
+
+  '@tanstack/react-query-persist-client@5.100.9(@tanstack/react-query@5.99.2(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      '@tanstack/query-persist-client-core': 5.100.9
+      '@tanstack/react-query': 5.99.2(react@19.1.0)
+      react: 19.1.0
 
   '@tanstack/react-query@5.99.2(react@19.1.0)':
     dependencies:
