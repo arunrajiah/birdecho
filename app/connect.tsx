@@ -21,9 +21,22 @@ export default function ConnectScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const stations = useStationStore((s) => s.stations);
   const connectBirdWeather = useStationStore((s) => s.connectBirdWeather);
   const connectBirdNetGo = useStationStore((s) => s.connectBirdNetGo);
   const connectBirdNetPi = useStationStore((s) => s.connectBirdNetPi);
+
+  const isFirstStation = stations.length === 0;
+
+  // After a successful connection: go to the feed if this is the first station;
+  // otherwise go back to wherever the user came from (typically Settings).
+  function onConnected() {
+    if (isFirstStation) {
+      router.replace('/(tabs)');
+    } else {
+      router.back();
+    }
+  }
 
   function validateBirdWeather(): string | null {
     if (!token.trim()) return 'Token is required.';
@@ -46,8 +59,15 @@ export default function ConnectScreen() {
     setError(null);
     try {
       const station = await fetchStation(stationId.trim(), token.trim());
-      await connectBirdWeather(token.trim(), stationId.trim(), station.name, station.timezone);
-      router.replace('/');
+      await connectBirdWeather(
+        token.trim(),
+        stationId.trim(),
+        station.name,
+        station.timezone,
+        station.latitude,
+        station.longitude,
+      );
+      onConnected();
     } catch (e) {
       if (e instanceof Error) {
         if (/API error 40[13]/.test(e.message)) {
@@ -75,7 +95,7 @@ export default function ConnectScreen() {
     try {
       const stationName = await pingBirdNetGo(hostUrl.trim());
       await connectBirdNetGo(hostUrl.trim(), stationName);
-      router.replace('/');
+      onConnected();
     } catch (e) {
       setError(
         e instanceof Error
@@ -95,7 +115,7 @@ export default function ConnectScreen() {
     try {
       await pingBirdNetPi(hostUrl.trim());
       await connectBirdNetPi(hostUrl.trim());
-      router.replace('/');
+      onConnected();
     } catch (e) {
       setError(
         e instanceof Error
@@ -122,7 +142,9 @@ export default function ConnectScreen() {
       className="flex-1 bg-white"
       contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 40, paddingBottom: 32 }}
     >
-      <Text className="mb-6 text-2xl font-bold text-gray-900">Connect your station</Text>
+      <Text className="mb-6 text-2xl font-bold text-gray-900">
+        {isFirstStation ? 'Connect your station' : 'Add a station'}
+      </Text>
 
       {/* Mode toggle — three options */}
       <View className="mb-8 flex-row rounded-xl border border-gray-200 overflow-hidden">
