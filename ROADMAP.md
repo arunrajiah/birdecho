@@ -35,18 +35,30 @@ Want to help ship something? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick up
 - **F-Droid submission** — get BirdEcho listed on F-Droid for users who prefer not to sideload APKs
 - **Screenshots in README and release notes** — real device captures to help new users know what they're installing
 - ✅ **Direct BirdNET-Pi HTTP API support** (v0.3.1) — connect to a local BirdNET-Pi instance over your LAN; supports both mcguirepr89 and Nachtzuster forks
-- **Home screen widget** — today's detection count and last detected species, glanceable without opening the app
+- ✅ **Home screen widget** (v0.3.3) — today's detection count and last detected species, glanceable without opening the app
 - ✅ **Offline cache** (v0.3.0) — last 24 hours of detections/species/stats persisted to AsyncStorage; feed is readable with no network connection
 
 ---
 
-## 🔭 v0.4 — Longer-term
+## ✅ v0.4.0 — Shipped
+
+- ✅ **Multi-station support** — monitor any number of stations (BirdWeather, BirdNET-Go, BirdNET-Pi) from one app; switch with a tap from Settings
+
+---
+
+## ✅ v0.5.0 — Shipped
+
+- ✅ **Station map tab** — all BirdWeather stations shown as interactive markers; tap to switch or open in native Maps app
+- ✅ **Detection CSV export** — export the current feed as a `.csv` file from the Stats tab
+
+---
+
+## 🔭 v0.6 — Longer-term
 
 - **iOS App Store / TestFlight** — a signed iOS build distributed through the App Store
-- **Multi-station support** — monitor more than one station from the same app, switch with a swipe
 - **Rare-species push alerts** — server-side push notifications when a starred or regionally unusual species is detected
-- **Map view** — show your station on a map alongside nearby public BirdWeather stations
 - **Apple Watch / Wear OS glance** — last detection and daily count on your wrist
+- **Species rarity badge** — flag species that are unusual for your region or time of year
 
 ---
 

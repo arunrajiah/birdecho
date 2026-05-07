@@ -5,6 +5,60 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] — 2026-05-07
+
+### Added
+
+- **Station map tab**: a new **Map** tab shows every BirdWeather station on an interactive map.
+  - Active station marker is green; inactive station markers are gray. Tapping any marker reveals a callout with a **Switch** button (switches to that station instantly) and an **Open in Maps** button (hands off to Apple Maps / Google Maps).
+  - When multiple stations are visible a colour-coded legend is shown at the bottom of the map.
+  - BirdNET-Go and BirdNET-Pi stations (which have no GPS coordinates) are shown an explanatory message instead of the map; the fallback state also handles "no stations connected" and "station has no coordinates".
+  - GPS coordinates (`latitude`, `longitude`) are now stored in `SavedStation` at connect time for BirdWeather stations and forwarded through the store's `connectBirdWeather` action.
+  - Android map tiles require a Google Maps API key (`EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`). Without it, tiles are blank but all markers and interactions still work. iOS uses Apple Maps and requires no key.
+  - Powered by `react-native-maps` 1.27.2.
+
+- **CSV export** on the Stats tab: tap **Export detections as CSV** to save and share the current feed's detections as a `.csv` file.
+  - Columns: `id`, `common_name`, `scientific_name`, `timestamp`, `confidence_pct`.
+  - Uses the already-cached feed data (no extra network call) — go to the Feed tab first, then export from Stats.
+  - File is named `{station-slug}-detections-{YYYY-MM-DD}.csv` and shared via the system share sheet.
+  - Powered by `expo-file-system` (legacy API) + `expo-sharing`.
+
+---
+
+## [0.4.0] — 2026-05-04
+
+### Added
+
+- **Multi-station support**: monitor up to any number of stations simultaneously and switch between them in seconds.
+  - Add as many stations as you like — any mix of BirdWeather, BirdNET-Go, and BirdNET-Pi.
+  - The active station is shown by name in the Feed tab header.  When you have multiple stations a count badge appears on the Feed tab.
+  - Switch stations by tapping the station row in Settings → Stations.
+  - Remove individual stations with the per-row **Remove** button (confirms before deleting).
+  - **Disconnect all** is still available at the bottom of the Settings screen as a full reset.
+  - Connect screen title changes to "Add a station" once the first station is already saved.
+  - After adding a second+ station, the connect flow returns to Settings rather than navigating to the feed, so you can continue managing your list.
+
+### Changed
+
+- `stationStore` rewritten with a `stations: SavedStation[]` list and an `activeStationId` pointer.  All backwards-compatible flat fields (`stationName`, `stationId`, `hostUrl`, `connectionType`, `isConnected`) are derived from the active station on every state update, so every existing screen continues to work without changes.
+- Station list is stored in `AsyncStorage` under `birdecho-stations`; the active station pointer lives in SecureStore.  BirdWeather API tokens are archived per-station so they are restored correctly when switching.
+- **Automatic migration**: users upgrading from v0.1–v0.3 have their existing single-station data silently migrated to the new multi-station format on first launch.  No data is lost.
+
+---
+
+## [0.3.3] — 2026-05-04
+
+### Added
+
+- **Android home-screen widget**: add the *BirdEcho – Latest Detection* widget to your Android home screen to see your station's most recent detection, the time it was recorded, and today's total detection count — all without opening the app.
+  - Widget is updated automatically every time the feed refreshes (every 60 seconds while the app is in the foreground).
+  - Android also triggers a background refresh every 30 minutes when the app is killed, reading the last-known data from AsyncStorage so the widget never goes blank.
+  - Widget UI uses the app brand colours (forest green `#1A3226`, warm gold `#C8A94C`, cream `#F5F0E8`) with rounded corners for a consistent look on any launcher.
+  - Powered by `react-native-android-widget` v0.20.3 with the official Expo config plugin; added `app.config.ts` to carry the plugin configuration.
+  - Widget registration moved to a custom `index.js` entry point (`registerWidgetTaskHandler`) while continuing to boot via `expo-router/entry`.
+
+---
+
 ## [0.3.2] — 2026-05-04
 
 ### Fixed

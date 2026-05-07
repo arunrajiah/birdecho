@@ -1,6 +1,13 @@
 import { Tabs } from 'expo-router';
+import { useStationStore } from '../../src/stores/stationStore';
 
 export default function TabsLayout() {
+  const stationName = useStationStore((s) => s.stationName);
+  const stationsCount = useStationStore((s) => s.stations.length);
+
+  // Show the active station name as the Feed tab title.
+  const feedTitle = stationName ?? 'BirdEcho';
+
   return (
     <Tabs
       screenOptions={{
@@ -11,7 +18,11 @@ export default function TabsLayout() {
     >
       <Tabs.Screen
         name="index"
-        options={{ title: 'Feed', tabBarLabel: 'Feed' }}
+        options={{
+          title: feedTitle,
+          tabBarLabel: 'Feed',
+          tabBarBadge: stationsCount > 1 ? stationsCount : undefined,
+        }}
       />
       <Tabs.Screen
         name="species"
@@ -24,6 +35,10 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="stats"
         options={{ title: 'Stats', tabBarLabel: 'Stats' }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{ title: 'Map', tabBarLabel: 'Map' }}
       />
       <Tabs.Screen
         name="settings"
