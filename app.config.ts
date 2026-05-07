@@ -83,8 +83,6 @@ const config: ExpoConfig = {
             minWidth: '250dp',
             minHeight: '110dp',
             description: 'Shows the latest bird detection from your BirdEcho station.',
-            /** Use the launcher icon as the preview until a dedicated preview is designed. */
-            previewImage: '@mipmap/ic_launcher',
             resizeMode: 'horizontal|vertical',
             /**
              * `configuration_optional` means no configuration activity is required —
