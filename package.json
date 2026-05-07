@@ -1,7 +1,7 @@
 {
   "name": "birdecho",
   "version": "1.0.0",
-  "main": "expo-router/entry",
+  "main": "./index.js",
   "scripts": {
     "start": "expo start",
     "android": "expo run:android",
@@ -23,6 +23,7 @@
     "expo": "~54.0.33",
     "expo-av": "~16.0.8",
     "expo-build-properties": "^55.0.13",
+    "expo-file-system": "^55.0.19",
     "expo-notifications": "~0.32.16",
     "expo-router": "~6.0.23",
     "expo-secure-store": "~15.0.8",
@@ -31,7 +32,9 @@
     "nativewind": "^4.2.3",
     "react": "19.1.0",
     "react-native": "0.81.5",
+    "react-native-android-widget": "^0.20.3",
     "react-native-css-interop": "0.2.3",
+    "react-native-maps": "^1.27.2",
     "react-native-svg": "15.12.1",
     "react-native-view-shot": "^4.0.3",
     "victory-native": "^36.9.2",
