@@ -25,18 +25,22 @@ function tz(timezone: string | undefined): TzOptions {
 
 /** "2:34 PM" — used in the feed card */
 export function formatTime(timestamp: string, timezone?: string): string {
+  const date = new Date(timestamp);
+  if (isNaN(date.getTime())) return '—';
   return new Intl.DateTimeFormat(undefined, {
     hour: '2-digit',
     minute: '2-digit',
     ...tz(timezone),
-  }).format(new Date(timestamp));
+  }).format(date);
 }
 
 /** "Apr 27, 2026, 2:34 PM" — used in the sighting detail screen */
 export function formatDateTime(timestamp: string, timezone?: string): string {
+  const date = new Date(timestamp);
+  if (isNaN(date.getTime())) return '—';
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
     ...tz(timezone),
-  }).format(new Date(timestamp));
+  }).format(date);
 }
