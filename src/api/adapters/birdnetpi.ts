@@ -85,7 +85,12 @@ function parseDetectionRows(html: string, base: string): Detection[] {
     // Extract date from audio path: /By_Date/YYYY-MM-DD/...
     const pathParts = audioRelPath.split('/').filter(Boolean);
     // pathParts: ['By_Date', '2024-03-15', 'American_Robin', '2024-03-15-birdnet-14:23:05.mp3']
-    const date = pathParts[1] ?? new Date().toISOString().slice(0, 10);
+    // Guard: some BirdNET-Pi forks use a different directory layout (e.g. species
+    // folder before date).  Scan all path segments for the first one that looks
+    // like a date so we don't accidentally use a species name as the date value.
+    const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+    const date =
+      pathParts.find((p) => ISO_DATE_RE.test(p)) ?? new Date().toISOString().slice(0, 10);
 
     // Extract td text content (strip inner HTML tags)
     const cells = Array.from(row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi))
