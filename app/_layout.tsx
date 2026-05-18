@@ -10,6 +10,7 @@ import { useStationStore } from '../src/stores/stationStore';
 import { useFavoritesStore } from '../src/stores/favoritesStore';
 import { useThemeStore } from '../src/stores/themeStore';
 import { initSentry, captureException } from '../src/lib/sentry';
+import { QUERY_CACHE_STORAGE_KEY } from '../src/lib/queryCache';
 
 initSentry();
 
@@ -29,7 +30,7 @@ const queryClient = new QueryClient({
 
 const asyncStoragePersister = createAsyncStoragePersister({
   storage: AsyncStorage,
-  key: 'birdecho-query-cache',
+  key: QUERY_CACHE_STORAGE_KEY,
   // Throttle writes to AsyncStorage — at most once every 2 seconds
   throttleTime: 2000,
 });

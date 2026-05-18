@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import * as storage from '../lib/secureStorage';
+import { clearQueryCache } from '../lib/queryCache';
 import type { ConnectionType, SavedStation } from '../types/station';
 
 // Re-export ConnectionType so existing imports from this module still work.
@@ -277,6 +278,7 @@ export const useStationStore = create<StationState>((set, get) => ({
         storage.setStationList([]),
         storage.clearActiveStationId(),
         storage.clearToken(),
+        clearQueryCache(),
       ]);
       set({
         stations: [],
@@ -319,6 +321,7 @@ export const useStationStore = create<StationState>((set, get) => ({
       storage.setStationList([]),
       storage.clearActiveStationId(),
       storage.clearToken(),
+      clearQueryCache(),
       ...stations.map((s) => storage.deleteTokenForStation(s.id)),
     ]);
 
