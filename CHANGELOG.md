@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2] — 2026-05-29
+
+### Fixed
+
+- **Tab bar icons missing** — no `tabBarIcon` was defined in `_layout.tsx`, causing React Navigation to render broken-image placeholders on Android instead of icons. Added Ionicons for all six tabs (Feed: home, Species: leaf, Favorites: heart, Stats: bar-chart, Map: map, Settings: settings). Active tab shows filled variant; inactive shows outline. (#20 screenshot)
+
+- **BirdNET-Pi stats — Unique species always 0** — `parseStatsHtml` used a regex that only matched bare `<td>N</td>` cells, silently dropping cells with inner elements (e.g. `<td><b>48531</b></td>`) and cells from forks that omit the species columns. Fixed by stripping inner HTML tags before parsing. Added a fallback: if `uniqueSpecies` is still 0 after parsing but `totalRecords > 0`, the species count is derived from `/play.php?byspecies=1`. (#20 screenshot)
+
+- **BirdNET-Pi stats — Top species counts always 0** — `fetchTopSpecies` hardcoded `count: 0` for all BirdNET-Pi results. Now fetches today's full detection list (up to 500 records), tallies detections per species, and sorts the species list by that count so "Top species" reflects meaningful data. The Stats screen also renders `—` instead of `0` for any species with no today's detections, making it clear the value is unavailable rather than actually zero. (#20 screenshot)
+
+---
+
 ## [0.5.1] — 2026-05-29
 
 ### Fixed

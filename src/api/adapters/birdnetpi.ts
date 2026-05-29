@@ -129,10 +129,19 @@ function parseDetectionRows(html: string, base: string): Detection[] {
  *
  * The HTML table columns (in order):
  *   Total | Today | Last Hour | Species Total | Species Today
+ *
+ * Some BirdNET-Pi forks/versions wrap values in inner elements (e.g. <b>)
+ * or omit the species columns entirely.  We strip inner tags before parsing
+ * and handle the missing-column case with a fallback in fetchStats().
  */
 function parseStatsHtml(html: string): Stats {
-  const numbers = Array.from(html.matchAll(/<td[^>]*>\s*(\d+)\s*<\/td>/gi))
-    .map((m) => parseInt(m[1] ?? '0', 10));
+  // Strip inner HTML from every <td> cell, then keep only cells whose text
+  // content is a bare integer — tolerates <td><b>48531</b></td> as well as
+  // <td class="...">48531</td>.
+  const numbers = Array.from(html.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi))
+    .map((m) => (m[1] ?? '').replace(/<[^>]+>/g, '').trim())
+    .filter((text) => /^\d+$/.test(text))
+    .map((text) => parseInt(text, 10));
   // [0] = Total detections, [1] = Today, [2] = Last Hour, [3] = Species Total, [4] = Species Today
   return {
     totalRecords: numbers[0] ?? 0,
@@ -245,34 +254,61 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
     async fetchTopSpecies(limit: number): Promise<Species[]> {
       const nachtzuster = await getNachtzuster();
 
+      // Build the candidate species list first (name only; no count yet)
+      let candidates: Pick<Species, 'id' | 'commonName' | 'scientificName'>[] = [];
+
       if (nachtzuster) {
         // Nachtzuster: /play.php?getlabels=true returns JSON ["Sci_Name_Common Name", ...]
         const labels = await bpiGetJson<string[]>(base, '/play.php?getlabels=true');
-        const species: Species[] = [];
-        for (const label of labels.slice(0, limit)) {
+        for (const label of labels) {
           const underscoreIdx = label.indexOf('_');
           if (underscoreIdx === -1) continue;
-          species.push({
+          candidates.push({
             id: label.slice(0, underscoreIdx),
             commonName: label.slice(underscoreIdx + 1),
             scientificName: label.slice(0, underscoreIdx),
-            imageUrl: undefined,
-            count: 0, // count not in labels list; would need stats endpoint
           });
         }
-        return species;
+      } else {
+        // mcguirepr89: parse HTML from /play.php?byspecies=1
+        const html = await bpiGetHtml(base, '/play.php?byspecies=1');
+        const partials = parseSpeciesListHtml(html);
+        candidates = partials.map((p) => ({
+          id: p.id,
+          commonName: p.commonName,
+          scientificName: p.id, // sci name not available here; fall back to common name
+        }));
       }
 
-      // mcguirepr89: parse HTML from /play.php?byspecies=1
-      const html = await bpiGetHtml(base, '/play.php?byspecies=1');
-      const partials = parseSpeciesListHtml(html);
-      return partials.slice(0, limit).map((p) => ({
-        id: p.id,
-        commonName: p.commonName,
-        scientificName: p.id, // sci name not in this view; use common name as fallback
-        imageUrl: undefined,
-        count: 0,
-      }));
+      // BirdNET-Pi has no bulk "count per species" endpoint.  Use today's full
+      // detection list to derive per-species counts, then sort descending so the
+      // stats screen shows meaningful "top species" rather than all-zero counts.
+      // We fetch up to 500 of today's detections — enough for an accurate ranking
+      // on any normal day.
+      let countMap: Record<string, number> = {};
+      try {
+        const html = await bpiGetHtml(
+          base,
+          '/todays_detections.php?ajax_detections=true&display_limit=500',
+        );
+        const detections = parseDetectionRows(html, base);
+        for (const d of detections) {
+          const key = d.commonName;
+          countMap[key] = (countMap[key] ?? 0) + 1;
+        }
+      } catch {
+        // If the fetch fails, fall back to count: 0 (still renders a species list)
+      }
+
+      // Sort by today's count descending, then slice to the requested limit
+      return candidates
+        .map((c) => ({
+          ...c,
+          imageUrl: undefined as string | undefined,
+          count: countMap[c.commonName] ?? 0,
+        }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, limit);
     },
 
     // ── Single species ────────────────────────────────────────────────────────
@@ -312,7 +348,24 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
     // ── Stats ─────────────────────────────────────────────────────────────────
     async fetchStats(): Promise<Stats> {
       const html = await bpiGetHtml(base, '/todays_detections.php?today_stats=true');
-      return parseStatsHtml(html);
+      const stats = parseStatsHtml(html);
+
+      // Some BirdNET-Pi versions omit or differently format the species columns,
+      // causing uniqueSpecies to parse as 0 even when there are thousands of
+      // total records.  Fall back to counting species from the species-list page.
+      if (stats.uniqueSpecies === 0 && stats.totalRecords > 0) {
+        try {
+          const speciesHtml = await bpiGetHtml(base, '/play.php?byspecies=1');
+          const speciesList = parseSpeciesListHtml(speciesHtml);
+          if (speciesList.length > 0) {
+            stats.uniqueSpecies = speciesList.length;
+          }
+        } catch {
+          // Best-effort — leave as 0 rather than crashing stats
+        }
+      }
+
+      return stats;
     },
 
     // ── Daily detection counts ────────────────────────────────────────────────

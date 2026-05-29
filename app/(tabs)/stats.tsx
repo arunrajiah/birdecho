@@ -188,7 +188,9 @@ export default function StatsScreen() {
               <View key={sp.id} className="flex-row items-center py-2 border-b border-gray-100">
                 <Text className="w-7 text-sm text-gray-400">{i + 1}.</Text>
                 <Text className="flex-1 text-sm font-medium text-gray-900">{sp.commonName}</Text>
-                <Text className="text-sm text-gray-500">{sp.count.toLocaleString()}</Text>
+                <Text className="text-sm text-gray-500">
+                  {sp.count > 0 ? sp.count.toLocaleString() : '—'}
+                </Text>
               </View>
             ))}
           </View>
