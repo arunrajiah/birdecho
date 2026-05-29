@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] — 2026-05-29
+
+### Fixed
+
+- **BirdNET-Pi blank screen** — the HTML parser extracted the audio file path date by position
+  (`pathParts[1]`), which produced a species-name string instead of a date on installs where the
+  folder layout differs from the expected `/By_Date/YYYY-MM-DD/Species/` order.  The resulting
+  timestamp (`'American_RobinT14:23:05'`) could not be parsed, causing `Intl.DateTimeFormat` to
+  throw `RangeError: Invalid time value` inside `RecordCard`, which silently blanked the entire
+  tab navigator in production builds.  The parser now scans every path segment for the first
+  `YYYY-MM-DD`-shaped token, falling back to today's date if none is found.  (#20)
+
+- **`formatTime` / `formatDateTime` throw on unparseable timestamps** — both helpers now guard
+  against `Invalid Date` with `isNaN(date.getTime())` and return `'—'` instead of letting
+  `Intl.DateTimeFormat.format` throw.  This makes the app resilient to any malformed timestamp
+  that may reach `RecordCard`, regardless of source.  (#20)
+
+- **Stale cache survives disconnect** — `disconnect()` and the last-station-removed path in
+  `removeStation()` now wipe the React Query AsyncStorage cache (`birdecho-query-cache`)
+  atomically alongside credentials.  Previously, corrupt detections in the cache would
+  re-crash the feed on every reopen even after "clearing storage" in the app, because only
+  the SecureStore credentials were erased.  (#20)
+
+---
+
 ## [0.5.0] — 2026-05-07
 
 ### Added
