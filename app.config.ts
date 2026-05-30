@@ -12,7 +12,7 @@ import type { ExpoConfig } from 'expo/config';
 const config: ExpoConfig = {
   name: 'BirdEcho',
   slug: 'birdecho',
-  version: '0.5.2',
+  version: '0.5.3',
   scheme: 'birdecho',
   orientation: 'portrait',
   icon: './assets/icon.png',
@@ -25,7 +25,7 @@ const config: ExpoConfig = {
   },
   android: {
     package: 'dev.arunrajiah.birdecho',
-    versionCode: 15,
+    versionCode: 16,
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#ffffff',

@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] — 2026-05-29
+
+### Fixed
+
+- **BirdNET-Pi feed shows only one detection with "..." species name** — the detection HTML parser only recognised the `data-audio-src` attribute used by the custom audio player in newer BirdNET-Pi builds. Installations that serve audio via a plain `<audio src="...">` element (older versions / some forks) had all detection rows skipped; only one spurious non-detection element that happened to carry `data-audio-src` was parsed, producing "..." as the species name and 9 % confidence. The parser now also matches `<audio … src="…">` so all rows are found regardless of audio player implementation. Added row validation (time must be `HH:MM:SS`, species name must be non-empty and non-placeholder) to filter out any remaining template rows. (#20 follow-up)
+
+- **Top species counts all showing "—" after v0.5.2** — cascading consequence of the parser bug above: `fetchTopSpecies` built today's count map from the same parser, found only one spurious detection, and gave every real species a count of 0, which rendered as "—". Fixed automatically by the parser fix. (#20 follow-up)
+
+- **Dark mode: headers and tab bar stay white** — React Navigation's `Stack` and `Tab` navigators do not inherit NativeWind's dark-mode colour scheme. Added explicit `headerStyle`, `headerTintColor`, and `tabBarStyle` driven by `useColorScheme()` in both `app/_layout.tsx` and `app/(tabs)/_layout.tsx`. Navigation chrome now matches the rest of the app in dark mode. (#20 follow-up)
+
+- **Dark mode: screen backgrounds and text stay light** — `Feed`, `Species`, `Favorites`, and `Stats` screens used `bg-white` with no `dark:` variants, so their backgrounds and text remained white/dark-on-light even when the system was in dark mode. Added `dark:bg-gray-900` and matching `dark:text-*` / `dark:border-*` variants throughout all four screens and the `RecordCard` and `SpeciesRow` shared components. (#20 follow-up)
+
+- **Species count shows 0 in Species tab** — `SpeciesRow` always rendered `species.count.toLocaleString()` even when count was 0, showing "0" for every BirdNET-Pi species. Now shows "—" when count is 0, consistent with the Stats tab. (#20 follow-up)
+
+---
+
 ## [0.5.2] — 2026-05-29
 
 ### Fixed

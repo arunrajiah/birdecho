@@ -121,7 +121,7 @@ export default function FeedScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
         <ActivityIndicator size="large" color="#15803d" />
       </View>
     );
@@ -138,7 +138,7 @@ export default function FeedScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white dark:bg-gray-900">
       <FlashList
         data={records}
         keyExtractor={(item) => item.id}
@@ -148,10 +148,10 @@ export default function FeedScreen() {
         refreshing={isRefetching}
         onEndReached={() => { if (hasNextPage && !isFetchingNextPage) fetchNextPage(); }}
         onEndReachedThreshold={0.3}
-        ItemSeparatorComponent={() => <View className="h-px bg-gray-100 ml-20" />}
+        ItemSeparatorComponent={() => <View className="h-px bg-gray-100 dark:bg-gray-800 ml-20" />}
         ListEmptyComponent={() => (
           <View className="flex-1 items-center justify-center py-24">
-            <Text className="text-center text-base text-gray-400">
+            <Text className="text-center text-base text-gray-400 dark:text-gray-500">
               No recent sightings from your station yet.
             </Text>
           </View>

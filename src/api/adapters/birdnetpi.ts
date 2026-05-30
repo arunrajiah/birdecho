@@ -76,8 +76,12 @@ function parseDetectionRows(html: string, base: string): Detection[] {
   while ((rowMatch = rowRegex.exec(html)) !== null) {
     const row = rowMatch[1] ?? '';
 
-    // Extract audio src — this also gives us the date
-    const audioSrcMatch = row.match(/data-audio-src=['"]([^'"]+)['"]/);
+    // Extract the audio file path.  BirdNET-Pi versions differ in how audio is embedded:
+    //   Newer (custom audio player component): data-audio-src="/By_Date/..."
+    //   Older / some forks:                   <audio ... src="/By_Date/..." ...>
+    const audioSrcMatch =
+      row.match(/data-audio-src=['"]([^'"]+)['"]/) ??
+      row.match(/<audio[^>]*\bsrc=['"]([^'"]+)['"]/i);
     if (!audioSrcMatch) continue;
     const audioRelPath = audioSrcMatch[1] ?? '';
     if (!audioRelPath) continue;
@@ -101,6 +105,12 @@ function parseDetectionRows(html: string, base: string): Detection[] {
     const comName = cells[1] ?? '';
     const sciName = cells[2] ?? '';
     const confRaw = cells[3] ?? '0';
+
+    // Sanity-check: skip template/placeholder/summary rows that aren't real detections.
+    // A real detection must have a HH:MM:SS time and a non-empty, non-placeholder species name.
+    const TIME_RE = /^\d{2}:\d{2}:\d{2}$/;
+    if (!TIME_RE.test(time)) continue;
+    if (!comName || comName === '...' || comName === '—') continue;
     // Confidence may be "0.87" or "87%" — normalise to 0–1
     const confNum = parseFloat(confRaw.replace('%', ''));
     const confidence = confNum > 1 ? confNum / 100 : confNum;

@@ -40,7 +40,7 @@ export default function RootLayout() {
   const hydrateFavorites = useFavoritesStore((s) => s.hydrate);
   const hydrateTheme = useThemeStore((s) => s.hydrate);
   const themeMode = useThemeStore((s) => s.mode);
-  const { setColorScheme } = useColorScheme();
+  const { colorScheme, setColorScheme } = useColorScheme();
   const hydrated = useRef(false);
 
   useEffect(() => {
@@ -54,6 +54,10 @@ export default function RootLayout() {
   useEffect(() => {
     setColorScheme(themeMode);
   }, [themeMode, setColorScheme]);
+
+  const isDark = colorScheme === 'dark';
+  const headerBg = isDark ? '#111827' : '#ffffff';
+  const headerText = isDark ? '#f9fafb' : '#111827';
 
   return (
     <PersistQueryClientProvider
@@ -70,7 +74,13 @@ export default function RootLayout() {
         },
       }}
     >
-      <Stack>
+      <Stack
+        screenOptions={{
+          headerStyle: { backgroundColor: headerBg },
+          headerTintColor: headerText,
+          headerShadowVisible: false,
+        }}
+      >
         <Stack.Screen name="index" options={{ title: 'BirdEcho', headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="connect" options={{ title: 'Connect station', presentation: 'modal' }} />

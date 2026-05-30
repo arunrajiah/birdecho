@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useColorScheme } from 'nativewind';
 import { useStationStore } from '../../src/stores/stationStore';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
@@ -15,16 +16,28 @@ function tabIcon(active: IoniconName, inactive: IoniconName) {
 export default function TabsLayout() {
   const stationName = useStationStore((s) => s.stationName);
   const stationsCount = useStationStore((s) => s.stations.length);
+  const { colorScheme } = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   // Show the active station name as the Feed tab title.
   const feedTitle = stationName ?? 'BirdEcho';
+
+  const headerBg = isDark ? '#111827' : '#ffffff';
+  const headerText = isDark ? '#f9fafb' : '#111827';
 
   return (
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: '#15803d',
-        tabBarInactiveTintColor: '#9ca3af',
+        tabBarInactiveTintColor: isDark ? '#6b7280' : '#9ca3af',
         headerShown: true,
+        headerStyle: { backgroundColor: headerBg },
+        headerTintColor: headerText,
+        headerShadowVisible: false,
+        tabBarStyle: {
+          backgroundColor: isDark ? '#111827' : '#ffffff',
+          borderTopColor: isDark ? '#374151' : '#e5e7eb',
+        },
       }}
     >
       <Tabs.Screen
