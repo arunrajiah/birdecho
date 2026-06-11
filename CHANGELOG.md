@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.4] — 2026-06-11
+
+### Fixed
+
+- **Nachtzuster fork: no detections shown** — when `display_limit` is a numeric parameter (which the app always sends), Nachtzuster's `todays_detections.php` packs all row content (time, common name, scientific name, confidence, audio player) into a **single `<td>`** instead of the four-cell layout used by mcguirepr89. The parser's `cells.length < 4` guard skipped every Nachtzuster row, resulting in an empty feed. The parser now detects single-cell rows and extracts each field with targeted regexes (`<b><a class="a2">` for common name, `<i>` for scientific name, `HH:MM:SS` pattern for time, `N%` for confidence). (#20)
+
+- **Nachtzuster fork: Species tab empty** — `fetchTopSpecies` called `/play.php?getlabels=true`, which returns raw BirdNET model labels in the format `"Turdus migratorius"` (scientific name with spaces, no underscore, no common name). The code expected `"Sci_Name_Common Name"` format and skipped every label when `indexOf('_') === -1`, returning an empty species list. For Nachtzuster, the species list is now derived directly from today's parsed detections (which carry both common and scientific names), eliminating the broken API call. (#20)
+
+---
+
 ## [0.5.3] — 2026-05-29
 
 ### Fixed

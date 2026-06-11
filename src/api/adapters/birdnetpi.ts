@@ -8,8 +8,8 @@
  *
  * Two forks are supported:
  *   - mcguirepr89/BirdNET-Pi   — HTML-only, no images API
- *   - Nachtzuster/BirdNET-Pi   — adds /api/v1/image/{Sci_Name} (Flickr) and
- *                                /play.php?getlabels=true (JSON species list)
+ *   - Nachtzuster/BirdNET-Pi   — adds /api/v1/image/{Sci_Name} (Flickr); detection
+ *                                rows use a single-cell layout when display_limit is set
  *
  * Auth: HTTP Basic Auth is required only for admin/write paths (/scripts/*,
  * /stream, /Processed/*, etc.). All read endpoints used here are public.
@@ -58,14 +58,12 @@ async function bpiGetJson<T>(base: string, path: string): Promise<T> {
  * Parse detection rows from the HTML fragment returned by
  * /todays_detections.php?ajax_detections=true&display_limit=N
  *
- * Each <tr> contains:
- *   <td>{Time HH:MM:SS}</td>
- *   <td>{Common Name}</td>
- *   <td>{Scientific Name}</td>
- *   <td>{Confidence 0.87 or 87%}</td>
- *   <td>...<div class="custom-audio-player" data-audio-src="/By_Date/{Date}/{Com_Underscored}/{File_Name}">...</div></td>
+ * mcguirepr89 format — 4+ cells per <tr>:
+ *   <td>{Time}</td><td>{Common Name}</td><td>{Sci Name}</td><td>{Confidence}</td><td>..audio..</td>
  *
- * The audio path includes the date, so we derive timestamps from it.
+ * Nachtzuster format (when display_limit is numeric) — single cell per <tr>:
+ *   <td><div class="centered_image_container">HH:MM:SS<br><b><a class="a2">Common</a></b><br>
+ *   <i>Sci Name</i>...<b>Confidence:</b> 87%</div><div data-audio-src="..."></div></td>
  */
 function parseDetectionRows(html: string, base: string): Detection[] {
   const detections: Detection[] = [];
@@ -100,11 +98,27 @@ function parseDetectionRows(html: string, base: string): Detection[] {
     const cells = Array.from(row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi))
       .map((m) => (m[1] ?? '').replace(/<[^>]+>/g, '').trim());
 
-    if (cells.length < 4) continue;
-    const time = cells[0] ?? '';
-    const comName = cells[1] ?? '';
-    const sciName = cells[2] ?? '';
-    const confRaw = cells[3] ?? '0';
+    let time: string;
+    let comName: string;
+    let sciName: string;
+    let confRaw: string;
+
+    if (cells.length >= 4) {
+      // Standard mcguirepr89 format: 4+ cells (time | common | sci | confidence | audio)
+      time = cells[0] ?? '';
+      comName = cells[1] ?? '';
+      sciName = cells[2] ?? '';
+      confRaw = cells[3] ?? '0';
+    } else if (cells.length >= 1) {
+      // Nachtzuster single-cell format: all content packed into one <td> when display_limit is set
+      time = row.match(/\b(\d{2}:\d{2}:\d{2})\b/)?.[1] ?? '';
+      comName = (row.match(/<b><a[^>]*class=["']a2["'][^>]*>([^<]+)<\/a><\/b>/)?.[1] ?? '').trim();
+      sciName = (row.match(/<i>([^<]+)<\/i>/)?.[1] ?? '').trim();
+      const pct = row.match(/(\d{1,3}(?:\.\d+)?)\s*%/)?.[1] ?? '0';
+      confRaw = pct + '%';
+    } else {
+      continue;
+    }
 
     // Sanity-check: skip template/placeholder/summary rows that aren't real detections.
     // A real detection must have a HH:MM:SS time and a non-empty, non-placeholder species name.
@@ -268,17 +282,39 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
       let candidates: Pick<Species, 'id' | 'commonName' | 'scientificName'>[] = [];
 
       if (nachtzuster) {
-        // Nachtzuster: /play.php?getlabels=true returns JSON ["Sci_Name_Common Name", ...]
-        const labels = await bpiGetJson<string[]>(base, '/play.php?getlabels=true');
-        for (const label of labels) {
-          const underscoreIdx = label.indexOf('_');
-          if (underscoreIdx === -1) continue;
-          candidates.push({
-            id: label.slice(0, underscoreIdx),
-            commonName: label.slice(underscoreIdx + 1),
-            scientificName: label.slice(0, underscoreIdx),
-          });
+        // Nachtzuster: getlabels returns raw BirdNET model sci names with spaces and no common names,
+        // so we can't use it for a usable species list. Derive species from today's detections instead.
+        const html = await bpiGetHtml(
+          base,
+          '/todays_detections.php?ajax_detections=true&display_limit=500',
+        );
+        const detections = parseDetectionRows(html, base);
+        const speciesMap = new Map<
+          string,
+          { commonName: string; scientificName: string; count: number }
+        >();
+        for (const d of detections) {
+          const entry = speciesMap.get(d.commonName);
+          if (entry) {
+            entry.count += 1;
+          } else {
+            speciesMap.set(d.commonName, {
+              commonName: d.commonName,
+              scientificName: d.scientificName,
+              count: 1,
+            });
+          }
         }
+        return Array.from(speciesMap.values())
+          .sort((a, b) => b.count - a.count)
+          .slice(0, limit)
+          .map((s) => ({
+            id: s.scientificName,
+            commonName: s.commonName,
+            scientificName: s.scientificName,
+            imageUrl: undefined as string | undefined,
+            count: s.count,
+          }));
       } else {
         // mcguirepr89: parse HTML from /play.php?byspecies=1
         const html = await bpiGetHtml(base, '/play.php?byspecies=1');
