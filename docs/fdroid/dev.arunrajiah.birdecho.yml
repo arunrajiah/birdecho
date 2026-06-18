@@ -523,6 +523,55 @@ Builds:
       - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-view-shot/android/build.gradle
 
+  # ── v0.7.0 ──────────────────────────────────────────────────────────────────
+  - versionName: '0.7.0'
+    versionCode: 20
+    commit: df957915cdd46d37d332a11a3f6b02e27fbf91cb
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make python3 openjdk-17-jdk
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
+      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v24.0.2-linux-x64/. /usr/local/
+      - npm install -g pnpm@10
+    init:
+      - cd ../.. && pnpm install --frozen-lockfile
+      - cd ../.. && npx expo prebuild --platform android --clean --no-install
+    prebuild:
+      - sed -i '/signingConfig signingConfigs/d' build.gradle
+      - sed -i '/projectId/d' ../../app.config.ts || true
+      - sed -i '/projectId/d' ../../app.json || true
+    gradle:
+      - yes
+    rm:
+      - node_modules/react-native/sdks/hermesc/osx-bin
+      - node_modules/react-native/sdks/hermesc/win64-bin
+      - node_modules/@sentry/react-native/android/src/main/jniLibs
+      - node_modules/react-native-maps/android/libs
+    scanignore:
+      - android/build.gradle
+      - node_modules/react-native/android
+      - node_modules/hermes-engine
+      - node_modules/jsc-android
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@sentry/react-native/android/build.gradle
+      - node_modules/expo/android/build.gradle
+      - node_modules/expo-av/android/build.gradle
+      - node_modules/expo-build-properties/android/build.gradle
+      - node_modules/expo-file-system/android/build.gradle
+      - node_modules/expo-modules-core/android/build.gradle
+      - node_modules/expo-notifications/android/build.gradle
+      - node_modules/expo-router/android/build.gradle
+      - node_modules/expo-secure-store/android/build.gradle
+      - node_modules/expo-sharing/android/build.gradle
+      - node_modules/react-native-android-widget/android/build.gradle
+      - node_modules/react-native-css-interop/android/build.gradle
+      - node_modules/react-native-maps/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-view-shot/android/build.gradle
+
 # Reproducible build path (preferred). Uncomment once confirmed byte-for-byte identical.
 # To get the fingerprint: apksigner verify --print-certs birdecho.apk | grep SHA-256
 # AllowedAPKSigningKeys: <lowercase-sha256-hex>
@@ -556,5 +605,5 @@ MaintainerNotes: |-
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: '0.6.0'
-CurrentVersionCode: 19
+CurrentVersion: '0.7.0'
+CurrentVersionCode: 20
