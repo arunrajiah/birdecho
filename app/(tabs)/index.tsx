@@ -5,6 +5,7 @@ import { FlashList } from '@shopify/flash-list';
 import { requestWidgetUpdate } from 'react-native-android-widget';
 import RecordCard from '../../src/components/RecordCard';
 import ErrorState from '../../src/components/ErrorState';
+import UpdateBanner from '../../src/components/UpdateBanner';
 import { useStationStore } from '../../src/stores/stationStore';
 import { useFavoritesStore } from '../../src/stores/favoritesStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
@@ -160,6 +161,7 @@ export default function FeedScreen() {
 
   return (
     <View className="flex-1 bg-white dark:bg-gray-900">
+      <UpdateBanner />
       <FlashList
         data={records}
         keyExtractor={(item) => item.id}

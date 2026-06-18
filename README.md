@@ -97,6 +97,8 @@ See [ROADMAP.md](ROADMAP.md) for the full, living roadmap.
 
 > No Play Store account needed — enable "Install from unknown sources" in Android Settings, download the APK, and install.
 
+**Staying up to date** — from v0.8.0 onward, BirdEcho checks GitHub Releases on launch and shows an in-app banner when a newer version is available. Tap **Download & install** and confirm the Android install prompt — no need to revisit this page. (Android requires that confirmation for sideloaded apps; there is no fully silent auto-update without the Play Store.)
+
 **iOS** — App Store / TestFlight distribution is currently **on hold** while development focuses on Android. The codebase stays cross-platform, so community builds are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for how to build locally with EAS.
 
 > F-Droid submission is in progress.

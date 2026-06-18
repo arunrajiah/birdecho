@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] — 2026-06-18
+
+### Added
+
+- **In-app updates from GitHub** — since BirdEcho is distributed as a sideloaded APK (no Play Store), the app now checks GitHub Releases on launch and, if a newer version is available, shows a banner on the Feed with a one-tap **Download & install** that fetches the APK and hands it to Android's package installer. Android still asks you to confirm the install (a sideloading requirement — there is no silent auto-update without device-owner/MDM). Adds the `expo-application` and `expo-intent-launcher` modules and the `REQUEST_INSTALL_PACKAGES` permission. Android-only; no external service — it talks straight to the GitHub Releases API.
+
+### Fixed
+
+- **Critical: app version and versionCode were frozen at 0.5.3 / 16 in every build since v0.5.4.** `app.config.ts` supersedes `app.json` in Expo, but version bumps were only being made in `app.json`, so every release from v0.5.4 through v0.7.0 actually embedded version `0.5.3` / versionCode `16`. Because Android blocks installing an APK whose versionCode isn't higher than the installed one, this could prevent updates from installing at all, and left every build mis-reporting its version. `app.config.ts` now derives its config from `app.json` (single source of truth), so version/versionCode bumps can no longer drift. This release embeds the correct `0.8.0` / `21`.
+
+---
+
 ## [0.7.0] — 2026-06-18
 
 ### Added

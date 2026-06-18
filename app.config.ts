@@ -1,93 +1,52 @@
 import type { ExpoConfig } from 'expo/config';
+import appJson from './app.json';
 
 /**
- * app.config.ts supersedes app.json.
- * app.json is kept as a reference copy but is NOT read by Expo when this file exists.
+ * app.config.ts supersedes app.json — Expo reads THIS file, not app.json, when
+ * it exists. To prevent the two from drifting (version/versionCode bumps in
+ * app.json were previously silently ignored), this file now *reads* app.json as
+ * its base and only layers on the bits that can't be expressed in plain JSON:
  *
- * This file exists solely to add the react-native-android-widget Expo config plugin,
- * which cannot be expressed as a plain JSON plugin entry (it requires an object argument
- * with a `widgets` array).  All other config is mirrored verbatim from app.json so that
- * a single source of truth is easy to maintain.
+ *   1. the react-native-android-widget config plugin (needs an object argument)
+ *   2. the Google Maps API key (sourced from the environment at prebuild time)
+ *   3. the REQUEST_INSTALL_PACKAGES permission (for the in-app GitHub updater)
+ *
+ * Edit version, versionCode, and everything else in app.json — it flows through
+ * here automatically.
  */
+const base = appJson.expo as ExpoConfig;
+
 const config: ExpoConfig = {
-  name: 'BirdEcho',
-  slug: 'birdecho',
-  version: '0.5.3',
-  scheme: 'birdecho',
-  orientation: 'portrait',
-  icon: './assets/icon.png',
-  userInterfaceStyle: 'light',
-  newArchEnabled: true,
-  splash: {
-    image: './assets/splash-icon.png',
-    resizeMode: 'contain',
-    backgroundColor: '#ffffff',
-  },
+  ...base,
   android: {
-    package: 'dev.arunrajiah.birdecho',
-    versionCode: 16,
-    adaptiveIcon: {
-      foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#ffffff',
-    },
-    edgeToEdgeEnabled: true,
-    predictiveBackGestureEnabled: false,
-    /**
-     * Google Maps API key for the react-native-maps map tab.
-     * Without this key, Android map tiles are blank but station markers
-     * still render and interactions still work.
-     * Set EXPO_PUBLIC_GOOGLE_MAPS_API_KEY in your environment before `expo prebuild`.
-     */
+    ...base.android,
+    // Google Maps tiles for the map tab. Blank tiles (no key) still allow
+    // markers and interaction. Set EXPO_PUBLIC_GOOGLE_MAPS_API_KEY before prebuild.
     config: {
       googleMaps: {
         apiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
       },
     },
-  },
-  ios: {
-    bundleIdentifier: 'dev.arunrajiah.birdecho',
-    supportsTablet: true,
-    infoPlist: {
-      NSAppTransportSecurity: {
-        NSAllowsArbitraryLoads: false,
-        NSAllowsLocalNetworking: true,
-      },
-    },
-  },
-  web: {
-    favicon: './assets/favicon.png',
+    // Required so the in-app updater can hand a downloaded APK to Android's
+    // package installer (sideloaded builds have no Play Store auto-update).
+    permissions: [...(base.android?.permissions ?? []), 'android.permission.REQUEST_INSTALL_PACKAGES'],
   },
   plugins: [
-    'expo-router',
-    'expo-secure-store',
-    [
-      'expo-build-properties',
-      {
-        android: {
-          usesCleartextTraffic: true,
-        },
-      },
-    ],
+    ...(base.plugins ?? []),
     [
       'react-native-android-widget',
       {
         widgets: [
           {
-            /**
-             * Widget class name prefix.  Expo prebuild generates
-             * `BirdStationWidgetProvider` in the Android manifest.
-             * This must match the `widgetName` passed to `requestWidgetUpdate`.
-             */
+            // Expo prebuild generates `BirdStationWidgetProvider`; must match the
+            // widgetName passed to requestWidgetUpdate.
             name: 'BirdStation',
             label: 'BirdEcho – Latest Detection',
             minWidth: '250dp',
             minHeight: '110dp',
             description: 'Shows the latest bird detection from your BirdEcho station.',
             resizeMode: 'horizontal|vertical',
-            /**
-             * `configuration_optional` means no configuration activity is required —
-             * the widget is usable immediately after being added to the home screen.
-             */
+            // configuration_optional → usable immediately after being added.
             widgetFeatures: 'reconfigurable|configuration_optional',
           },
         ],
@@ -95,7 +54,7 @@ const config: ExpoConfig = {
     ],
   ],
   extra: {
-    router: {},
+    ...base.extra,
     eas: {
       projectId: 'eabffb00-b763-416a-afc6-85897ebb0e92',
     },
