@@ -11,7 +11,7 @@ export default function SpeciesDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const adapter = useApiAdapter();
   const { has, toggle } = useFavoritesStore();
-  const isRare = useRarityChecker();
+  const { isRare } = useRarityChecker();
 
   const { data: species, isLoading } = useQuery({
     queryKey: [adapter?.cacheKey, 'species', id],

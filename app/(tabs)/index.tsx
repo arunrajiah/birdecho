@@ -7,7 +7,9 @@ import RecordCard from '../../src/components/RecordCard';
 import ErrorState from '../../src/components/ErrorState';
 import { useStationStore } from '../../src/stores/stationStore';
 import { useFavoritesStore } from '../../src/stores/favoritesStore';
+import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useApiAdapter } from '../../src/hooks/useApiAdapter';
+import { useRarityChecker } from '../../src/hooks/useRarityChecker';
 import { scheduleLocalNotification } from '../../src/lib/notifications';
 import { saveWidgetData, WIDGET_NAME } from '../../src/widgetTaskHandler';
 import { BirdStationWidget } from '../../src/widgets/BirdStationWidget';
@@ -21,8 +23,10 @@ export default function FeedScreen() {
   const stationTimezone = useStationStore((s) => s.stationTimezone) ?? undefined;
   const queryClient = useQueryClient();
   const favSpeciesIds = useFavoritesStore((s) => s.speciesIds);
+  const rareAlertsEnabled = useSettingsStore((s) => s.rareAlertsEnabled);
   const lastNotifiedRef = useRef<Record<string, number>>({});
   const adapter = useApiAdapter();
+  const { isRareSpecies } = useRarityChecker();
 
   useEffect(() => {
     lastNotifiedRef.current = {};
@@ -65,6 +69,23 @@ export default function FeedScreen() {
       scheduleLocalNotification(r.commonName, 'Seen at your station just now.');
     });
   }, [records, favSpeciesIds]);
+
+  // ─── Rare-species local alerts (opt-in) ──────────────────────────────────
+  // When enabled in Settings, notify the first time each rare species is seen
+  // per day. Dedup keys are namespaced ("rare:") so a species that is both a
+  // favourite and rare can fire both notifications independently.
+  useEffect(() => {
+    if (!rareAlertsEnabled || !records.length) return;
+    const now = Date.now();
+    records.forEach((r) => {
+      if (!isRareSpecies(r.speciesId)) return;
+      const key = `rare:${r.speciesId}`;
+      const last = lastNotifiedRef.current[key] ?? 0;
+      if (now - last < DAY_MS) return;
+      lastNotifiedRef.current[key] = now;
+      scheduleLocalNotification(`Rare: ${r.commonName}`, 'A species rarely seen at your station was just detected.');
+    });
+  }, [records, rareAlertsEnabled, isRareSpecies]);
 
   // ─── Home-screen widget update (Android only) ────────────────────────────
   //

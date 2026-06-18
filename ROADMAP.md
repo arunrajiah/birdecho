@@ -2,6 +2,8 @@
 
 This is a living document. Items move between releases as priorities shift — check [Issues](https://github.com/arunrajiah/birdecho/issues) and [Discussions](https://github.com/arunrajiah/birdecho/discussions) for the latest status on any item.
 
+> **Focus: Android.** Development is Android-first for now. iOS distribution (App Store / TestFlight) is **on hold** until the Android app matures — the codebase stays cross-platform (Expo / React Native), so iOS builds remain possible for contributors, but they are not a near-term priority.
+
 Want to help ship something? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick up an issue tagged [`help wanted`](https://github.com/arunrajiah/birdecho/labels/help%20wanted).
 
 ---
@@ -53,12 +55,13 @@ Want to help ship something? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick up
 
 ---
 
-## 🔭 v0.6 — Longer-term
+## 🔭 v0.6 / v0.7 — In progress
 
 - ✅ **Species rarity badge** (v0.6.0) — flag species infrequently detected at your station with a "Rare" badge in the Species/Favorites tabs and species detail. Rarity is station-relative (relative to your own detection counts); regional/seasonal rarity would need an external checklist dataset and remains out of scope.
-- **iOS App Store / TestFlight** — a signed iOS build distributed through the App Store
-- **Rare-species push alerts** — local notification when a rare species (per the rarity badge) is detected; server-side push for starred species later
-- **Apple Watch / Wear OS glance** — last detection and daily count on your wrist
+- ✅ **Rare-species detection alerts** (v0.7.0) — opt-in local notification the first time each rare species is detected per day, judged by the rarity badge above. On-device only; server-side push for starred species may follow later.
+- **Wear OS glance** — last detection and daily count on your wrist (Android)
+- ⏸️ **iOS App Store / TestFlight** — _on hold_ (Android-first; see note at top)
+- ⏸️ **Apple Watch glance** — _on hold_ (paired with the iOS pause)
 
 ---
 

@@ -59,11 +59,35 @@ BirdEcho is **not** a bird-identification app. It does not listen to audio or id
 
 ### Notifications & Widget
 - **Favourites** — star any species and get a local notification the first time it's detected each day
+- **Rare-species alerts** — opt-in local notification when a species rarely seen at your station is detected
 - **Android home-screen widget** — today's detection count and last detected species, glanceable without opening the app
 
 ### Customisation
 - Light / Dark / System theme
 - Secure token storage via iOS Keychain / Android Keystore
+
+---
+
+## Roadmap
+
+> **Android-first.** iOS distribution is on hold while the Android app matures (the code stays cross-platform, so local iOS builds remain possible).
+
+**Recently shipped**
+- 🔔 Rare-species detection alerts — v0.7.0
+- 🏷️ Species rarity badge — v0.6.0
+- 📊 Detection CSV export & 🗺️ station map — v0.5.0
+- 📡 Multi-station support — v0.4.0
+- 🐦 Direct BirdNET-Pi & BirdNET-Go, 📴 offline cache, 🔲 home-screen widget — v0.3.x
+
+**Planned (Android)**
+- ⌚ Wear OS glance — last detection & daily count on your wrist
+- 🎵 Spectrogram view on the sighting detail screen
+- 📦 F-Droid listing
+
+**On hold**
+- 🍎 iOS App Store / TestFlight, Apple Watch — paused to focus on Android
+
+See [ROADMAP.md](ROADMAP.md) for the full, living roadmap.
 
 ---
 
@@ -73,7 +97,7 @@ BirdEcho is **not** a bird-identification app. It does not listen to audio or id
 
 > No Play Store account needed — enable "Install from unknown sources" in Android Settings, download the APK, and install.
 
-**iOS** — community builds are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to build locally with EAS. iOS App Store / TestFlight is planned for a future release.
+**iOS** — App Store / TestFlight distribution is currently **on hold** while development focuses on Android. The codebase stays cross-platform, so community builds are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for how to build locally with EAS.
 
 > F-Droid submission is in progress.
 
@@ -127,7 +151,7 @@ Double-check both values — the token is case-sensitive and the Station ID must
 Your station may not have any detections yet. Pull down to refresh. If your station has detections on the BirdWeather website but not in BirdEcho, please [open an issue](https://github.com/arunrajiah/birdecho/issues).
 
 **Notifications aren't arriving.**
-Check that you granted notification permission when prompted. On Android, also check that battery optimisation isn't killing the app in the background. Note: server-side push alerts are a future feature; today's alerts are local-only and fire when a favourited species is detected.
+Check that you granted notification permission when prompted. On Android, also check that battery optimisation isn't killing the app in the background. Note: alerts are local-only (no server-side push yet) and fire while the app polls — when a **favourited** species is detected, or, if you enable **Rare species alerts** in Settings, when a species rarely seen at your station shows up.
 
 **The Android map shows blank tiles.**
 Markers and interactions work without a key. For full tile rendering, the app needs a Google Maps API key set at build time (`EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`). iOS uses Apple Maps and always shows tiles.

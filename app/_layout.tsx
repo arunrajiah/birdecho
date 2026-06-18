@@ -9,6 +9,7 @@ import { useColorScheme } from 'nativewind';
 import { useStationStore } from '../src/stores/stationStore';
 import { useFavoritesStore } from '../src/stores/favoritesStore';
 import { useThemeStore } from '../src/stores/themeStore';
+import { useSettingsStore } from '../src/stores/settingsStore';
 import { initSentry, captureException } from '../src/lib/sentry';
 import { QUERY_CACHE_STORAGE_KEY } from '../src/lib/queryCache';
 
@@ -39,6 +40,7 @@ export default function RootLayout() {
   const hydrateStation = useStationStore((s) => s.hydrate);
   const hydrateFavorites = useFavoritesStore((s) => s.hydrate);
   const hydrateTheme = useThemeStore((s) => s.hydrate);
+  const hydrateSettings = useSettingsStore((s) => s.hydrate);
   const themeMode = useThemeStore((s) => s.mode);
   const { colorScheme, setColorScheme } = useColorScheme();
   const hydrated = useRef(false);
@@ -49,7 +51,8 @@ export default function RootLayout() {
     hydrateStation().catch(captureException);
     hydrateFavorites().catch(captureException);
     hydrateTheme().catch(captureException);
-  }, [hydrateStation, hydrateFavorites, hydrateTheme]);
+    hydrateSettings().catch(captureException);
+  }, [hydrateStation, hydrateFavorites, hydrateTheme, hydrateSettings]);
 
   useEffect(() => {
     setColorScheme(themeMode);

@@ -10,7 +10,7 @@ import type { Species } from '../../src/types/birdweather';
 export default function FavoritesScreen() {
   const adapter = useApiAdapter();
   const speciesIds = useFavoritesStore((s) => s.speciesIds);
-  const isRare = useRarityChecker();
+  const { isRare } = useRarityChecker();
 
   const results = useQueries({
     queries: speciesIds.map((id) => ({

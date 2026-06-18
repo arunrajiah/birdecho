@@ -2,7 +2,7 @@
   "expo": {
     "name": "BirdEcho",
     "slug": "birdecho",
-    "version": "0.6.0",
+    "version": "0.7.0",
     "scheme": "birdecho",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,7 +15,7 @@
     },
     "android": {
       "package": "dev.arunrajiah.birdecho",
-      "versionCode": 19,
+      "versionCode": 20,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

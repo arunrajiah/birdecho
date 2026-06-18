@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] — 2026-06-18
+
+### Added
+
+- **Rare-species detection alerts** — the "Rare species alerts" toggle in Settings now does something. When enabled, BirdEcho fires a local notification the first time each rare species is detected per day, as the feed polls. "Rare" reuses the v0.6.0 station-relative definition (a species detected far less often than your station's most common bird). The toggle now persists across launches, and the dedup is namespaced separately from favourites alerts so a species that is both starred and rare fires both. Entirely on-device — no server, no push, no data leaves the phone. (roadmap: v0.6)
+
+### Changed
+
+- Settings "Rare species alerts" copy updated from "Coming soon" to describe the now-live behaviour.
+
+---
+
 ## [0.6.0] — 2026-06-18
 
 ### Added

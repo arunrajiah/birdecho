@@ -1,9 +1,9 @@
-import { useState } from 'react';
 import { View, Text, Pressable, Switch, Alert, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import { useStationStore } from '../../src/stores/stationStore';
 import { useThemeStore } from '../../src/stores/themeStore';
-import { requestPermission, scheduleLocalNotification } from '../../src/lib/notifications';
+import { useSettingsStore } from '../../src/stores/settingsStore';
+import { requestPermission } from '../../src/lib/notifications';
 import type { SavedStation } from '../../src/types/station';
 
 type Mode = 'light' | 'dark' | 'system';
@@ -80,22 +80,19 @@ export default function SettingsScreen() {
   const isConnected = useStationStore((s) => s.isConnected);
 
   const { mode, setMode } = useThemeStore();
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const rareAlertsEnabled = useSettingsStore((s) => s.rareAlertsEnabled);
+  const setRareAlerts = useSettingsStore((s) => s.setRareAlerts);
 
-  async function handleNotificationsToggle(value: boolean) {
+  async function handleRareAlertsToggle(value: boolean) {
     if (value) {
       const granted = await requestPermission();
       if (!granted) {
         Alert.alert('Permission required', 'Enable notifications in your device settings.');
         return;
       }
-      setNotificationsEnabled(true);
-      await scheduleLocalNotification(
-        'BirdEcho notifications enabled',
-        'You will receive rare-species alerts once that feature ships.',
-      );
+      setRareAlerts(true);
     } else {
-      setNotificationsEnabled(false);
+      setRareAlerts(false);
     }
   }
 
@@ -175,17 +172,18 @@ export default function SettingsScreen() {
           <View className="flex-1 mr-3">
             <Text className="text-sm text-gray-700 dark:text-gray-300">Rare species alerts</Text>
             <Text className="text-xs text-gray-400 mt-0.5">
-              Coming soon — grant permission now to opt in early
+              Notify me when a species rarely seen at my station is detected
             </Text>
           </View>
           <Switch
-            value={notificationsEnabled}
-            onValueChange={handleNotificationsToggle}
+            value={rareAlertsEnabled}
+            onValueChange={handleRareAlertsToggle}
             trackColor={{ true: '#15803d' }}
           />
         </View>
         <Text className="mb-6 px-1 text-xs text-gray-400">
-          Grants OS permission for future push alerts. No data leaves your device today.
+          Fires a local notification the first time each rare species is detected per day. Rarity
+          is judged against your station's own detection counts. No data leaves your device.
         </Text>
 
         {/* ── Stations ─────────────────────────────────────────────────────── */}
