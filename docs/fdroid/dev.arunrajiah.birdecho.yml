@@ -786,7 +786,7 @@ Builds:
   # ── v0.9.0 ──────────────────────────────────────────────────────────────────
   - versionName: '0.9.0'
     versionCode: 25
-    commit: COMMIT_SHA_PLACEHOLDER
+    commit: e6299ff53b1ceaa50e17a6a4e696970828f02829
     subdir: android/app
     sudo:
       - apt-get update
