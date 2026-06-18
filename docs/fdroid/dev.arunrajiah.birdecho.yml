@@ -627,6 +627,60 @@ Builds:
       - node_modules/react-native-svg/android/build.gradle
       - node_modules/react-native-view-shot/android/build.gradle
 
+  # ── v0.8.1 ──────────────────────────────────────────────────────────────────
+  # EXPO_PUBLIC_FDROID=1 at prebuild produces a repo-compliant build: the in-app
+  # GitHub APK updater is disabled and REQUEST_INSTALL_PACKAGES is dropped.
+  - versionName: '0.8.1'
+    versionCode: 22
+    commit: COMMIT_SHA_PLACEHOLDER
+    subdir: android/app
+    sudo:
+      - apt-get update
+      - apt-get install -y g++ make python3 openjdk-17-jdk
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
+      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
+      - tar xJf node.tar.xz
+      - cp -a node-v24.0.2-linux-x64/. /usr/local/
+      - npm install -g pnpm@10
+    init:
+      - cd ../.. && pnpm install --frozen-lockfile
+      # EXPO_PUBLIC_FDROID=1 → drops the in-app updater + REQUEST_INSTALL_PACKAGES.
+      - cd ../.. && EXPO_PUBLIC_FDROID=1 npx expo prebuild --platform android --clean --no-install
+    prebuild:
+      - sed -i '/signingConfig signingConfigs/d' build.gradle
+      - sed -i '/projectId/d' ../../app.config.ts || true
+      - sed -i '/projectId/d' ../../app.json || true
+    gradle:
+      - yes
+    rm:
+      - node_modules/react-native/sdks/hermesc/osx-bin
+      - node_modules/react-native/sdks/hermesc/win64-bin
+      - node_modules/@sentry/react-native/android/src/main/jniLibs
+      - node_modules/react-native-maps/android/libs
+    scanignore:
+      - android/build.gradle
+      - node_modules/react-native/android
+      - node_modules/hermes-engine
+      - node_modules/jsc-android
+      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/@sentry/react-native/android/build.gradle
+      - node_modules/expo/android/build.gradle
+      - node_modules/expo-application/android/build.gradle
+      - node_modules/expo-av/android/build.gradle
+      - node_modules/expo-build-properties/android/build.gradle
+      - node_modules/expo-file-system/android/build.gradle
+      - node_modules/expo-intent-launcher/android/build.gradle
+      - node_modules/expo-modules-core/android/build.gradle
+      - node_modules/expo-notifications/android/build.gradle
+      - node_modules/expo-router/android/build.gradle
+      - node_modules/expo-secure-store/android/build.gradle
+      - node_modules/expo-sharing/android/build.gradle
+      - node_modules/react-native-android-widget/android/build.gradle
+      - node_modules/react-native-css-interop/android/build.gradle
+      - node_modules/react-native-maps/android/build.gradle
+      - node_modules/react-native-svg/android/build.gradle
+      - node_modules/react-native-view-shot/android/build.gradle
+
 # Reproducible build path (preferred). Uncomment once confirmed byte-for-byte identical.
 # To get the fingerprint: apksigner verify --print-certs birdecho.apk | grep SHA-256
 # AllowedAPKSigningKeys: <lowercase-sha256-hex>
@@ -658,15 +712,15 @@ MaintainerNotes: |-
   HTTP connections to local BirdNET-Pi/Go stations on the user's LAN. This is
   intentional and documented.
 
-  From v0.8.0 the GitHub build includes an in-app updater (expo-application +
-  expo-intent-launcher) that downloads the latest APK from GitHub Releases and
-  launches Android's package installer — hence the REQUEST_INSTALL_PACKAGES
-  permission. F-Droid provides its own update channel, so for the F-Droid build
-  this updater should be disabled and the permission dropped. The cleanest way is
-  to gate the banner behind an env flag at build time; until that is wired up,
-  reviewers may treat the in-app updater as the reason for REQUEST_INSTALL_PACKAGES.
+  The GitHub build includes an in-app updater (expo-application + expo-intent-launcher)
+  that downloads the latest APK from GitHub Releases and launches Android's package
+  installer. F-Droid provides its own update channel, so this build sets
+  EXPO_PUBLIC_FDROID=1 before `expo prebuild` (see the prebuild step below). That flag
+  disables the in-app updater AND drops the REQUEST_INSTALL_PACKAGES permission, so the
+  F-Droid APK contains neither the self-updater nor that permission. Verify with
+  `aapt dump permissions` that REQUEST_INSTALL_PACKAGES is absent from the built APK.
 
 AutoUpdateMode: Version %v
 UpdateCheckMode: Tags
-CurrentVersion: '0.8.0'
-CurrentVersionCode: 21
+CurrentVersion: '0.8.1'
+CurrentVersionCode: 22

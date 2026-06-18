@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.1] — 2026-06-18
+
+### Added
+
+- **`EXPO_PUBLIC_FDROID` build flag** — set to `1` at build time to produce an F-Droid / IzzyOnDroid-compliant build: the in-app GitHub APK updater is disabled and the `REQUEST_INSTALL_PACKAGES` permission is dropped. Those repositories provide their own update channel and their inclusion policies disallow self-updating without an explicit bypass opt-in, so the standard GitHub build keeps the updater while repo builds omit it. The flag is baked into the app config (`extra.fdroidBuild`) so the JS layer and the native permission stay in sync. No effect on the default GitHub APK.
+
+---
+
 ## [0.8.0] — 2026-06-18
 
 ### Added

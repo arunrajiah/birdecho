@@ -13,6 +13,7 @@
  */
 
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import * as Application from 'expo-application';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as IntentLauncher from 'expo-intent-launcher';
@@ -29,6 +30,17 @@ export interface UpdateInfo {
   latestVersion: string;
   currentVersion: string;
   notes: string;
+}
+
+/**
+ * Whether the in-app updater is active for this build. Disabled on non-Android
+ * and on F-Droid/IzzyOnDroid builds (EXPO_PUBLIC_FDROID=1 at prebuild), which
+ * ship their own update channel and disallow self-updating.
+ */
+export function isUpdaterEnabled(): boolean {
+  if (Platform.OS !== 'android') return false;
+  if (Constants.expoConfig?.extra?.fdroidBuild === true) return false;
+  return true;
 }
 
 function parseVersion(v: string): number[] {
@@ -57,7 +69,7 @@ export function isNewerVersion(latest: string, current: string): boolean {
  * non-Android) so the caller never has to surface a check error.
  */
 export async function checkForUpdate(): Promise<UpdateInfo | null> {
-  if (Platform.OS !== 'android') return null;
+  if (!isUpdaterEnabled()) return null;
   const currentVersion = Application.nativeApplicationVersion ?? '0.0.0';
 
   let res: Response;
