@@ -173,7 +173,7 @@ export default function SettingsScreen() {
           <View className="flex-1 mr-3">
             <Text className="text-sm text-gray-700 dark:text-gray-300">Rare species alerts</Text>
             <Text className="text-xs text-gray-400 mt-0.5">
-              Notify me when a species rarely seen at my station is detected
+              Notify me when a species I marked as rare is detected
             </Text>
           </View>
           <Switch
@@ -183,8 +183,8 @@ export default function SettingsScreen() {
           />
         </View>
         <Text className="mb-6 px-1 text-xs text-gray-400">
-          Fires a local notification the first time each rare species is detected per day. Rarity
-          is judged against the detection counts at your own station. No data leaves your device.
+          Mark species as rare from their detail page (⚑). This fires a local notification the
+          first time each one is detected per day. No data leaves your device.
         </Text>
 
         {/* ── Stations ─────────────────────────────────────────────────────── */}

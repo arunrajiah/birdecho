@@ -57,8 +57,8 @@ Want to help ship something? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick up
 
 ## 🔭 v0.6 / v0.7 — In progress
 
-- ✅ **Species rarity badge** (v0.6.0) — flag species infrequently detected at your station with a "Rare" badge in the Species/Favorites tabs and species detail. Rarity is station-relative (relative to your own detection counts); regional/seasonal rarity would need an external checklist dataset and remains out of scope.
-- ✅ **Rare-species detection alerts** (v0.7.0) — opt-in local notification the first time each rare species is detected per day, judged by the rarity badge above. On-device only; server-side push for starred species may follow later.
+- ✅ **Species rarity badge** (v0.6.0, reworked in v0.9.0) — a "Rare" badge in the Species/Favorites tabs and species detail. Now **user-defined**: mark species as rare from their detail page (the original auto-by-count heuristic mislabelled common-but-infrequent birds, #24). Regional/seasonal auto-rarity would need an external checklist dataset and remains out of scope.
+- ✅ **Rare-species detection alerts** (v0.7.0) — opt-in local notification the first time each species you've marked as rare is detected per day. On-device only; server-side push for starred species may follow later.
 - **Wear OS glance** — last detection and daily count on your wrist (Android)
 - ⏸️ **iOS App Store / TestFlight** — _on hold_ (Android-first; see note at top)
 - ⏸️ **Apple Watch glance** — _on hold_ (paired with the iOS pause)

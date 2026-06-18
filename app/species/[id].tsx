@@ -3,7 +3,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import { useFavoritesStore } from '../../src/stores/favoritesStore';
-import { useRarityChecker } from '../../src/hooks/useRarityChecker';
+import { useRareStore } from '../../src/stores/rareStore';
 import RecordCard from '../../src/components/RecordCard';
 import RareBadge from '../../src/components/RareBadge';
 
@@ -11,7 +11,8 @@ export default function SpeciesDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const adapter = useApiAdapter();
   const { has, toggle } = useFavoritesStore();
-  const { isRare } = useRarityChecker();
+  const toggleRare = useRareStore((s) => s.toggle);
+  const rare = useRareStore((s) => s.speciesIds.includes(id));
 
   const { data: species, isLoading } = useQuery({
     queryKey: [adapter?.cacheKey, 'species', id],
@@ -26,7 +27,6 @@ export default function SpeciesDetailScreen() {
   });
 
   const favorited = has(id);
-  const rare = species ? isRare(species.count) : false;
 
   if (isLoading) {
     return (
@@ -70,11 +70,19 @@ export default function SpeciesDetailScreen() {
         <Text className="mt-3 text-sm text-gray-500">
           {species.count.toLocaleString()} detections at this station
         </Text>
-        {rare ? (
-          <Text className="mt-1 text-xs text-amber-600">
-            Rarely detected at this station
+
+        {/* User-defined rarity (issue #24). Marked species show the Rare badge and,
+            when rare-species alerts are enabled, trigger a notification on detection. */}
+        <Pressable
+          onPress={() => toggleRare(id)}
+          className={`mt-3 self-start flex-row items-center rounded-full border px-3 py-1.5 active:opacity-75 ${
+            rare ? 'border-amber-300 bg-amber-50' : 'border-gray-200 bg-white'
+          }`}
+        >
+          <Text className={`text-sm ${rare ? 'text-amber-700' : 'text-gray-600'}`}>
+            {rare ? '⚑  Marked as rare' : '⚑  Mark as rare'}
           </Text>
-        ) : null}
+        </Pressable>
 
         {recentRecords && recentRecords.length > 0 ? (
           <View className="mt-5">

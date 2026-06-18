@@ -9,8 +9,8 @@ import UpdateBanner from '../../src/components/UpdateBanner';
 import { useStationStore } from '../../src/stores/stationStore';
 import { useFavoritesStore } from '../../src/stores/favoritesStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
+import { useRareStore } from '../../src/stores/rareStore';
 import { useApiAdapter } from '../../src/hooks/useApiAdapter';
-import { useRarityChecker } from '../../src/hooks/useRarityChecker';
 import { scheduleLocalNotification } from '../../src/lib/notifications';
 import { saveWidgetData, WIDGET_NAME } from '../../src/widgetTaskHandler';
 import { BirdStationWidget } from '../../src/widgets/BirdStationWidget';
@@ -25,9 +25,9 @@ export default function FeedScreen() {
   const queryClient = useQueryClient();
   const favSpeciesIds = useFavoritesStore((s) => s.speciesIds);
   const rareAlertsEnabled = useSettingsStore((s) => s.rareAlertsEnabled);
+  const rareSpeciesIds = useRareStore((s) => s.speciesIds);
   const lastNotifiedRef = useRef<Record<string, number>>({});
   const adapter = useApiAdapter();
-  const { isRareSpecies } = useRarityChecker();
 
   useEffect(() => {
     lastNotifiedRef.current = {};
@@ -72,21 +72,21 @@ export default function FeedScreen() {
   }, [records, favSpeciesIds]);
 
   // ─── Rare-species local alerts (opt-in) ──────────────────────────────────
-  // When enabled in Settings, notify the first time each rare species is seen
-  // per day. Dedup keys are namespaced ("rare:") so a species that is both a
-  // favourite and rare can fire both notifications independently.
+  // When enabled in Settings, notify the first time each user-marked rare
+  // species is seen per day. Dedup keys are namespaced ("rare:") so a species
+  // that is both a favourite and rare can fire both notifications independently.
   useEffect(() => {
     if (!rareAlertsEnabled || !records.length) return;
     const now = Date.now();
     records.forEach((r) => {
-      if (!isRareSpecies(r.speciesId)) return;
+      if (!rareSpeciesIds.includes(r.speciesId)) return;
       const key = `rare:${r.speciesId}`;
       const last = lastNotifiedRef.current[key] ?? 0;
       if (now - last < DAY_MS) return;
       lastNotifiedRef.current[key] = now;
-      scheduleLocalNotification(`Rare: ${r.commonName}`, 'A species rarely seen at your station was just detected.');
+      scheduleLocalNotification(`Rare: ${r.commonName}`, 'A species you marked as rare was just detected.');
     });
-  }, [records, rareAlertsEnabled, isRareSpecies]);
+  }, [records, rareAlertsEnabled, rareSpeciesIds]);
 
   // ─── Home-screen widget update (Android only) ────────────────────────────
   //

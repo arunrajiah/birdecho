@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] — 2026-06-18
+
+### Changed
+
+- **Rarity is now user-defined, not auto-detected** (#24). The previous "station-relative" heuristic flagged the *least-detected* species as rare, which wrongly labelled common-but-infrequent birds (Robin, Wood Pigeon, …) as "Rare". True regional/seasonal rarity needs an external checklist dataset that's out of scope, so rarity is now something **you** decide:
+  - A **"⚑ Mark as rare"** toggle on each species' detail page.
+  - The **Rare** badge (Species / Favorites lists and detail) shows only for species you've marked.
+  - **Rare-species alerts** now fire for your marked species (the Settings copy and notification text were updated to match).
+  - Removed the old auto-rarity logic entirely. Marked species persist locally; nothing leaves the device.
+
+---
+
 ## [0.8.3] — 2026-06-18
 
 ### Fixed

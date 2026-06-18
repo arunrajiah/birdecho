@@ -2,13 +2,17 @@ import { useEffect, useState } from 'react';
 import { View, Text, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import type { Species } from '../types/birdweather';
+import { useRareStore } from '../stores/rareStore';
 import RareBadge from './RareBadge';
 
 // M-5: Bundled local asset — no external network call for placeholder images.
 const PLACEHOLDER = require('../../assets/icon.png') as number;
 
-export default function SpeciesRow({ species, rare = false }: { species: Species; rare?: boolean }) {
+export default function SpeciesRow({ species }: { species: Species }) {
   const [imgFailed, setImgFailed] = useState(false);
+  // Rarity is user-defined (issue #24): badge shows only for species the user
+  // has marked rare on the detail screen.
+  const rare = useRareStore((s) => s.speciesIds.includes(species.id));
   // FlashList recycles row instances; reset the failure flag when the image
   // changes so a recycled row doesn't keep showing the placeholder (or a stale
   // broken image) from the previous species.

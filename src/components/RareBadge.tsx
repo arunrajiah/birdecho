@@ -1,8 +1,8 @@
 import { View, Text } from 'react-native';
 
 /**
- * Small "RARE" pill shown next to species that are infrequently detected at the
- * connected station. See src/lib/rarity.ts for the rarity definition.
+ * Small "RARE" pill shown next to species the user has marked as rare on the
+ * species detail screen (see src/stores/rareStore.ts).
  */
 export default function RareBadge() {
   return (

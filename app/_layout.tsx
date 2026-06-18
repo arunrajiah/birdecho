@@ -10,6 +10,7 @@ import { useStationStore } from '../src/stores/stationStore';
 import { useFavoritesStore } from '../src/stores/favoritesStore';
 import { useThemeStore } from '../src/stores/themeStore';
 import { useSettingsStore } from '../src/stores/settingsStore';
+import { useRareStore } from '../src/stores/rareStore';
 import { initSentry, captureException } from '../src/lib/sentry';
 import { QUERY_CACHE_STORAGE_KEY } from '../src/lib/queryCache';
 
@@ -41,6 +42,7 @@ export default function RootLayout() {
   const hydrateFavorites = useFavoritesStore((s) => s.hydrate);
   const hydrateTheme = useThemeStore((s) => s.hydrate);
   const hydrateSettings = useSettingsStore((s) => s.hydrate);
+  const hydrateRare = useRareStore((s) => s.hydrate);
   const themeMode = useThemeStore((s) => s.mode);
   const { colorScheme, setColorScheme } = useColorScheme();
   const hydrated = useRef(false);
@@ -52,7 +54,8 @@ export default function RootLayout() {
     hydrateFavorites().catch(captureException);
     hydrateTheme().catch(captureException);
     hydrateSettings().catch(captureException);
-  }, [hydrateStation, hydrateFavorites, hydrateTheme, hydrateSettings]);
+    hydrateRare().catch(captureException);
+  }, [hydrateStation, hydrateFavorites, hydrateTheme, hydrateSettings, hydrateRare]);
 
   useEffect(() => {
     setColorScheme(themeMode);
