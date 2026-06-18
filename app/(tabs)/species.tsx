@@ -5,6 +5,7 @@ import { useStationStore } from '../../src/stores/stationStore';
 import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import SpeciesRow from '../../src/components/SpeciesRow';
 import ErrorState from '../../src/components/ErrorState';
+import { isRareAtStation } from '../../src/lib/rarity';
 
 export default function SpeciesScreen() {
   const isConnected = useStationStore((s) => s.isConnected);
@@ -34,12 +35,17 @@ export default function SpeciesScreen() {
     );
   }
 
+  const list = species ?? [];
+  const maxCount = list.length > 0 ? Math.max(...list.map((s) => s.count)) : 0;
+
   return (
     <View className="flex-1 bg-white dark:bg-gray-900">
       <FlashList
-        data={species ?? []}
+        data={list}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <SpeciesRow species={item} />}
+        renderItem={({ item }) => (
+          <SpeciesRow species={item} rare={isRareAtStation(item.count, maxCount, list.length)} />
+        )}
         overrideItemLayout={(_layout, _item, _index) => ({ size: 68 })}
         ItemSeparatorComponent={() => <View className="h-px bg-gray-100 dark:bg-gray-800 ml-16" />}
         ListEmptyComponent={() => (

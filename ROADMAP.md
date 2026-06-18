@@ -55,10 +55,10 @@ Want to help ship something? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick up
 
 ## 🔭 v0.6 — Longer-term
 
+- ✅ **Species rarity badge** (v0.6.0) — flag species infrequently detected at your station with a "Rare" badge in the Species/Favorites tabs and species detail. Rarity is station-relative (relative to your own detection counts); regional/seasonal rarity would need an external checklist dataset and remains out of scope.
 - **iOS App Store / TestFlight** — a signed iOS build distributed through the App Store
-- **Rare-species push alerts** — server-side push notifications when a starred or regionally unusual species is detected
+- **Rare-species push alerts** — local notification when a rare species (per the rarity badge) is detected; server-side push for starred species later
 - **Apple Watch / Wear OS glance** — last detection and daily count on your wrist
-- **Species rarity badge** — flag species that are unusual for your region or time of year
 
 ---
 
@@ -67,7 +67,6 @@ Want to help ship something? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick up
 These are things worth exploring but with no committed timeline:
 
 - Spectrogram view on the sighting detail screen
-- Species rarity badge (flag species that are unusual for your region or time of year)
 - Export detections as CSV
 - BirdWeather social features — reactions, comments on detections
 - iPad / tablet layout optimisation

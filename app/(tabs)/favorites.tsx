@@ -3,12 +3,14 @@ import { useQueries } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import { useFavoritesStore } from '../../src/stores/favoritesStore';
+import { useRarityChecker } from '../../src/hooks/useRarityChecker';
 import SpeciesRow from '../../src/components/SpeciesRow';
 import type { Species } from '../../src/types/birdweather';
 
 export default function FavoritesScreen() {
   const adapter = useApiAdapter();
   const speciesIds = useFavoritesStore((s) => s.speciesIds);
+  const isRare = useRarityChecker();
 
   const results = useQueries({
     queries: speciesIds.map((id) => ({
@@ -27,7 +29,7 @@ export default function FavoritesScreen() {
       <FlashList
         data={loaded}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <SpeciesRow species={item} />}
+        renderItem={({ item }) => <SpeciesRow species={item} rare={isRare(item.count)} />}
         overrideItemLayout={(_layout, _item, _index) => ({ size: 68 })}
         ItemSeparatorComponent={() => <View className="h-px bg-gray-100 dark:bg-gray-800 ml-16" />}
         ListEmptyComponent={() => (

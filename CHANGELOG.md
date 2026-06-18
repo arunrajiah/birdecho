@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] — 2026-06-18
+
+### Added
+
+- **Species rarity badge** — species that are infrequently detected at your station now show a "Rare" badge in the Species and Favorites tabs and on the species detail screen. Rarity is computed relative to the station's own detection distribution: a species detected less than 5% as often as the station's most-common bird is flagged (only on stations with at least 5 distinct species, so new stations aren't over-labelled). No external data or network calls — it works entirely off the detection counts already fetched. The species detail screen also shows "Rarely detected at this station" for context. (roadmap: v0.6)
+
+---
+
 ## [0.5.5] — 2026-06-18
 
 ### Fixed

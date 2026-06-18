@@ -3,12 +3,15 @@ import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import { useFavoritesStore } from '../../src/stores/favoritesStore';
+import { useRarityChecker } from '../../src/hooks/useRarityChecker';
 import RecordCard from '../../src/components/RecordCard';
+import RareBadge from '../../src/components/RareBadge';
 
 export default function SpeciesDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const adapter = useApiAdapter();
   const { has, toggle } = useFavoritesStore();
+  const isRare = useRarityChecker();
 
   const { data: species, isLoading } = useQuery({
     queryKey: [adapter?.cacheKey, 'species', id],
@@ -23,6 +26,7 @@ export default function SpeciesDetailScreen() {
   });
 
   const favorited = has(id);
+  const rare = species ? isRare(species.count) : false;
 
   if (isLoading) {
     return (
@@ -49,7 +53,10 @@ export default function SpeciesDetailScreen() {
       <View className="px-5 pt-4">
         <View className="flex-row items-start justify-between">
           <View className="flex-1 mr-4">
-            <Text className="text-2xl font-bold text-gray-900">{species.commonName}</Text>
+            <View className="flex-row items-center gap-2">
+              <Text className="shrink text-2xl font-bold text-gray-900">{species.commonName}</Text>
+              {rare ? <RareBadge /> : null}
+            </View>
             <Text className="text-base italic text-gray-400">{species.scientificName}</Text>
           </View>
           <Pressable
@@ -63,6 +70,11 @@ export default function SpeciesDetailScreen() {
         <Text className="mt-3 text-sm text-gray-500">
           {species.count.toLocaleString()} detections at this station
         </Text>
+        {rare ? (
+          <Text className="mt-1 text-xs text-amber-600">
+            Rarely detected at this station
+          </Text>
+        ) : null}
 
         {recentRecords && recentRecords.length > 0 ? (
           <View className="mt-5">

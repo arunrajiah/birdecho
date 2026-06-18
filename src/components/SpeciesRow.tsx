@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { View, Text, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import type { Species } from '../types/birdweather';
+import RareBadge from './RareBadge';
 
 // M-5: Bundled local asset — no external network call for placeholder images.
 const PLACEHOLDER = require('../../assets/icon.png') as number;
 
-export default function SpeciesRow({ species }: { species: Species }) {
+export default function SpeciesRow({ species, rare = false }: { species: Species; rare?: boolean }) {
   const [imgFailed, setImgFailed] = useState(false);
   return (
     <Pressable
@@ -20,9 +21,12 @@ export default function SpeciesRow({ species }: { species: Species }) {
         resizeMode="cover"
       />
       <View className="flex-1">
-        <Text className="text-sm font-semibold text-gray-900 dark:text-white" numberOfLines={1}>
-          {species.commonName}
-        </Text>
+        <View className="flex-row items-center gap-2">
+          <Text className="shrink text-sm font-semibold text-gray-900 dark:text-white" numberOfLines={1}>
+            {species.commonName}
+          </Text>
+          {rare ? <RareBadge /> : null}
+        </View>
         <Text className="text-xs italic text-gray-400 dark:text-gray-500" numberOfLines={1}>
           {species.scientificName}
         </Text>
