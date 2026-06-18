@@ -579,7 +579,7 @@ Builds:
   # own updates) — see MaintainerNotes.
   - versionName: '0.8.0'
     versionCode: 21
-    commit: COMMIT_SHA_PLACEHOLDER
+    commit: 4c3537354a49fac769700d3783059228a14fa2ad
     subdir: android/app
     sudo:
       - apt-get update
