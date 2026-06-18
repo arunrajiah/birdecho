@@ -39,7 +39,6 @@ export function captureException(error: unknown): void {
   if (process.env.EXPO_PUBLIC_SENTRY_DSN) {
     Sentry.captureException(error);
   } else {
-    // eslint-disable-next-line no-console
     console.error(error);
   }
 }

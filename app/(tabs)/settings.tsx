@@ -184,7 +184,7 @@ export default function SettingsScreen() {
         </View>
         <Text className="mb-6 px-1 text-xs text-gray-400">
           Fires a local notification the first time each rare species is detected per day. Rarity
-          is judged against your station's own detection counts. No data leaves your device.
+          is judged against the detection counts at your own station. No data leaves your device.
         </Text>
 
         {/* ── Stations ─────────────────────────────────────────────────────── */}
