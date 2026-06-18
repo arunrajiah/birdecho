@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View, Text, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import type { Detection } from '../types/birdweather';
@@ -19,13 +20,15 @@ interface Props {
 }
 
 export default function RecordCard({ record, timezone }: Props) {
+  const [imgFailed, setImgFailed] = useState(false);
   return (
     <Pressable
       className="flex-row items-center gap-3 bg-white dark:bg-gray-900 px-4 py-3 active:bg-gray-50 dark:active:bg-gray-800"
       onPress={() => router.push(`/record/${record.id}`)}
     >
       <Image
-        source={record.imageUrl ? { uri: record.imageUrl } : PLACEHOLDER}
+        source={record.imageUrl && !imgFailed ? { uri: record.imageUrl } : PLACEHOLDER}
+        onError={() => setImgFailed(true)}
         className="h-14 w-14 rounded-lg bg-gray-100 dark:bg-gray-800"
         resizeMode="cover"
       />

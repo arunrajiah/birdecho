@@ -149,10 +149,16 @@ export function createBirdNetGoAdapter(hostUrl: string): StationAdapter {
     },
 
     async fetchStats(): Promise<Stats> {
-      const [summary, daily] = await Promise.all([
+      const [summaryResult, dailyResult] = await Promise.allSettled([
         bngFetch<BngSpeciesSummary[]>(base, `/analytics/species/summary`),
         bngFetch<BngDailyCount[]>(base, `/analytics/time/daily?days=1`),
       ]);
+      // Surface error only if both calls failed — partial data is better than an error screen.
+      if (summaryResult.status === 'rejected' && dailyResult.status === 'rejected') {
+        throw summaryResult.reason;
+      }
+      const summary = summaryResult.status === 'fulfilled' ? summaryResult.value : [];
+      const daily = dailyResult.status === 'fulfilled' ? dailyResult.value : [];
       return {
         totalRecords: summary.reduce((n, s) => n + s.count, 0),
         uniqueSpecies: summary.length,

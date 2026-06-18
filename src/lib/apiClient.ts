@@ -37,7 +37,12 @@ export async function apiFetch<T>(
   }
 
   const url = `${BASE_URL}${path}`;
-  const response = await fetch(url, { ...init, headers });
+  let response: Response;
+  try {
+    response = await fetch(url, { ...init, headers });
+  } catch {
+    throw new Error('Could not reach BirdWeather — check your internet connection and try again.');
+  }
 
   if (!response.ok) {
     // L-3: Verify JSON before parsing; surface a clean message on unexpected content.

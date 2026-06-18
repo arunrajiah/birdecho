@@ -195,7 +195,8 @@ export default function ConnectScreen() {
             keyboardType="numeric"
           />
           <Text className="mb-6 text-xs text-gray-400">
-            Find your token and station ID at app.birdweather.com → Account settings
+            Find your token and station ID at app.birdweather.com → Account settings.
+            Requires an internet connection (unlike BirdNET-Go / BirdNET-Pi which connect over your local network).
           </Text>
         </>
       ) : (

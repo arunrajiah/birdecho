@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.5] — 2026-06-18
+
+### Fixed
+
+- **BirdNET-Go: species and detection images show dark placeholders** — `SpeciesRow` and `RecordCard` had no `onError` handler on the `Image` component. When the BirdNET-Go instance's `/api/v2/media/image/` endpoint returned a 404 (no species images downloaded), React Native silently displayed the component background instead of the bundled placeholder. Both components now fall back to the local placeholder asset on any image load failure. (#21)
+
+- **BirdNET-Go: Stats tab shows error screen** — `fetchStats()` used `Promise.all` to call two analytics endpoints in parallel; if either call failed, the entire stats screen showed an error. Changed to `Promise.allSettled` — if one endpoint fails, the stats screen still shows whatever data the other returned. Only if both fail is the error state surfaced. (#22)
+
+- **BirdWeather: "network error" on connect with no explanation** — `apiFetch` did not catch network-level errors from `fetch()`, causing a raw TypeError to surface. Wrapped in try/catch with a clean message. Added a note in the connect screen that BirdWeather requires an internet connection, unlike BirdNET-Go and BirdNET-Pi which work over your local network. (#23)
+
+---
+
 ## [0.5.4] — 2026-06-11
 
 ### Fixed

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { View, Text, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import type { Species } from '../types/birdweather';
@@ -6,13 +7,15 @@ import type { Species } from '../types/birdweather';
 const PLACEHOLDER = require('../../assets/icon.png') as number;
 
 export default function SpeciesRow({ species }: { species: Species }) {
+  const [imgFailed, setImgFailed] = useState(false);
   return (
     <Pressable
       className="flex-row items-center gap-3 px-4 py-3 active:bg-gray-50 dark:active:bg-gray-800"
       onPress={() => router.push(`/species/${species.id}`)}
     >
       <Image
-        source={species.imageUrl ? { uri: species.imageUrl } : PLACEHOLDER}
+        source={species.imageUrl && !imgFailed ? { uri: species.imageUrl } : PLACEHOLDER}
+        onError={() => setImgFailed(true)}
         className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800"
         resizeMode="cover"
       />
