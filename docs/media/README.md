@@ -8,13 +8,13 @@ Screenshots should be taken on a physical device or a clean simulator/emulator w
 
 ### Screens to capture
 
-- [ ] **Feed tab** — at least 6 sighting rows visible; a mix of confidence levels (green, amber)
-- [ ] **Sighting detail** — species photo, confidence pill, play button visible
-- [ ] **Species tab** — species list with thumbnails
-- [ ] **Species detail** — photo, detection count, star button active
-- [ ] **Stats tab** — bar chart with 14 days of data, top species list below
-- [ ] **Favorites tab** — at least 3 starred species
-- [ ] **Settings tab** — theme toggle, notifications switch
+- [x] **Feed tab** — at least 6 sighting rows visible; a mix of confidence levels (green, amber) — `feed-dark-galaxys24.jpg`
+- [x] **Sighting detail** — species photo, confidence pill, play button visible — `sighting-detail-light-galaxys24.jpg`
+- [ ] **Species tab** — species list with thumbnails _(needs recapture on v0.5.5 — thumbnails were blank before the image fix)_
+- [ ] **Species detail** — photo, detection count, star button active _(needs recapture on v0.5.5 — hero photo was blank)_
+- [ ] **Stats tab** — bar chart with 14 days of data, top species list below _(needs recapture on v0.5.5 — was showing the load error)_
+- [ ] **Favorites tab** — at least 3 starred species _(needs recapture on v0.5.5 — thumbnails were blank)_
+- [x] **Settings tab** — theme toggle, notifications switch — `settings-dark-galaxys24.jpg`
 - [ ] **Connect screen** — empty state for onboarding docs
 
 ### Dark mode variants

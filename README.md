@@ -23,7 +23,13 @@ BirdEcho is **not** a bird-identification app. It does not listen to audio or id
 
 ## Screenshots
 
-> Screenshots coming soon — if you're running BirdEcho against your station, we'd love your help! See [docs/media/README.md](docs/media/README.md) for the capture checklist and how to submit a PR.
+| Feed | Sighting detail | Settings |
+|---|---|---|
+| ![Feed tab](docs/media/feed-dark-galaxys24.jpg) | ![Sighting detail](docs/media/sighting-detail-light-galaxys24.jpg) | ![Settings](docs/media/settings-dark-galaxys24.jpg) |
+
+<sub>Captured on a Samsung Galaxy S24+ against a BirdNET-Go station. Thanks to [@HWittingen](https://github.com/HWittingen) for contributing these.</sub>
+
+> More screens (Species, Stats, Favorites) coming soon — if you're running BirdEcho against your station, we'd love your help! See [docs/media/README.md](docs/media/README.md) for the capture checklist and how to submit a PR.
 
 ---
 
