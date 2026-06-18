@@ -632,7 +632,7 @@ Builds:
   # GitHub APK updater is disabled and REQUEST_INSTALL_PACKAGES is dropped.
   - versionName: '0.8.1'
     versionCode: 22
-    commit: COMMIT_SHA_PLACEHOLDER
+    commit: 0d11b09d46d2999487344b512190baeceee6342e
     subdir: android/app
     sudo:
       - apt-get update
