@@ -684,7 +684,7 @@ Builds:
   # ── v0.8.2 ──────────────────────────────────────────────────────────────────
   - versionName: '0.8.2'
     versionCode: 23
-    commit: COMMIT_SHA_PLACEHOLDER
+    commit: adecca1a12359365b786b25ff695c8e2b2c60888
     subdir: android/app
     sudo:
       - apt-get update
