@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import type { Species } from '../types/birdweather';
@@ -9,6 +9,10 @@ const PLACEHOLDER = require('../../assets/icon.png') as number;
 
 export default function SpeciesRow({ species, rare = false }: { species: Species; rare?: boolean }) {
   const [imgFailed, setImgFailed] = useState(false);
+  // FlashList recycles row instances; reset the failure flag when the image
+  // changes so a recycled row doesn't keep showing the placeholder (or a stale
+  // broken image) from the previous species.
+  useEffect(() => setImgFailed(false), [species.imageUrl]);
   return (
     <Pressable
       className="flex-row items-center gap-3 px-4 py-3 active:bg-gray-50 dark:active:bg-gray-800"

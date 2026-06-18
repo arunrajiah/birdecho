@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.3] — 2026-06-18
+
+### Fixed
+
+- **BirdWeather was broken end-to-end — connect, feed, species, and stats** (#23). The app's BirdWeather data layer no longer matched the live `app.birdweather.com/api/v1` responses:
+  - **Connect** read `data.station`, but the API returns the station object directly (`{id, name, coords:{lat,lon}}`, no `timezone`). `data.station` was `undefined`, and reading `.name` threw a `TypeError` that surfaced as a misleading "network error" — exactly the reported symptom. Now parses the real shape (and maps `coords` → lat/lon).
+  - **Feed** expected a `{records, cursor}` wrapper; the API returns `{detections:[{species:{…}, soundscape:{…}}]}`. Detections are now mapped correctly, with `?cursor=<id>` pagination.
+  - **Species** now reads the per-station count from `species.detections.total` (previously missing → no counts) and uses the real image URLs.
+  - **Stats** read `data.stats` (the API returns `{detections, species}` directly). Fixed; "today" is counted via `?period=day`.
+  - All of the above were verified against the live BirdWeather API.
+
+- **BirdNET-Go: Species/Favorites images still showed dark boxes** (#21). `mapSpecies` used `thumbnail_url ?? <media endpoint>`, but the summary's `thumbnail_url` is an unloadable value and `??` doesn't fall back on a non-null empty/relative string. Now always uses the `/api/v2/media/image/{scientificName}` proxy — the same endpoint detection images already load from. Also reset the image-error flag when a recycled list row changes species, so FlashList recycling can't leave a stale broken image.
+
+- **BirdNET-Go: Stats "Today" always 0 and 14-day chart empty** (#22). `/analytics/time/daily` requires a `start_date` query param and returns `{data:[{date,count}], total}`. The code sent `?days=1` (invalid → HTTP 400) and parsed the result as a bare array, so "Today" fell back to 0. Now sends `start_date`/`end_date` and reads `total` for today; the chart fetches the real date range and zero-fills missing days.
+
+---
+
 ## [0.8.2] — 2026-06-18
 
 ### Added

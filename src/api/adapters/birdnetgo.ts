@@ -38,9 +38,14 @@ interface BngSpeciesSummary {
   thumbnail_url?: string;
 }
 
-interface BngDailyCount {
-  date: string;
-  count: number;
+// /api/v2/analytics/time/daily requires a start_date (and optional end_date) and
+// returns { start_date, end_date, data: [{date, count}], total }. There is NO
+// `days` parameter — sending one yields a 400.
+interface BngDailyResponse {
+  start_date: string;
+  end_date: string;
+  data: { date: string; count: number }[];
+  total: number;
 }
 
 // ── Low-level fetch ─────────────────────────────────────────────────────────
@@ -89,9 +94,20 @@ function mapSpecies(s: BngSpeciesSummary, base: string): Species {
     id: s.species_code ?? s.scientific_name,
     commonName: s.common_name,
     scientificName: s.scientific_name,
-    imageUrl: s.thumbnail_url ?? `${base}/api/v2/media/image/${encodeURIComponent(s.scientific_name)}`,
+    // Always use the media/image proxy (same endpoint detection rows use and
+    // which loads reliably). The summary's thumbnail_url is often an unloadable
+    // value, and `?? ` wouldn't catch an empty/relative string, so don't use it.
+    imageUrl: `${base}/api/v2/media/image/${encodeURIComponent(s.scientific_name)}`,
     count: s.count,
   };
+}
+
+/** Local calendar date as YYYY-MM-DD (BirdNET-Go analytics are keyed by date). */
+function ymd(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 // ── Adapter factory ─────────────────────────────────────────────────────────
@@ -149,25 +165,50 @@ export function createBirdNetGoAdapter(hostUrl: string): StationAdapter {
     },
 
     async fetchStats(): Promise<Stats> {
+      const today = ymd(new Date());
       const [summaryResult, dailyResult] = await Promise.allSettled([
         bngFetch<BngSpeciesSummary[]>(base, `/analytics/species/summary`),
-        bngFetch<BngDailyCount[]>(base, `/analytics/time/daily?days=1`),
+        bngFetch<BngDailyResponse>(
+          base,
+          `/analytics/time/daily?start_date=${today}&end_date=${today}`,
+        ),
       ]);
       // Surface error only if both calls failed — partial data is better than an error screen.
       if (summaryResult.status === 'rejected' && dailyResult.status === 'rejected') {
         throw summaryResult.reason;
       }
       const summary = summaryResult.status === 'fulfilled' ? summaryResult.value : [];
-      const daily = dailyResult.status === 'fulfilled' ? dailyResult.value : [];
+      // `total` is today's detection count for a single-day range.
+      const recordsToday = dailyResult.status === 'fulfilled' ? dailyResult.value.total : 0;
       return {
         totalRecords: summary.reduce((n, s) => n + s.count, 0),
         uniqueSpecies: summary.length,
-        recordsToday: daily[0]?.count ?? 0,
+        recordsToday,
       };
     },
 
     async fetchDailyCounts(days: number): Promise<{ date: string; count: number }[]> {
-      return bngFetch<BngDailyCount[]>(base, `/analytics/time/daily?days=${days}`);
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - (days - 1));
+      let res: BngDailyResponse;
+      try {
+        res = await bngFetch<BngDailyResponse>(
+          base,
+          `/analytics/time/daily?start_date=${ymd(start)}&end_date=${ymd(end)}`,
+        );
+      } catch {
+        return [];
+      }
+      // Zero-fill missing days so the chart shows a continuous series.
+      const counts: Record<string, number> = {};
+      for (const d of res.data ?? []) counts[d.date] = d.count;
+      return Array.from({ length: days }, (_, i) => {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        const key = ymd(d);
+        return { date: key, count: counts[key] ?? 0 };
+      });
     },
   };
 }

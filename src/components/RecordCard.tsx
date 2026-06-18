@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import type { Detection } from '../types/birdweather';
@@ -21,6 +21,8 @@ interface Props {
 
 export default function RecordCard({ record, timezone }: Props) {
   const [imgFailed, setImgFailed] = useState(false);
+  // FlashList recycles cards; reset on image change (see SpeciesRow).
+  useEffect(() => setImgFailed(false), [record.imageUrl]);
   return (
     <Pressable
       className="flex-row items-center gap-3 bg-white dark:bg-gray-900 px-4 py-3 active:bg-gray-50 dark:active:bg-gray-800"

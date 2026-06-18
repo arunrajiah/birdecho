@@ -11,7 +11,7 @@ export function createBirdWeatherAdapter(stationId: string): StationAdapter {
     fetchRecordsForSpecies: (speciesId, limit) =>
       fetchRecordsForSpecies(stationId, speciesId, limit),
     fetchTopSpecies: (limit) => fetchTopSpecies(stationId, limit),
-    fetchSpecies,
+    fetchSpecies: (id) => fetchSpecies(stationId, id),
     fetchStats: () => fetchStats(stationId),
     fetchDailyCounts: (days) => fetchDailyCounts(stationId, days),
   };
