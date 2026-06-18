@@ -1,0 +1,26 @@
+BirdEcho connects to your backyard bird-detection station (BirdNET-Pi, BirdNET-Go, or BirdWeather) and shows you live detections, species histories, audio playback, and statistics — all from your phone.
+
+Features include:
+
+* Real-time detection feed with confidence scores, auto-refreshed every 60 s
+* Per-sighting audio playback and shareable image cards
+* Species browser with detection history and per-species recent sightings
+* Species rarity badge — flags birds rarely detected at your station
+* Optional rare-species alerts — a local notification when an uncommon bird is detected
+* 14-day detection bar chart and headline stats (total, today, unique species)
+* CSV export of detections from the Stats tab
+* Offline cache — the last 24 hours of detections are readable without a network connection
+* Favorites with local notifications (once per starred species per day)
+* Dark mode and station-timezone timestamps
+* Multi-station — save any number of stations and switch between them in Settings
+* Android home-screen widget showing the latest detection and today's count
+* Station map showing BirdWeather station locations (tap marker to switch)
+* BirdNET-Pi direct — connects over your LAN via HTTP, no cloud account required
+* BirdNET-Go direct — connects to a local BirdNET-Go instance over your LAN
+* BirdWeather — connects via the hosted BirdWeather API (free account required)
+
+BirdEcho is not a bird-identification app. It does not access your microphone or run any detection model. It surfaces what your existing station has already detected.
+
+The API token for BirdWeather connections is stored in the device's secure enclave (Android Keystore). BirdNET-Pi and BirdNET-Go connections require no token.
+
+Optional, opt-in error reporting via Sentry is disabled unless a DSN is set at build time — it is not set in F-Droid / IzzyOnDroid builds.

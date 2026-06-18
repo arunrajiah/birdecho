@@ -1,0 +1,1 @@
+Gate the in-app GitHub updater behind a build flag so F-Droid/IzzyOnDroid builds ship without the self-updater or the install-packages permission.
