@@ -1,5 +1,6 @@
 import { View, Text, Pressable, Switch, Alert, ScrollView } from 'react-native';
 import { router } from 'expo-router';
+import * as Application from 'expo-application';
 import { useStationStore } from '../../src/stores/stationStore';
 import { useThemeStore } from '../../src/stores/themeStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
@@ -232,6 +233,12 @@ export default function SettingsScreen() {
             <Text className="text-sm font-semibold text-red-600">Disconnect all stations</Text>
           </Pressable>
         ) : null}
+
+        {/* Version footer */}
+        <Text className="mt-8 text-center text-xs text-gray-400 dark:text-gray-600">
+          BirdEcho v{Application.nativeApplicationVersion ?? '?'}
+          {Application.nativeBuildVersion ? ` (${Application.nativeBuildVersion})` : ''}
+        </Text>
       </View>
     </ScrollView>
   );
