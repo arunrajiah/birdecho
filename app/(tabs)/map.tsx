@@ -10,15 +10,23 @@
  * that station the active one.  Tapping "Open in Maps" hands off to the
  * device's native maps app.
  *
- * Android: map tiles require a Google Maps API key.  Without one the tiles
- * are blank but all markers and interactions still work.  Set
- * EXPO_PUBLIC_GOOGLE_MAPS_API_KEY in your environment before `expo prebuild`.
+ * Android: the native map requires a Google Maps API key.  Mounting MapView
+ * without one crashes the app (grey screen → crash — issue #25), so on Android
+ * we only render the map when a key was baked in at prebuild; otherwise the tab
+ * shows a fallback.  Set EXPO_PUBLIC_GOOGLE_MAPS_API_KEY before `expo prebuild`
+ * to enable it.  iOS uses Apple Maps and needs no key.
  */
 import { useRef, useMemo, useCallback } from 'react';
 import { View, Text, Pressable, Linking, Platform } from 'react-native';
+import Constants from 'expo-constants';
 import MapView, { Marker, Callout, type Region } from 'react-native-maps';
 import { useStationStore } from '../../src/stores/stationStore';
 import type { SavedStation } from '../../src/types/station';
+
+// Android needs a Google Maps API key to mount MapView safely; iOS (Apple Maps)
+// does not. `hasGoogleMapsKey` is set in app.config.ts at prebuild time.
+const MAP_AVAILABLE =
+  Platform.OS !== 'android' || Constants.expoConfig?.extra?.hasGoogleMapsKey === true;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -172,6 +180,26 @@ export default function MapScreen() {
     },
     [switchStation],
   );
+
+  // ── Map unavailable: Android build without a Google Maps API key ───────────
+  // Mounting MapView would crash the native Google Maps SDK (issue #25), so
+  // show a fallback. Checked first: the map will never render on this build, so
+  // the "connect a station" prompt below would be misleading.
+  if (!MAP_AVAILABLE) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white px-8">
+        <Text className="text-4xl mb-4">🗺️</Text>
+        <Text className="text-center text-base font-semibold text-gray-900 mb-2">
+          Map not available in this build
+        </Text>
+        <Text className="text-center text-sm text-gray-400">
+          This build was compiled without a Google Maps API key, so the map can&apos;t be
+          shown. Open a station&apos;s location in your device&apos;s maps app from the Feed or
+          Settings instead.
+        </Text>
+      </View>
+    );
+  }
 
   // ── No stations with location data ─────────────────────────────────────────
   if (mappableStations.length === 0) {

@@ -155,8 +155,8 @@ Your station may not have any detections yet. Pull down to refresh. If your stat
 **Notifications aren't arriving.**
 Check that you granted notification permission when prompted. On Android, also check that battery optimisation isn't killing the app in the background. Note: alerts are local-only (no server-side push yet) and fire while the app polls — when a **favourited** species is detected, or, if you enable **Rare species alerts** in Settings, when a species rarely seen at your station shows up.
 
-**The Android map shows blank tiles.**
-Markers and interactions work without a key. For full tile rendering, the app needs a Google Maps API key set at build time (`EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`). iOS uses Apple Maps and always shows tiles.
+**The Android Map tab says "Map not available in this build."**
+The Android map needs a Google Maps API key set at build time (`EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`). Builds compiled without one — including F-Droid/IzzyOnDroid builds — show this fallback instead of the map, because mounting the native map without a key crashes the app. iOS uses Apple Maps and needs no key.
 
 **Is my token stored securely?**
 Yes. BirdEcho uses `expo-secure-store`, which maps to iOS Keychain and Android Keystore. Your token is never logged, cached to disk in plain text, or sent anywhere other than the BirdWeather API.

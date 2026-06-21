@@ -856,9 +856,10 @@ MaintainerNotes: |-
   Its native Android layer is compiled regardless of the env var, hence the Tracking
   declaration. To produce a Sentry-free build, uncomment the sed line in init:.
 
-  react-native-maps (added in v0.5.0) requires a Google Maps API key for tile rendering
-  on Android. The key is NOT set in this recipe (EXPO_PUBLIC_GOOGLE_MAPS_API_KEY is
-  absent). Map tiles will be blank but station markers and all interactions still work.
+  react-native-maps (added in v0.5.0) requires a Google Maps API key on Android. The key
+  is NOT set in this recipe (EXPO_PUBLIC_GOOGLE_MAPS_API_KEY is absent), so the Map tab
+  renders a "Map not available in this build" fallback instead of mounting the native
+  Google map — which crashes without a key (issue #25). All other features work normally.
   This is documented in the app's README.
 
   The app sets android:usesCleartextTraffic="true" (via expo-build-properties) to allow
