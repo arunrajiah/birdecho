@@ -67,9 +67,10 @@ Options:
 
 ### 4. Google Maps API key (v0.5.0+)
 
-`react-native-maps` is compiled in from v0.5.0. Without `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` the
-map tile layer is blank but station markers still render. This is intentional and documented in
-MaintainerNotes. F-Droid reviewers may ask about it; point them to the README note.
+`react-native-maps` is compiled in from v0.5.0. F-Droid builds ship without
+`EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`, so the Map tab renders a "Map not available in this build"
+fallback rather than mounting the native Google map (which crashes without a key — issue #25).
+All other features are unaffected. F-Droid reviewers may ask about it; point them to the README note.
 
 ---
 

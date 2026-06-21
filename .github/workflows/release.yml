@@ -42,6 +42,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate native Android project
+        # EXPO_PUBLIC_GOOGLE_MAPS_API_KEY enables Android map tiles and, more
+        # importantly, prevents the Map-tab crash on keyless builds (issue #25).
+        # If the secret is unset the Map tab renders a graceful fallback instead.
+        env:
+          EXPO_PUBLIC_GOOGLE_MAPS_API_KEY: ${{ secrets.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY }}
         run: npx expo prebuild --platform android --clean --no-install
 
       - name: Decode keystore
