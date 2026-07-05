@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="BirdEcho logo">
+  <defs><linearGradient id="g" x1="14" y1="10" x2="82" y2="86" gradientUnits="userSpaceOnUse"><stop stop-color="#0284C7"/><stop offset="1" stop-color="#22C55E"/></linearGradient></defs>
+  <rect width="96" height="96" rx="22" fill="url(#g)"/>
+  <path d="M25 52c15-23 38-25 48-7-12 1-20 8-24 24-6-11-14-16-24-17Z" fill="#fff"/>
+  <circle cx="57" cy="39" r="4" fill="#0284C7"/>
+  <path d="M24 66c13-2 22-1 31 5" stroke="#BBF7D0" stroke-width="6" stroke-linecap="round"/>
+</svg>

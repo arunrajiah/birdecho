@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/logo.svg" alt="BirdEcho logo" width="96" height="96">
+</p>
+
 <div align="center">
 
 # BirdEcho
