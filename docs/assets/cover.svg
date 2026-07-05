@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="BirdEcho product cover">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#052E16"/>
+      <stop offset="100%" stop-color="#14532D"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#16A34A" stop-opacity="0.42"/>
+      <stop offset="100%" stop-color="#A16207" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="950" cy="100" r="280" fill="url(#glow)"/>
+  <circle cx="1100" cy="500" r="150" fill="#A16207" fill-opacity="0.08"/>
+  <circle cx="80" cy="550" r="200" fill="#16A34A" fill-opacity="0.06"/>
+  <line x1="0" y1="210" x2="1200" y2="210" stroke="white" stroke-opacity="0.04" stroke-width="1"/>
+  <line x1="0" y1="420" x2="1200" y2="420" stroke="white" stroke-opacity="0.04" stroke-width="1"/>
+  <line x1="400" y1="0" x2="400" y2="630" stroke="white" stroke-opacity="0.04" stroke-width="1"/>
+  <line x1="800" y1="0" x2="800" y2="630" stroke="white" stroke-opacity="0.04" stroke-width="1"/>
+  <image href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA5NiA5NiIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJCaXJkRWNobyBsb2dvIj4KICA8ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIxNCIgeTE9IjEwIiB4Mj0iODIiIHkyPSI4NiIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPjxzdG9wIHN0b3AtY29sb3I9IiMwMjg0QzciLz48c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMyMkM1NUUiLz48L2xpbmVhckdyYWRpZW50PjwvZGVmcz4KICA8cmVjdCB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHJ4PSIyMiIgZmlsbD0idXJsKCNnKSIvPgogIDxwYXRoIGQ9Ik0yNSA1MmMxNS0yMyAzOC0yNSA0OC03LTEyIDEtMjAgOC0yNCAyNC02LTExLTE0LTE2LTI0LTE3WiIgZmlsbD0iI2ZmZiIvPgogIDxjaXJjbGUgY3g9IjU3IiBjeT0iMzkiIHI9IjQiIGZpbGw9IiMwMjg0QzciLz4KICA8cGF0aCBkPSJNMjQgNjZjMTMtMiAyMi0xIDMxIDUiIHN0cm9rZT0iI0JCRjdEMCIgc3Ryb2tlLXdpZHRoPSI2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cg==" x="92" y="240" width="150" height="150" filter="url(#shadow)"/>
+  <rect x="260" y="155" width="174" height="34" rx="17" fill="#16A34A" fill-opacity="0.5" stroke="#16A34A" stroke-width="1"/>
+  <text x="347" y="178" font-size="15" font-family="Inter,system-ui,-apple-system,Segoe UI,sans-serif" font-weight="600" fill="#BBF7D0" text-anchor="middle">Conservation</text>
+  <text x="260" y="270" font-size="80" font-family="Inter,system-ui,-apple-system,Segoe UI,sans-serif" font-weight="800" fill="white" letter-spacing="-3">BirdEcho</text>
+  <text x="262" y="330" font-size="28" font-family="Inter,system-ui,-apple-system,Segoe UI,sans-serif" font-weight="400" fill="#BBF7D0">Mobile companion for BirdNET-Pi, BirdNET-Go &amp; BirdWeather</text>
+  <line x1="262" y1="370" x2="980" y2="370" stroke="white" stroke-opacity="0.12" stroke-width="1"/>
+  <rect x="262" y="390" width="171" height="36" rx="8" fill="white" fill-opacity="0.08" stroke="white" stroke-opacity="0.15" stroke-width="1"/>
+  <text x="347.5" y="413" font-size="15" font-family="Inter,system-ui,-apple-system,Segoe UI,sans-serif" fill="white" fill-opacity="0.8" text-anchor="middle">Live detections</text>
+  <rect x="447" y="390" width="135" height="36" rx="8" fill="white" fill-opacity="0.08" stroke="white" stroke-opacity="0.15" stroke-width="1"/>
+  <text x="514.5" y="413" font-size="15" font-family="Inter,system-ui,-apple-system,Segoe UI,sans-serif" fill="white" fill-opacity="0.8" text-anchor="middle">Rare alerts</text>
+  <rect x="596" y="390" width="116" height="36" rx="8" fill="white" fill-opacity="0.08" stroke="white" stroke-opacity="0.15" stroke-width="1"/>
+  <text x="654" y="413" font-size="15" font-family="Inter,system-ui,-apple-system,Segoe UI,sans-serif" fill="white" fill-opacity="0.8" text-anchor="middle">Audio</text>
+  <rect x="262" y="450" width="162" height="44" rx="10" fill="#16A34A"/>
+  <text x="343" y="477" font-size="22" font-family="Inter,system-ui,-apple-system,Segoe UI,sans-serif" font-weight="700" fill="white" text-anchor="middle">Open source</text>
+  <text x="1140" y="600" font-size="18" font-family="Inter,system-ui,-apple-system,Segoe UI,sans-serif" fill="white" fill-opacity="0.35" text-anchor="end">hub.arunrajiah.com</text>
+</svg>
