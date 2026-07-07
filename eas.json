@@ -24,6 +24,12 @@
       "distribution": "store",
       "channel": "production",
       "autoIncrement": true
+    },
+    "playstore": {
+      "extends": "production",
+      "env": {
+        "EXPO_PUBLIC_FDROID": "1"
+      }
     }
   },
   "submit": {
