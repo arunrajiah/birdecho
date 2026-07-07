@@ -67,9 +67,9 @@ const config: ExpoConfig = {
   ],
   extra: {
     ...base.extra,
-    eas: {
-      projectId: 'eabffb00-b763-416a-afc6-85897ebb0e92',
-    },
+    // eas.projectId is inherited from app.json (extra.eas.projectId), written by
+    // `eas init`. Don't hardcode it here — that would override app.json and pin
+    // the build to the wrong EAS project.
     // Baked into the build so the JS layer can disable the updater UI to match
     // the dropped permission above. Read via Constants.expoConfig.extra.
     fdroidBuild: isFdroidBuild,

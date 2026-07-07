@@ -15,7 +15,7 @@
     },
     "android": {
       "package": "dev.arunrajiah.birdecho",
-      "versionCode": 25,
+      "versionCode": 27,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -51,7 +51,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "eabffb00-b763-416a-afc6-85897ebb0e92"
+        "projectId": "ed4198ed-7829-4ffd-983a-5ff038e9aee4"
       }
     },
     "owner": "arunrajiah"
