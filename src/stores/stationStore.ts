@@ -69,6 +69,9 @@ interface StationState {
   /** Add (or update) a BirdNET-Pi station and make it active. */
   connectBirdNetPi: (hostUrl: string, stationName?: string) => Promise<void>;
 
+  /** Add a demo station (bundled sample data, no network) and make it active. */
+  connectDemo: () => Promise<void>;
+
   /** Switch the active station. */
   switchStation: (id: string) => Promise<void>;
 
@@ -229,6 +232,30 @@ export const useStationStore = create<StationState>((set, get) => ({
       connectionType: 'birdnetpi',
       stationName: stationName ?? hostUrl,
       hostUrl,
+    };
+
+    const stations = [...get().stations, station];
+
+    await Promise.all([
+      storage.setStationList(stations),
+      storage.setActiveStationId(id),
+    ]);
+
+    set({
+      stations,
+      activeStationId: id,
+      ...deriveActive(stations, id),
+    });
+  },
+
+  // ── connectDemo ────────────────────────────────────────────────────────────
+
+  connectDemo: async () => {
+    const id = storage.generateStationId();
+    const station: SavedStation = {
+      id,
+      connectionType: 'demo',
+      stationName: 'Demo station',
     };
 
     const stations = [...get().stations, station];

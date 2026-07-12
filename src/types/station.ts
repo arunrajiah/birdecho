@@ -3,7 +3,7 @@
  * Keep this file free of React / Zustand imports so it can be used anywhere.
  */
 
-export type ConnectionType = 'birdweather' | 'birdnetgo' | 'birdnetpi';
+export type ConnectionType = 'birdweather' | 'birdnetgo' | 'birdnetpi' | 'demo';
 
 /**
  * A single saved station entry.  The app can hold many of these; one is

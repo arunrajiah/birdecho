@@ -25,6 +25,7 @@ export default function ConnectScreen() {
   const connectBirdWeather = useStationStore((s) => s.connectBirdWeather);
   const connectBirdNetGo = useStationStore((s) => s.connectBirdNetGo);
   const connectBirdNetPi = useStationStore((s) => s.connectBirdNetPi);
+  const connectDemo = useStationStore((s) => s.connectDemo);
 
   const isFirstStation = stations.length === 0;
 
@@ -102,6 +103,19 @@ export default function ConnectScreen() {
           ? e.message
           : 'Could not reach BirdNET-Go station. Check the URL and your network.',
       );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleTryDemo() {
+    setLoading(true);
+    setError(null);
+    try {
+      await connectDemo();
+      onConnected();
+    } catch {
+      setError('Could not start the demo. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -236,6 +250,25 @@ export default function ConnectScreen() {
           <Text className="text-base font-semibold text-white">Connect</Text>
         )}
       </Pressable>
+
+      {/* Demo — lets anyone explore the app with sample data, no station,
+          account, token, or network required. */}
+      <View className="my-6 flex-row items-center">
+        <View className="h-px flex-1 bg-gray-200" />
+        <Text className="mx-3 text-xs text-gray-400">or</Text>
+        <View className="h-px flex-1 bg-gray-200" />
+      </View>
+
+      <Pressable
+        className="items-center rounded-xl border border-green-700 py-3 active:opacity-75 disabled:opacity-50"
+        onPress={handleTryDemo}
+        disabled={loading}
+      >
+        <Text className="text-base font-semibold text-green-700">Try a demo station</Text>
+      </Pressable>
+      <Text className="mt-2 text-center text-xs text-gray-400">
+        Explore BirdEcho with sample data — no station needed.
+      </Text>
     </ScrollView>
   );
 }

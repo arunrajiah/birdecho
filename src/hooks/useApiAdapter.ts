@@ -3,6 +3,7 @@ import { useStationStore } from '../stores/stationStore';
 import { createBirdWeatherAdapter } from '../api/adapters/birdweather';
 import { createBirdNetGoAdapter } from '../api/adapters/birdnetgo';
 import { createBirdNetPiAdapter } from '../api/adapters/birdnetpi';
+import { createDemoAdapter } from '../api/adapters/demo';
 import type { StationAdapter } from '../api/adapter';
 
 /**
@@ -23,6 +24,9 @@ export function useApiAdapter(): StationAdapter | null {
   const activeStationId = useStationStore((s) => s.activeStationId);
 
   return useMemo(() => {
+    if (connectionType === 'demo') {
+      return createDemoAdapter();
+    }
     if (connectionType === 'birdnetgo' && hostUrl) {
       return createBirdNetGoAdapter(hostUrl);
     }
