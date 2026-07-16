@@ -12,6 +12,7 @@
 
 **Your backyard bird station, on your phone.**
 
+[![Get it on Google Play](https://img.shields.io/badge/Google_Play-BirdEcho-3ddc84?logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=dev.arunrajiah.birdecho)
 [![CI](https://github.com/arunrajiah/birdecho/actions/workflows/ci.yml/badge.svg)](https://github.com/arunrajiah/birdecho/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Latest release](https://img.shields.io/github/v/release/arunrajiah/birdecho)](https://github.com/arunrajiah/birdecho/releases)
@@ -101,11 +102,17 @@ See [ROADMAP.md](ROADMAP.md) for the full, living roadmap.
 
 ## Download
 
-**Android** — grab the latest signed APK directly from [GitHub Releases](https://github.com/arunrajiah/birdecho/releases/latest).
+**Android: [get it on Google Play](https://play.google.com/store/apps/details?id=dev.arunrajiah.birdecho).** This is the recommended way to install BirdEcho and get automatic updates.
 
-> No Play Store account needed — enable "Install from unknown sources" in Android Settings, download the APK, and install.
+<p align="center">
+  <a href="https://play.google.com/store/apps/details?id=dev.arunrajiah.birdecho">
+    <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="64">
+  </a>
+</p>
 
-**Staying up to date** — from v0.8.0 onward, BirdEcho checks GitHub Releases on launch and shows an in-app banner when a newer version is available. Tap **Download & install** and confirm the Android install prompt — no need to revisit this page. (Android requires that confirmation for sideloaded apps; there is no fully silent auto-update without the Play Store.)
+**Prefer to sideload?** Grab the latest signed APK from [GitHub Releases](https://github.com/arunrajiah/birdecho/releases/latest). No Play account needed: enable "Install from unknown sources" in Android Settings, download the APK, and install.
+
+**Staying up to date:** the Google Play build updates automatically through Play. GitHub and F-Droid builds instead self-update from v0.8.0 onward, showing an in-app banner when a newer version is on GitHub Releases (tap **Download & install** and confirm the Android install prompt).
 
 **iOS** — App Store / TestFlight distribution is currently **on hold** while development focuses on Android. The codebase stays cross-platform, so community builds are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for how to build locally with EAS.
 
