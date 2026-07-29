@@ -213,6 +213,46 @@ async function detectNachtzuster(base: string): Promise<boolean> {
   }
 }
 
+// ── Pagination helper ────────────────────────────────────────────────────────
+
+/**
+ * `todays_detections.php?ajax_detections=true&display_limit=N` is NOT "return
+ * up to N rows". The server always runs
+ * `LIMIT (display_limit-40),40` — i.e. `display_limit` is a running cursor
+ * that must climb in steps of exactly 40 (40, 80, 120, ...) to line up with a
+ * fixed 40-row page, matching the site's own "Load 40 More" button. A single
+ * request with a large `display_limit` (e.g. 500, previously used here to
+ * "get everything") computes an offset of 460 and comes back completely empty
+ * unless the station logged 461+ detections that same day — which is true for
+ * almost no station. That's what made every tab except Stats (which queries
+ * separate summary counters, unaffected by this) show "No recent sightings".
+ *
+ * To fetch a full day's detections we instead walk `display_limit` in steps
+ * of 40, matching the page's own pagination, stopping once a page comes back
+ * with fewer than 40 rows (end of data) or `maxRows` is reached.
+ */
+async function fetchAllTodaysDetections(
+  base: string,
+  searchterm?: string,
+  maxRows = 500,
+): Promise<Detection[]> {
+  const PAGE_SIZE = 40;
+  const all: Detection[] = [];
+  let displayLimit = PAGE_SIZE;
+  const query = searchterm ? `&searchterm=${encodeURIComponent(searchterm)}` : '';
+  for (;;) {
+    const html = await bpiGetHtml(
+      base,
+      `/todays_detections.php?ajax_detections=true${query}&display_limit=${displayLimit}`,
+    );
+    const page = parseDetectionRows(html, base);
+    all.push(...page);
+    if (page.length < PAGE_SIZE || all.length >= maxRows) break;
+    displayLimit += PAGE_SIZE;
+  }
+  return all;
+}
+
 // ── Adapter factory ─────────────────────────────────────────────────────────
 
 export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
@@ -231,20 +271,20 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
     cacheKey: `bnpi:${base}`,
 
     // ── Recent detections ────────────────────────────────────────────────────
-    // BirdNET-Pi's todays_detections.php only shows today's detections.
-    // Pagination: display_limit acts as a "load up to N" cap; we use it as cursor.
+    // BirdNET-Pi's todays_detections.php only shows today's detections. Each
+    // request is already a single, server-windowed page of up to 40 rows (see
+    // fetchAllTodaysDetections' doc comment) — the cursor is simply the
+    // display_limit value we just used, so the next call can request the next
+    // 40-row window.
     async fetchRecentRecords(cursor?: string): Promise<RecordsPage> {
-      const limit = 50;
-      const displayLimit = cursor ? parseInt(cursor, 10) + limit : limit;
+      const PAGE_SIZE = 40;
+      const displayLimit = cursor ? parseInt(cursor, 10) + PAGE_SIZE : PAGE_SIZE;
       const html = await bpiGetHtml(
         base,
         `/todays_detections.php?ajax_detections=true&display_limit=${displayLimit}`,
       );
-      const all = parseDetectionRows(html, base);
-      // The offset into all rows for this page
-      const offset = cursor ? parseInt(cursor, 10) : 0;
-      const page = all.slice(offset, offset + limit);
-      const hasMore = all.length >= displayLimit;
+      const page = parseDetectionRows(html, base);
+      const hasMore = page.length >= PAGE_SIZE;
       return {
         records: page,
         cursor: hasMore ? String(displayLimit) : undefined,
@@ -254,11 +294,7 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
     // ── Single detection ─────────────────────────────────────────────────────
     // BirdNET-Pi has no single-record endpoint; scan today's list.
     async fetchRecord(id: string): Promise<Detection> {
-      const html = await bpiGetHtml(
-        base,
-        `/todays_detections.php?ajax_detections=true&display_limit=500`,
-      );
-      const detections = parseDetectionRows(html, base);
+      const detections = await fetchAllTodaysDetections(base);
       const found = detections.find((d) => d.id === id);
       if (!found) throw new Error(`Detection not found: ${id}`);
       return found;
@@ -267,11 +303,8 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
     // ── Per-species detections ────────────────────────────────────────────────
     // searchterm matches common name, sci name, confidence, filename, or time
     async fetchRecordsForSpecies(speciesId: string, limit = 20): Promise<Detection[]> {
-      const html = await bpiGetHtml(
-        base,
-        `/todays_detections.php?ajax_detections=true&searchterm=${encodeURIComponent(speciesId)}&display_limit=${limit}`,
-      );
-      return parseDetectionRows(html, base);
+      const detections = await fetchAllTodaysDetections(base, speciesId, Math.max(limit, 40));
+      return detections.slice(0, limit);
     },
 
     // ── Species list ──────────────────────────────────────────────────────────
@@ -284,11 +317,7 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
       if (nachtzuster) {
         // Nachtzuster: getlabels returns raw BirdNET model sci names with spaces and no common names,
         // so we can't use it for a usable species list. Derive species from today's detections instead.
-        const html = await bpiGetHtml(
-          base,
-          '/todays_detections.php?ajax_detections=true&display_limit=500',
-        );
-        const detections = parseDetectionRows(html, base);
+        const detections = await fetchAllTodaysDetections(base);
         const speciesMap = new Map<
           string,
           { commonName: string; scientificName: string; count: number }
@@ -333,11 +362,7 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
       // on any normal day.
       let countMap: Record<string, number> = {};
       try {
-        const html = await bpiGetHtml(
-          base,
-          '/todays_detections.php?ajax_detections=true&display_limit=500',
-        );
-        const detections = parseDetectionRows(html, base);
+        const detections = await fetchAllTodaysDetections(base);
         for (const d of detections) {
           const key = d.commonName;
           countMap[key] = (countMap[key] ?? 0) + 1;
@@ -375,11 +400,7 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
       }
 
       // Get detection count from the per-species search
-      const html = await bpiGetHtml(
-        base,
-        `/todays_detections.php?ajax_detections=true&searchterm=${encodeURIComponent(id)}&display_limit=500`,
-      );
-      const detections = parseDetectionRows(html, base);
+      const detections = await fetchAllTodaysDetections(base, id);
       const sample = detections[0];
 
       return {
