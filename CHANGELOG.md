@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.1] — 2026-07-29
+
+### Fixed
+
+- **BirdNET-Pi (mcguirepr89 and Nachtzuster forks): Feed and Species tabs showed "No recent sightings" while Stats worked fine** (#28). The `todays_detections.php?display_limit=N` endpoint isn't "return up to N rows" — the server always runs `LIMIT (display_limit-40),40`, so `display_limit` has to climb in steps of exactly 40 to line up with a fixed 40-row page. The app was requesting `display_limit=500` in several places to mean "give me everything," which computes an offset of 460 and returns empty unless the station logged 461+ detections that same day. Stats was unaffected because it queries a separate summary endpoint. The adapter now paginates correctly in steps of 40, matching the station's own "Load 40 More" behaviour.
+
+---
+
 ## [0.9.0] — 2026-06-18
 
 ### Changed
