@@ -72,7 +72,6 @@ Builds:
       - node_modules/.pnpm/@sentry+react-native@*/node_modules/@sentry/react-native/android
       - node_modules/.pnpm/@sentry+cli-*/node_modules/@sentry/cli-*/bin
       - node_modules/.pnpm/expo-*/node_modules/expo-*/local-maven-repo
-      - node_modules/.pnpm/expo-file-system@*/node_modules/expo-file-system/prebuilds
       - node_modules/.pnpm/expo@*/node_modules/expo/template.tgz
       - node_modules/.pnpm/react-native@*/node_modules/react-native/React/I18n
       - node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc/osx-bin

@@ -82,7 +82,6 @@ jobs:
           rm -rf node_modules/.pnpm/@sentry+react-native@*/node_modules/@sentry/react-native/android
           rm -rf node_modules/.pnpm/@sentry+cli-*/node_modules/@sentry/cli-*/bin
           rm -rf node_modules/.pnpm/expo-*/node_modules/expo-*/local-maven-repo
-          rm -rf node_modules/.pnpm/expo-file-system@*/node_modules/expo-file-system/prebuilds
           rm -rf node_modules/.pnpm/expo@*/node_modules/expo/template.tgz
           rm -rf node_modules/.pnpm/react-native@*/node_modules/react-native/React/I18n
           rm -rf node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc/osx-bin
