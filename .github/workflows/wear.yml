@@ -1,0 +1,52 @@
+name: Wear OS build
+
+# Builds the standalone Wear OS app in wear/. Action refs are pinned to SHAs (M-1).
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'wear/**'
+      - 'app.json'
+      - '.github/workflows/wear.yml'
+  pull_request:
+    paths:
+      - 'wear/**'
+      - 'app.json'
+      - '.github/workflows/wear.yml'
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build Wear OS APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup Java
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654  # v5.2.0
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # No Gradle wrapper jar is committed (keeps binaries out of the repo).
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb  # v6.3.0
+        with:
+          gradle-version: '8.14.3'
+
+      - name: Build debug APK and lint
+        working-directory: wear
+        run: gradle :app:assembleDebug :app:lintDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: birdecho-wear-debug
+          path: wear/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
