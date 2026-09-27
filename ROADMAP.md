@@ -59,7 +59,7 @@ Want to help ship something? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick up
 
 - ✅ **Species rarity badge** (v0.6.0, reworked in v0.9.0) — a "Rare" badge in the Species/Favorites tabs and species detail. Now **user-defined**: mark species as rare from their detail page (the original auto-by-count heuristic mislabelled common-but-infrequent birds, #24). Regional/seasonal auto-rarity would need an external checklist dataset and remains out of scope.
 - ✅ **Rare-species detection alerts** (v0.7.0) — opt-in local notification the first time each species you've marked as rare is detected per day. On-device only; server-side push for starred species may follow later.
-- 🔄 **Wear OS glance** — last detection and daily count on your wrist (Android). In progress: the watch app (`wear/`, tile + app, BirdWeather and BirdNET-Go) and phone to watch station sync are in the repo and build in CI; not yet tested on a watch or included in releases
+- ✅ **Wear OS glance** (v0.10.0) — a tile and watch app with the latest detection and today's count. BirdWeather and BirdNET-Go; the watch fetches on its own and gets its station from the phone app. BirdNET-Pi support and a watch-face complication may follow
 - ⏸️ **iOS App Store / TestFlight** — _on hold_ (Android-first; see note at top)
 - ⏸️ **Apple Watch glance** — _on hold_ (paired with the iOS pause)
 
