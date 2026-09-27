@@ -116,7 +116,7 @@ See [ROADMAP.md](ROADMAP.md) for the full, living roadmap.
 
 **iOS** — App Store / TestFlight distribution is currently **on hold** while development focuses on Android. The codebase stays cross-platform, so community builds are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for how to build locally with EAS.
 
-> F-Droid submission is in progress.
+> F-Droid submission is in review: [fdroiddata!50346](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/50346).
 
 ---
 

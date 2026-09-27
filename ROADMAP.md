@@ -34,7 +34,7 @@ Want to help ship something? Read [CONTRIBUTING.md](CONTRIBUTING.md) and pick up
 
 ## 🔜 v0.3 — In progress
 
-- 🔄 **F-Droid submission** (#16) — v0.9.1 removed every proprietary dependency and passes the F-Droid source scanner; the fdroiddata merge request is the remaining step
+- 🔄 **F-Droid submission** (#16) — v0.9.1 removed every proprietary dependency and passes the F-Droid source scanner; the fdroiddata merge request is open and awaiting review: https://gitlab.com/fdroid/fdroiddata/-/merge_requests/50346
 - **Screenshots in README and release notes** — real device captures to help new users know what they're installing
 - ✅ **Direct BirdNET-Pi HTTP API support** (v0.3.1) — connect to a local BirdNET-Pi instance over your LAN; supports both mcguirepr89 and Nachtzuster forks
 - ✅ **Home screen widget** (v0.3.3) — today's detection count and last detected species, glanceable without opening the app
