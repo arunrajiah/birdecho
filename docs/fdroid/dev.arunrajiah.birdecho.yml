@@ -17,7 +17,7 @@ Repo: https://github.com/arunrajiah/birdecho.git
 Builds:
   - versionName: 0.9.2
     versionCode: 32
-    commit: v0.9.2
+    commit: c20a73b8ea1a53aec2ce1ace27d0f6b887ddd168
     subdir: android/app
     sudo:
       - apt-get update
