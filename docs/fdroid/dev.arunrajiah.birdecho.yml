@@ -1,880 +1,134 @@
-##
-## F-Droid metadata for BirdEcho
-##
-## Place this file at metadata/dev.arunrajiah.birdecho.yml in a fork of
-## https://gitlab.com/fdroid/fdroiddata and open a Merge Request.
-##
-## See: https://f-droid.org/en/docs/Build_Metadata_Reference/
-## See also: docs/fdroid/SUBMISSION_NOTES.md for gotchas before submitting.
-##
-
 Categories:
   - Science & Education
   - Internet
-
 License: MIT
 AuthorName: Arun Rajiah
 AuthorWebSite: https://github.com/arunrajiah
 WebSite: https://github.com/arunrajiah/birdecho
 SourceCode: https://github.com/arunrajiah/birdecho
 IssueTracker: https://github.com/arunrajiah/birdecho/issues
-Changelog: https://github.com/arunrajiah/birdecho/blob/main/CHANGELOG.md
+Changelog: https://github.com/arunrajiah/birdecho/blob/HEAD/CHANGELOG.md
 
 AutoName: BirdEcho
-Summary: Companion app for BirdNET-Pi, BirdNET-Go, and BirdWeather stations
+Summary: Companion app for BirdNET-Pi, BirdNET-Go and BirdWeather stations
 Description: |-
   BirdEcho connects to your backyard bird-detection station (BirdNET-Pi,
-  BirdNET-Go, or BirdWeather) and shows you live detections, species histories,
-  audio playback, and statistics — all from your phone.
+  BirdNET-Go or BirdWeather) and shows you live detections, species histories,
+  audio playback and statistics, all from your phone.
 
-  Features include:
+  Features:
 
   * Real-time detection feed with confidence scores, auto-refreshed every 60 s
   * Per-sighting audio playback and shareable image cards
   * Species browser with detection history and per-species recent sightings
   * 14-day detection bar chart and headline stats (total, today, unique species)
   * CSV export of detections from the Stats tab
-  * Offline cache — the last 24 hours of detections are readable without a network connection
-  * Favorites with local notifications (once per starred species per day)
+  * Offline cache: the last 24 hours of detections are readable without a network connection
+  * Favorites and user-defined rare species, with local notifications (once per species per day)
   * Dark mode and station-timezone timestamps
-  * Multi-station — save any number of stations and switch between them in Settings
+  * Multi-station: save any number of stations and switch between them in Settings
   * Android home-screen widget showing the latest detection and today's count
-  * Station map showing BirdWeather station locations (tap marker to switch)
-  * BirdNET-Pi direct — connects over your LAN via HTTP, no cloud account required
-  * BirdNET-Go direct — connects to a local BirdNET-Go instance over your LAN
-  * BirdWeather — connects via the hosted BirdWeather API (free account required)
+  * Station locations with one-tap hand-off to your maps app
+  * BirdNET-Pi and BirdNET-Go direct: connects over your LAN via HTTP, no cloud account required
+  * BirdWeather: connects via the hosted BirdWeather API (free account required)
 
   BirdEcho is not a bird-identification app. It does not access your microphone
   or run any detection model. It surfaces what your existing station has already detected.
 
-  API token for BirdWeather connections is stored in the device's secure enclave
-  (Android Keystore). BirdNET-Pi and BirdNET-Go connections require no token.
+  The BirdWeather API token is stored in the Android Keystore. BirdNET-Pi and
+  BirdNET-Go connections require no token.
 
-  Optional, opt-in error reporting via Sentry (disabled unless EXPO_PUBLIC_SENTRY_DSN
-  is set at build time — it is NOT set in F-Droid builds).
-
-AntiFeatures:
-  # Sentry's native Android SDK is compiled into the APK even when the DSN env
-  # var is absent. Sentry itself is open-source and self-hostable. Declared
-  # conservatively; remove if Sentry is stripped from the F-Droid build recipe
-  # by uncommenting the sed line in init: below.
-  - Tracking
+  Compared with the GitHub release, this build has no in-app updater (F-Droid
+  provides updates), no Sentry SDK and no Google Maps view; the Map tab shows a
+  station list that opens locations in your maps app instead.
 
 RepoType: git
 Repo: https://github.com/arunrajiah/birdecho.git
 
 Builds:
-
-  # ── v0.3.1 ──────────────────────────────────────────────────────────────────
-  - versionName: '0.3.1'
-    versionCode: 9
-    commit: 7e01dd540a4208385f2e0bff513978367be6ab4b
-    # android/ is not committed; expo prebuild generates it from app.json.
-    # After prebuild, the gradle project lives at android/app — hence subdir.
+  - versionName: 0.9.2
+    versionCode: 32
+    commit: v0.9.2
     subdir: android/app
     sudo:
       - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      # Download Node.js 24 LTS.
-      # IMPORTANT: update URL + SHA-256 to the latest Node 24.x LTS before submitting.
-      # Obtain the hash from https://nodejs.org/dist/vX.Y.Z/SHASUMS256.txt
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
+      - apt-get install -y g++ make python3
+      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
+      - echo "fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6  node.tar.xz" | sha256sum -c -
       - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      # Run from repo root (two levels above android/app subdir).
-      - cd ../.. && pnpm install --frozen-lockfile
-      # Strip Sentry so the Tracking anti-feature can be removed (optional).
-      # Uncomment the next line AND remove the AntiFeatures entry above for a clean build.
-      # - cd ../.. && sed -i '/"@sentry\/react-native"/d' package.json && pnpm install --frozen-lockfile
-      # Generate the native Android project.
-      - cd ../.. && npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      # Remove signing config — F-Droid applies its own.
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      # Strip EAS project ID (Expo cloud service, unused at runtime).
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      # Remove Hermes compiler platform binaries not needed on Linux.
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      # Remove Sentry pre-built JNI libs (rebuilt from source by Gradle).
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-    scanignore:
-      # Allow Gradle build files inside node_modules — these are FLOSS build
-      # scripts, not application-level config.
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.3.2 ──────────────────────────────────────────────────────────────────
-  - versionName: '0.3.2'
-    versionCode: 10
-    commit: 8af8730122b2c0239a2a4a8d7bbc03058c76a41b
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
+      - cp -a node-v24.21.0-linux-x64/. /usr/local/
       - npm install -g pnpm@10
     init:
       - cd ../.. && pnpm install --frozen-lockfile
-      # - cd ../.. && sed -i '/"@sentry\/react-native"/d' package.json && pnpm install --frozen-lockfile
-      - cd ../.. && npx expo prebuild --platform android --clean --no-install
+      - cd ../.. && node scripts/fdroid-prepare.mjs
+      - cd ../.. && EXPO_PUBLIC_FDROID=1 CI=1 npx expo prebuild --platform android --clean --no-install
     prebuild:
       - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.json || true
+      - sed -i '/projectId/d' ../../app.config.ts
     gradle:
       - yes
     rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
+      - node_modules/.pnpm/react-native-maps@*/node_modules/react-native-maps/android
+      - node_modules/.pnpm/@sentry+react-native@*/node_modules/@sentry/react-native/android
+      - node_modules/.pnpm/@sentry+cli-*/node_modules/@sentry/cli-*/bin
+      - node_modules/.pnpm/expo-*/node_modules/expo-*/local-maven-repo
+      - node_modules/.pnpm/expo-file-system@*/node_modules/expo-file-system/prebuilds
+      - node_modules/.pnpm/expo@*/node_modules/expo/template.tgz
+      - node_modules/.pnpm/react-native@*/node_modules/react-native/React/I18n
+      - node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc/osx-bin
+      - node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc/win64-bin
+      - node_modules/.pnpm/react-native-svg@*/node_modules/react-native-svg/android/.gradle
     scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.5.0 ──────────────────────────────────────────────────────────────────
-  # New packages in this release: react-native-android-widget (v0.3.3),
-  # react-native-maps and expo-file-system (v0.5.0).
-  # app.config.ts replaces app.json as the active Expo config from v0.3.3 onward;
-  # update the projectId-strip sed target accordingly.
-  - versionName: '0.5.0'
-    versionCode: 13
-    commit: e3ad17e2a9b271059a0fea1312a7d5d73c3768e0
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      # Update URL + SHA-256 to the current Node 24 LTS before submitting.
-      # Hash file: https://nodejs.org/dist/vX.Y.Z/SHASUMS256.txt
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      # - cd ../.. && sed -i '/"@sentry\/react-native"/d' package.json && pnpm install --frozen-lockfile
-      - cd ../.. && npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      # app.config.ts is the active config from v0.3.3+; app.json is a reference copy.
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      # react-native-maps bundles pre-built Google Play Services JARs; remove
-      # the closed-source stubs — Gradle will re-download via Maven Central.
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.5.1 ──────────────────────────────────────────────────────────────────
-  - versionName: '0.5.1'
-    versionCode: 14
-    commit: 2b8988f194fc2f5e5d42b549a87272c84e0bd7b8
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      - cd ../.. && npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.5.2 ──────────────────────────────────────────────────────────────────
-  - versionName: '0.5.2'
-    versionCode: 15
-    commit: d49356b2b66ffd2821ec9e517b5533a0ffe5ffe2
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      - cd ../.. && npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.5.3 ──────────────────────────────────────────────────────────────────
-  - versionName: '0.5.3'
-    versionCode: 16
-    commit: 2c3cfb816542ea343e32d93f738c19b43d280982
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      - cd ../.. && npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.5.4 ──────────────────────────────────────────────────────────────────
-  - versionName: '0.5.4'
-    versionCode: 17
-    commit: bd07997d1733046f68a734ea81a7aeb2013349c4
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      - cd ../.. && npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.5.5 ──────────────────────────────────────────────────────────────────
-  - versionName: '0.5.5'
-    versionCode: 18
-    commit: fc9677cac11f177dbc435ecea1f3508574030945
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      - cd ../.. && npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.6.0 ──────────────────────────────────────────────────────────────────
-  - versionName: '0.6.0'
-    versionCode: 19
-    commit: 429111f6817ba64f07ebcb02b2dd01822a863ed4
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      - cd ../.. && npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.7.0 ──────────────────────────────────────────────────────────────────
-  - versionName: '0.7.0'
-    versionCode: 20
-    commit: df957915cdd46d37d332a11a3f6b02e27fbf91cb
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      - cd ../.. && npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.8.0 ──────────────────────────────────────────────────────────────────
-  # Adds expo-application + expo-intent-launcher (in-app GitHub updater) and the
-  # REQUEST_INSTALL_PACKAGES permission. NOTE: the in-app APK updater is for the
-  # sideloaded GitHub build; for F-Droid it should be stripped (F-Droid ships its
-  # own updates) — see MaintainerNotes.
-  - versionName: '0.8.0'
-    versionCode: 21
-    commit: 4c3537354a49fac769700d3783059228a14fa2ad
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      - cd ../.. && npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-application/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-intent-launcher/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.8.1 ──────────────────────────────────────────────────────────────────
-  # EXPO_PUBLIC_FDROID=1 at prebuild produces a repo-compliant build: the in-app
-  # GitHub APK updater is disabled and REQUEST_INSTALL_PACKAGES is dropped.
-  - versionName: '0.8.1'
-    versionCode: 22
-    commit: 0d11b09d46d2999487344b512190baeceee6342e
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      # EXPO_PUBLIC_FDROID=1 → drops the in-app updater + REQUEST_INSTALL_PACKAGES.
-      - cd ../.. && EXPO_PUBLIC_FDROID=1 npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-application/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-intent-launcher/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.8.2 ──────────────────────────────────────────────────────────────────
-  - versionName: '0.8.2'
-    versionCode: 23
-    commit: adecca1a12359365b786b25ff695c8e2b2c60888
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      - cd ../.. && EXPO_PUBLIC_FDROID=1 npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-application/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-intent-launcher/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.8.3 ──────────────────────────────────────────────────────────────────
-  - versionName: '0.8.3'
-    versionCode: 24
-    commit: 6f31665d87e2ae86ecaec7f7ae4588f3473035af
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      - cd ../.. && EXPO_PUBLIC_FDROID=1 npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-application/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-intent-launcher/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-  # ── v0.9.0 ──────────────────────────────────────────────────────────────────
-  - versionName: '0.9.0'
-    versionCode: 25
-    commit: e6299ff53b1ceaa50e17a6a4e696970828f02829
-    subdir: android/app
-    sudo:
-      - apt-get update
-      - apt-get install -y g++ make python3 openjdk-17-jdk
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.0.2/node-v24.0.2-linux-x64.tar.xz
-      - echo "REPLACE_WITH_SHA256_FROM_NODEJS_ORG  node.tar.xz" | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.0.2-linux-x64/. /usr/local/
-      - npm install -g pnpm@10
-    init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      - cd ../.. && EXPO_PUBLIC_FDROID=1 npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts || true
-      - sed -i '/projectId/d' ../../app.json || true
-    gradle:
-      - yes
-    rm:
-      - node_modules/react-native/sdks/hermesc/osx-bin
-      - node_modules/react-native/sdks/hermesc/win64-bin
-      - node_modules/@sentry/react-native/android/src/main/jniLibs
-      - node_modules/react-native-maps/android/libs
-    scanignore:
-      - android/build.gradle
-      - node_modules/react-native/android
-      - node_modules/hermes-engine
-      - node_modules/jsc-android
-      - node_modules/@react-native-async-storage/async-storage/android/build.gradle
-      - node_modules/@sentry/react-native/android/build.gradle
-      - node_modules/expo/android/build.gradle
-      - node_modules/expo-application/android/build.gradle
-      - node_modules/expo-av/android/build.gradle
-      - node_modules/expo-build-properties/android/build.gradle
-      - node_modules/expo-file-system/android/build.gradle
-      - node_modules/expo-intent-launcher/android/build.gradle
-      - node_modules/expo-modules-core/android/build.gradle
-      - node_modules/expo-notifications/android/build.gradle
-      - node_modules/expo-router/android/build.gradle
-      - node_modules/expo-secure-store/android/build.gradle
-      - node_modules/expo-sharing/android/build.gradle
-      - node_modules/react-native-android-widget/android/build.gradle
-      - node_modules/react-native-css-interop/android/build.gradle
-      - node_modules/react-native-maps/android/build.gradle
-      - node_modules/react-native-svg/android/build.gradle
-      - node_modules/react-native-view-shot/android/build.gradle
-
-# Reproducible build path (preferred). Uncomment once confirmed byte-for-byte identical.
-# To get the fingerprint: apksigner verify --print-certs birdecho.apk | grep SHA-256
-# AllowedAPKSigningKeys: <lowercase-sha256-hex>
-# Binaries: https://github.com/arunrajiah/birdecho/releases/download/v%v/birdecho.apk
+      - node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
+      - node_modules/.pnpm/react-native@*/node_modules/react-native/ReactAndroid/publish.gradle
+      - node_modules/.pnpm/@react-native-async-storage+async-storage@*/node_modules/@react-native-async-storage/async-storage/android/build.gradle
+      - node_modules/.pnpm/expo-modules-autolinking@*/node_modules/expo-modules-autolinking/scripts/android/autolinking_implementation.gradle
+      - node_modules/.pnpm/expo-modules-core@*/node_modules/expo-modules-core/android/ExpoModulesCorePlugin.gradle
+      - node_modules/.pnpm/react-native-safe-area-context@*/node_modules/react-native-safe-area-context/android/build.gradle
+      - node_modules/.pnpm/react-native-screens@*/node_modules/react-native-screens/android/build.gradle
+      - node_modules/.pnpm/react-native-svg@*/node_modules/react-native-svg/android/build.gradle
+      - node_modules/.pnpm/react-native-view-shot@*/node_modules/react-native-view-shot/android/build.gradle
 
 MaintainerNotes: |-
-  Expo SDK 54 / React Native 0.81 app. The android/ directory is NOT committed —
-  it is generated at build time by `npx expo prebuild --platform android --clean`.
-  The subdir points to android/app (created by prebuild).
+  Expo SDK 54 / React Native 0.81 app. android/ is not committed; init: generates
+  it with `npx expo prebuild`, so subdir points at android/app.
 
-  Node 24 + pnpm 10 required. Node is manually downloaded in sudo: because Debian's
-  packaged Node is too old. Update the tarball URL and SHA-256 hash whenever the
-  Node 24 LTS patch version bumps (check https://nodejs.org/en/download/).
+  Node 24 LTS and pnpm 10 are required. Node is downloaded in sudo: because
+  Debian's packaged Node is too old. Bump the tarball URL and SHA-256 together.
 
-  Active Expo config changed from app.json to app.config.ts at v0.3.3. Both files
-  exist from v0.3.3 onward; the prebuild: step strips projectId from both to be safe.
+  scripts/fdroid-prepare.mjs (in the app repo) rewrites package.json's Expo
+  autolinking config so that:
+  * react-native-maps (depends on Google Play Services) and @sentry/react-native
+    (ships prebuilt stub jars) are not linked. The JS side only loads the map
+    module when a Google Maps key was baked in at prebuild (never the case here)
+    and Sentry is a no-op without a DSN, so neither native module is needed.
+  * every expo-* module is compiled from source instead of the prebuilt AARs that
+    Expo SDK 54 ships in node_modules/expo-*/local-maven-repo (deleted in rm:).
 
-  Sentry (@sentry/react-native) is present but is a no-op unless EXPO_PUBLIC_SENTRY_DSN
-  is set at build time (it is NOT set in this recipe). Sentry is self-hostable (AGPL).
-  Its native Android layer is compiled regardless of the env var, hence the Tracking
-  declaration. To produce a Sentry-free build, uncomment the sed line in init:.
+  expo-application (transitive via expo-notifications) is patched by the repo's
+  pnpm patch (patches/expo-application@7.0.8.patch) to drop the proprietary
+  com.android.installreferrer dependency. pnpm install applies it.
 
-  react-native-maps (added in v0.5.0) requires a Google Maps API key on Android. The key
-  is NOT set in this recipe (EXPO_PUBLIC_GOOGLE_MAPS_API_KEY is absent), so the Map tab
-  renders a "Map not available in this build" fallback instead of mounting the native
-  Google map — which crashes without a key (issue #25). All other features work normally.
-  This is documented in the app's README.
+  EXPO_PUBLIC_FDROID=1 makes app.config.ts drop the in-app GitHub-Releases updater
+  and the REQUEST_INSTALL_PACKAGES permission.
 
-  The app sets android:usesCleartextTraffic="true" (via expo-build-properties) to allow
-  HTTP connections to local BirdNET-Pi/Go stations on the user's LAN. This is
-  intentional and documented.
+  expo-notifications is patched the same way (patches/expo-notifications@0.32.16.patch)
+  to remove Firebase Cloud Messaging. BirdEcho only uses local notifications.
 
-  The GitHub build includes an in-app updater (expo-application + expo-intent-launcher)
-  that downloads the latest APK from GitHub Releases and launches Android's package
-  installer. F-Droid provides its own update channel, so this build sets
-  EXPO_PUBLIC_FDROID=1 before `expo prebuild` (see the prebuild step below). That flag
-  disables the in-app updater AND drops the REQUEST_INSTALL_PACKAGES permission, so the
-  F-Droid APK contains neither the self-updater nor that permission. Verify with
-  `aapt dump permissions` that REQUEST_INSTALL_PACKAGES is absent from the built APK.
+  pnpm stores packages under node_modules/.pnpm/<name>@<version>_<hash>/ and
+  symlinks them into node_modules/, so rm: and scanignore: use that layout.
 
-AutoUpdateMode: Version %v
+  scanignore: hermesc/linux64-bin/hermesc is the Hermes bytecode compiler that
+  ships with the react-native npm package. It only runs on the build host to
+  compile the JS bundle; nothing from it ends up in the APK. The remaining
+  entries are library build.gradle files that reference maven repo paths through
+  Gradle variables (${...}, $rootDir/..) which the scanner cannot resolve; those
+  directories do not exist in RN 0.81 and are unused.
+
+  android:usesCleartextTraffic is true so the app can reach BirdNET-Pi/Go
+  stations over plain HTTP on the user's LAN.
+
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: '0.9.0'
-CurrentVersionCode: 25
+CurrentVersion: 0.9.2
+CurrentVersionCode: 32

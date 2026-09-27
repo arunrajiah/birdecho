@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.2] — 2026-09-27
+
+### Changed
+
+- **F-Droid ready build.** The app no longer depends on any proprietary Google library, so it can be built by F-Droid from source (#16):
+  - Removed Firebase Cloud Messaging from `expo-notifications` and the Play Install Referrer client from `expo-application` via pnpm patches (`patches/`). BirdEcho only ever used local notifications, so nothing user-facing changes.
+  - `expo-application` is no longer a direct dependency; the version footer now reads from the Expo config.
+  - The Map tab's native map (`react-native-maps`, which needs Google Play Services) is loaded lazily and only when the build has a Google Maps key. Builds without one, including F-Droid, now show a station list with "Open in Maps" links instead of the plain "Map not available" message.
+  - F-Droid builds also exclude `react-native-maps` and the Sentry SDK at the native level (Sentry was already a no-op without a DSN).
+- New `scripts/fdroid-prepare.mjs` applies the F-Droid autolinking config; the recipe lives in `docs/fdroid/` and a new `fdroid-check` GitHub workflow builds the F-Droid flavor from source on relevant changes.
+
+---
+
 ## [0.9.1] — 2026-07-29
 
 ### Fixed

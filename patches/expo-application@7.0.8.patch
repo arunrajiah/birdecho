@@ -1,0 +1,71 @@
+diff --git a/android/build.gradle b/android/build.gradle
+index 36f85c00665e882ef6577a941ab0088582341412..438c5dd3d456ccc93d592ac268d32c624179f8a5 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -15,8 +15,6 @@ android {
+ }
+ 
+ dependencies {
+-  implementation 'com.android.installreferrer:installreferrer:2.2'
+-
+   if (project.findProject(':expo-modules-test-core')) {
+     testImplementation project(':expo-modules-test-core')
+   }
+diff --git a/android/src/main/java/expo/modules/application/ApplicationModule.kt b/android/src/main/java/expo/modules/application/ApplicationModule.kt
+index 3d0622b26cd48eb483abdf2f1c4a6b0b009f5f61..cddf58b44b9f71cd310c16ae019a2bf1852ca752 100644
+--- a/android/src/main/java/expo/modules/application/ApplicationModule.kt
++++ b/android/src/main/java/expo/modules/application/ApplicationModule.kt
+@@ -4,10 +4,7 @@ import android.content.Context
+ import android.content.pm.PackageInfo
+ import android.content.pm.PackageManager
+ import android.os.Build
+-import android.os.RemoteException
+ import android.provider.Settings
+-import com.android.installreferrer.api.InstallReferrerClient
+-import com.android.installreferrer.api.InstallReferrerStateListener
+ import expo.modules.kotlin.Promise
+ import expo.modules.kotlin.exception.CodedException
+ import expo.modules.kotlin.exception.Exceptions
+@@ -62,42 +59,6 @@ class ApplicationModule : Module() {
+         .toDouble()
+     }
+ 
+-    AsyncFunction("getInstallReferrerAsync") { promise: Promise ->
+-      val installReferrer = StringBuilder()
+-
+-      val referrerClient = InstallReferrerClient.newBuilder(context).build()
+-
+-      referrerClient.startConnection(object : InstallReferrerStateListener {
+-        override fun onInstallReferrerSetupFinished(responseCode: Int) {
+-          when (responseCode) {
+-            InstallReferrerClient.InstallReferrerResponse.OK -> {
+-              // Connection established and response received
+-              try {
+-                val response = referrerClient.installReferrer
+-                installReferrer.append(response.installReferrer)
+-              } catch (e: RemoteException) {
+-                promise.reject("ERR_APPLICATION_INSTALL_REFERRER_REMOTE_EXCEPTION", "RemoteException getting install referrer information. This may happen if the process hosting the remote object is no longer available.", e)
+-                return
+-              }
+-              promise.resolve(installReferrer.toString())
+-            }
+-
+-            InstallReferrerClient.InstallReferrerResponse.FEATURE_NOT_SUPPORTED -> // API not available in the current Play Store app
+-              promise.reject("ERR_APPLICATION_INSTALL_REFERRER_UNAVAILABLE", "The current Play Store app doesn't provide the installation referrer API, or the Play Store may not be installed.", null)
+-
+-            InstallReferrerClient.InstallReferrerResponse.SERVICE_UNAVAILABLE -> // Connection could not be established
+-              promise.reject("ERR_APPLICATION_INSTALL_REFERRER", "General error retrieving the install referrer: response code $responseCode", null)
+-
+-            else -> promise.reject("ERR_APPLICATION_INSTALL_REFERRER", "General error retrieving the install referrer: response code $responseCode", null)
+-          }
+-          referrerClient.endConnection()
+-        }
+-
+-        override fun onInstallReferrerServiceDisconnected() {
+-          promise.reject("ERR_APPLICATION_INSTALL_REFERRER_SERVICE_DISCONNECTED", "Connection to install referrer service was lost.", null)
+-        }
+-      })
+-    }
+   }
+ 
+   private val packageName

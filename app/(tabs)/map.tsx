@@ -13,15 +13,20 @@
  * Android: the native map requires a Google Maps API key.  Mounting MapView
  * without one crashes the app (grey screen → crash — issue #25), so on Android
  * we only render the map when a key was baked in at prebuild; otherwise the tab
- * shows a fallback.  Set EXPO_PUBLIC_GOOGLE_MAPS_API_KEY before `expo prebuild`
- * to enable it.  iOS uses Apple Maps and needs no key.
+ * shows a station list with "Open in Maps" links.  F-Droid builds never have a
+ * key and additionally exclude react-native-maps at the native level (it depends
+ * on Google Play Services), which is why the native map lives in
+ * src/components/StationMap.tsx and is require()d lazily: that module must never
+ * be evaluated when the map is unavailable.  Set EXPO_PUBLIC_GOOGLE_MAPS_API_KEY
+ * before `expo prebuild` to enable the map.  iOS uses Apple Maps and needs no key.
  */
-import { useRef, useMemo, useCallback } from 'react';
-import { View, Text, Pressable, Linking, Platform } from 'react-native';
+
+import { useMemo, useCallback } from 'react';
+import { View, Text, Pressable, Linking, Platform, ScrollView } from 'react-native';
 import Constants from 'expo-constants';
-import MapView, { Marker, Callout, type Region } from 'react-native-maps';
 import { useStationStore } from '../../src/stores/stationStore';
 import type { SavedStation } from '../../src/types/station';
+import type { MappableStation } from '../../src/components/StationMap';
 
 // Android needs a Google Maps API key to mount MapView safely; iOS (Apple Maps)
 // does not. `hasGoogleMapsKey` is set in app.config.ts at prebuild time.
@@ -39,113 +44,74 @@ function openInMaps(latitude: number, longitude: number, label: string) {
   void Linking.openURL(url);
 }
 
-/**
- * Compute a map region that fits all provided coordinates with a small
- * padding margin.
- */
-function regionForCoordinates(
-  coords: { latitude: number; longitude: number }[],
-): Region {
-  if (coords.length === 0) {
-    return { latitude: 20, longitude: 0, latitudeDelta: 120, longitudeDelta: 120 };
-  }
-  if (coords.length === 1) {
-    const { latitude, longitude } = coords[0]!;
-    return { latitude, longitude, latitudeDelta: 0.5, longitudeDelta: 0.5 };
-  }
-
-  const lats = coords.map((c) => c.latitude);
-  const lngs = coords.map((c) => c.longitude);
-  const minLat = Math.min(...lats);
-  const maxLat = Math.max(...lats);
-  const minLng = Math.min(...lngs);
-  const maxLng = Math.max(...lngs);
-
-  const padding = 0.3;
-  const latDelta = maxLat - minLat + padding * 2;
-  const lngDelta = maxLng - minLng + padding * 2;
-
-  return {
-    latitude: (minLat + maxLat) / 2,
-    longitude: (minLng + maxLng) / 2,
-    latitudeDelta: Math.max(latDelta, 0.5),
-    longitudeDelta: Math.max(lngDelta, 0.5),
-  };
-}
-
 const CONNECTION_BADGE: Record<string, string> = {
   birdweather: 'BirdWeather',
   birdnetgo: 'BirdNET-Go',
   birdnetpi: 'BirdNET-Pi',
 };
 
-// ─── Marker callout ───────────────────────────────────────────────────────────
+// ─── Fallback when the native map is unavailable: station list ───────────────
 
-function StationCallout({
-  station,
-  isActive,
+function StationList({
+  stations,
+  activeStationId,
   onSwitch,
-  onOpenMaps,
 }: {
-  station: SavedStation;
-  isActive: boolean;
-  onSwitch: () => void;
-  onOpenMaps: () => void;
+  stations: MappableStation[];
+  activeStationId: string | null;
+  onSwitch: (id: string) => void;
 }) {
   return (
-    <Callout onPress={() => {}} tooltip={false} style={{ width: 200 }}>
-      <View style={{ padding: 10, gap: 6 }}>
-        <Text style={{ fontWeight: '700', fontSize: 14, color: '#111827' }} numberOfLines={1}>
-          {station.stationName}
-        </Text>
-        <Text style={{ fontSize: 12, color: '#6b7280' }}>
-          {CONNECTION_BADGE[station.connectionType] ?? station.connectionType}
-        </Text>
-
-        <View style={{ flexDirection: 'row', gap: 8, marginTop: 4 }}>
-          {!isActive ? (
-            <Pressable
-              onPress={onSwitch}
-              style={{
-                flex: 1,
-                backgroundColor: '#15803d',
-                borderRadius: 6,
-                paddingVertical: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ color: '#fff', fontSize: 12, fontWeight: '600' }}>Switch</Text>
-            </Pressable>
-          ) : (
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: '#dcfce7',
-                borderRadius: 6,
-                paddingVertical: 5,
-                alignItems: 'center',
-              }}
-            >
-              <Text style={{ color: '#15803d', fontSize: 12, fontWeight: '600' }}>Active</Text>
-            </View>
-          )}
-
-          <Pressable
-            onPress={onOpenMaps}
-            style={{
-              flex: 1,
-              borderColor: '#d1d5db',
-              borderWidth: 1,
-              borderRadius: 6,
-              paddingVertical: 5,
-              alignItems: 'center',
-            }}
+    <ScrollView className="flex-1 bg-white dark:bg-gray-950" contentContainerClassName="p-4 gap-3">
+      <Text className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+        The interactive map is not available in this build. Tap a station to open its location
+        in your maps app.
+      </Text>
+      {stations.map((station) => {
+        const isActive = station.id === activeStationId;
+        return (
+          <View
+            key={station.id}
+            className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 gap-1"
           >
-            <Text style={{ color: '#374151', fontSize: 12, fontWeight: '600' }}>Maps ↗</Text>
-          </Pressable>
-        </View>
-      </View>
-    </Callout>
+            <Text
+              className="text-base font-semibold text-gray-900 dark:text-gray-100"
+              numberOfLines={1}
+            >
+              {station.stationName}
+            </Text>
+            <Text className="text-xs text-gray-500 dark:text-gray-400">
+              {CONNECTION_BADGE[station.connectionType] ?? station.connectionType} ·{' '}
+              {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}
+            </Text>
+            <View className="flex-row gap-2 mt-3">
+              {isActive ? (
+                <View className="flex-1 items-center rounded-md bg-green-100 dark:bg-green-900 py-2">
+                  <Text className="text-xs font-semibold text-green-700 dark:text-green-200">
+                    Active
+                  </Text>
+                </View>
+              ) : (
+                <Pressable
+                  onPress={() => onSwitch(station.id)}
+                  className="flex-1 items-center rounded-md bg-green-700 py-2"
+                >
+                  <Text className="text-xs font-semibold text-white">Switch</Text>
+                </Pressable>
+              )}
+              <Pressable
+                onPress={() => openInMaps(station.latitude, station.longitude, station.stationName)}
+                className="flex-1 items-center rounded-md border border-gray-300 dark:border-gray-700 py-2"
+              >
+                <Text className="text-xs font-semibold text-gray-700 dark:text-gray-200">
+                  Open in Maps ↗
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        );
+      })}
+    </ScrollView>
   );
 }
 
@@ -155,23 +121,15 @@ export default function MapScreen() {
   const stations = useStationStore((s) => s.stations);
   const activeStationId = useStationStore((s) => s.activeStationId);
   const switchStation = useStationStore((s) => s.switchStation);
-  const mapRef = useRef<MapView>(null);
 
   // Only stations with coordinates appear on the map.
   const mappableStations = useMemo(
     () =>
       stations.filter(
-        (s): s is SavedStation & { latitude: number; longitude: number } =>
+        (s): s is MappableStation =>
           typeof s.latitude === 'number' && typeof s.longitude === 'number',
       ),
     [stations],
-  );
-
-  const initialRegion = useMemo(
-    () => regionForCoordinates(mappableStations),
-    // We only want this on first render — ignore subsequent changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
   );
 
   const handleSwitch = useCallback(
@@ -181,29 +139,9 @@ export default function MapScreen() {
     [switchStation],
   );
 
-  // ── Map unavailable: Android build without a Google Maps API key ───────────
-  // Mounting MapView would crash the native Google Maps SDK (issue #25), so
-  // show a fallback. Checked first: the map will never render on this build, so
-  // the "connect a station" prompt below would be misleading.
-  if (!MAP_AVAILABLE) {
-    return (
-      <View className="flex-1 items-center justify-center bg-white px-8">
-        <Text className="text-4xl mb-4">🗺️</Text>
-        <Text className="text-center text-base font-semibold text-gray-900 mb-2">
-          Map not available in this build
-        </Text>
-        <Text className="text-center text-sm text-gray-400">
-          This build was compiled without a Google Maps API key, so the map can&apos;t be
-          shown. Open a station&apos;s location in your device&apos;s maps app from the Feed or
-          Settings instead.
-        </Text>
-      </View>
-    );
-  }
-
   // ── No stations with location data ─────────────────────────────────────────
   if (mappableStations.length === 0) {
-    const hasBirdWeather = stations.some((s) => s.connectionType === 'birdweather');
+    const hasBirdWeather = stations.some((s: SavedStation) => s.connectionType === 'birdweather');
     return (
       <View className="flex-1 items-center justify-center bg-white px-8">
         <Text className="text-4xl mb-4">🗺️</Text>
@@ -213,7 +151,7 @@ export default function MapScreen() {
               No station connected
             </Text>
             <Text className="text-center text-sm text-gray-400">
-              Connect a BirdWeather station to see it on the map.
+              Connect a BirdWeather station to see where it is.
             </Text>
           </>
         ) : hasBirdWeather ? (
@@ -229,11 +167,11 @@ export default function MapScreen() {
         ) : (
           <>
             <Text className="text-center text-base font-semibold text-gray-900 mb-2">
-              Map available for BirdWeather stations
+              Locations available for BirdWeather stations
             </Text>
             <Text className="text-center text-sm text-gray-400">
               BirdNET-Go and BirdNET-Pi stations do not expose GPS coordinates. Add a BirdWeather
-              station to see it on the map.
+              station to see where it is.
             </Text>
           </>
         )}
@@ -241,64 +179,27 @@ export default function MapScreen() {
     );
   }
 
-  return (
-    <View className="flex-1">
-      <MapView
-        ref={mapRef}
-        style={{ flex: 1 }}
-        initialRegion={initialRegion}
-        showsUserLocation={false}
-        showsMyLocationButton={false}
-      >
-        {mappableStations.map((station) => {
-          const isActive = station.id === activeStationId;
-          return (
-            <Marker
-              key={station.id}
-              coordinate={{ latitude: station.latitude, longitude: station.longitude }}
-              pinColor={isActive ? '#15803d' : '#78716C'}
-              title={station.stationName}
-            >
-              <StationCallout
-                station={station}
-                isActive={isActive}
-                onSwitch={() => handleSwitch(station.id)}
-                onOpenMaps={() =>
-                  openInMaps(station.latitude, station.longitude, station.stationName)
-                }
-              />
-            </Marker>
-          );
-        })}
-      </MapView>
+  // ── Map unavailable (Android build without a Google Maps key, incl. F-Droid) ─
+  if (!MAP_AVAILABLE) {
+    return (
+      <StationList
+        stations={mappableStations}
+        activeStationId={activeStationId}
+        onSwitch={handleSwitch}
+      />
+    );
+  }
 
-      {/* Legend when multiple stations are visible */}
-      {mappableStations.length > 1 && (
-        <View
-          style={{
-            position: 'absolute',
-            bottom: 24,
-            left: 16,
-            right: 16,
-            backgroundColor: 'rgba(255,255,255,0.92)',
-            borderRadius: 12,
-            paddingHorizontal: 14,
-            paddingVertical: 10,
-            flexDirection: 'row',
-            alignItems: 'center',
-            gap: 16,
-          }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#15803d' }} />
-            <Text style={{ fontSize: 12, color: '#374151' }}>Active station</Text>
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#78716C' }} />
-            <Text style={{ fontSize: 12, color: '#374151' }}>Other stations</Text>
-          </View>
-        </View>
-      )}
-    </View>
+  // Lazy require: react-native-maps must not be evaluated when the map is
+  // unavailable (F-Droid builds do not even link the native module).
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const StationMap = (require('../../src/components/StationMap') as typeof import('../../src/components/StationMap')).default;
+  return (
+    <StationMap
+      stations={mappableStations}
+      activeStationId={activeStationId}
+      onSwitch={handleSwitch}
+      onOpenMaps={(s) => openInMaps(s.latitude, s.longitude, s.stationName)}
+    />
   );
 }

@@ -1,0 +1,3 @@
+patchedDependencies:
+  expo-application@7.0.8: patches/expo-application@7.0.8.patch
+  expo-notifications@0.32.16: patches/expo-notifications@0.32.16.patch

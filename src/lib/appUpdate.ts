@@ -14,7 +14,6 @@
 
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
-import * as Application from 'expo-application';
 import * as FileSystem from 'expo-file-system/legacy';
 import * as IntentLauncher from 'expo-intent-launcher';
 
@@ -70,7 +69,7 @@ export function isNewerVersion(latest: string, current: string): boolean {
  */
 export async function checkForUpdate(): Promise<UpdateInfo | null> {
   if (!isUpdaterEnabled()) return null;
-  const currentVersion = Application.nativeApplicationVersion ?? '0.0.0';
+  const currentVersion = Constants.expoConfig?.version ?? '0.0.0';
 
   let res: Response;
   try {

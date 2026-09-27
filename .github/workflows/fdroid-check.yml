@@ -1,0 +1,112 @@
+name: F-Droid build check
+
+# Mirrors docs/fdroid/dev.arunrajiah.birdecho.yml on a Linux runner so a change that
+# would break the F-Droid build (new binary dep, proprietary lib, stale pnpm patch)
+# is caught here instead of on the fdroiddata MR. Action refs are pinned to SHAs (M-1).
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*.*.*'
+    branches:
+      - main
+    paths:
+      - 'patches/**'
+      - 'scripts/fdroid-prepare.mjs'
+      - 'docs/fdroid/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'app.config.ts'
+      - 'app.json'
+      - '.github/workflows/fdroid-check.yml'
+  pull_request:
+    paths:
+      - 'patches/**'
+      - 'scripts/fdroid-prepare.mjs'
+      - 'docs/fdroid/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'app.config.ts'
+      - 'app.json'
+      - '.github/workflows/fdroid-check.yml'
+
+permissions: {}
+
+jobs:
+  fdroid-build:
+    name: Build F-Droid flavor from source
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+
+      - name: Setup Java
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654  # v5.2.0
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Node
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
+        with:
+          node-version: 24
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320  # v5.0.0
+        with:
+          version: 10
+
+      # init: (recipe)
+      - name: Install, prepare, prebuild
+        run: |
+          pnpm install --frozen-lockfile
+          node scripts/fdroid-prepare.mjs
+          EXPO_PUBLIC_FDROID=1 CI=1 npx expo prebuild --platform android --clean --no-install
+
+      # prebuild: (recipe)
+      - name: Strip signing config and EAS project id
+        working-directory: android/app
+        run: |
+          sed -i '/signingConfig signingConfigs/d' build.gradle
+          sed -i '/projectId/d' ../../app.config.ts
+
+      # rm: (recipe). failglob makes a non-matching glob an error, like fdroidserver does.
+      - name: Remove prebuilt binaries
+        run: |
+          shopt -s failglob
+          rm -rf node_modules/.pnpm/react-native-maps@*/node_modules/react-native-maps/android
+          rm -rf node_modules/.pnpm/@sentry+react-native@*/node_modules/@sentry/react-native/android
+          rm -rf node_modules/.pnpm/@sentry+cli-*/node_modules/@sentry/cli-*/bin
+          rm -rf node_modules/.pnpm/expo-*/node_modules/expo-*/local-maven-repo
+          rm -rf node_modules/.pnpm/expo-file-system@*/node_modules/expo-file-system/prebuilds
+          rm -rf node_modules/.pnpm/expo@*/node_modules/expo/template.tgz
+          rm -rf node_modules/.pnpm/react-native@*/node_modules/react-native/React/I18n
+          rm -rf node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc/osx-bin
+          rm -rf node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc/win64-bin
+          rm -rf node_modules/.pnpm/react-native-svg@*/node_modules/react-native-svg/android/.gradle
+
+      - name: Build release APK (unsigned)
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Verify APK contents
+        run: |
+          APK=android/app/build/outputs/apk/release/app-release-unsigned.apk
+          ls -la "$APK"
+          AA="$ANDROID_HOME/cmdline-tools/latest/bin/apkanalyzer"
+          echo "--- permissions"; "$AA" manifest permissions "$APK" | tee perms.txt
+          ! grep -q REQUEST_INSTALL_PACKAGES perms.txt
+          echo "--- proprietary packages (must be empty)"
+          "$AA" dex packages --defined-only "$APK" | grep -E "com\.google\.(firebase|android\.gms)|com\.android\.installreferrer|io\.sentry|com\.rnmaps" | tee bad.txt || true
+          [ ! -s bad.txt ]
+
+      - name: Upload APK
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
+        with:
+          name: birdecho-fdroid-unsigned
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          retention-days: 7

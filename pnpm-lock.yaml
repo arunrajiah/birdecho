@@ -4,6 +4,14 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  expo-application@7.0.8:
+    hash: 078321bc9e5c5a656f5d6d46181bd48fa9e888dc7c318629e0d356c80bc7b8ce
+    path: patches/expo-application@7.0.8.patch
+  expo-notifications@0.32.16:
+    hash: 6b798dd81fa6509abfc06080a4a98d46f1dee0a09b8acd4f7e33c21398904504
+    path: patches/expo-notifications@0.32.16.patch
+
 importers:
 
   .:
@@ -31,7 +39,7 @@ importers:
         version: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
       expo-application:
         specifier: ^7.0.8
-        version: 7.0.8(expo@54.0.33)
+        version: 7.0.8(patch_hash=078321bc9e5c5a656f5d6d46181bd48fa9e888dc7c318629e0d356c80bc7b8ce)(expo@54.0.33)
       expo-av:
         specifier: ~16.0.8
         version: 16.0.8(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -46,7 +54,7 @@ importers:
         version: 13.0.8(expo@54.0.33)
       expo-notifications:
         specifier: ~0.32.16
-        version: 0.32.16(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
+        version: 0.32.16(patch_hash=6b798dd81fa6509abfc06080a4a98d46f1dee0a09b8acd4f7e33c21398904504)(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
       expo-router:
         specifier: ~6.0.23
         version: 6.0.23(fe42d8ac7ead63fa2e0308225b1b13b0)
@@ -7917,7 +7925,7 @@ snapshots:
 
   event-target-shim@5.0.1: {}
 
-  expo-application@7.0.8(expo@54.0.33):
+  expo-application@7.0.8(patch_hash=078321bc9e5c5a656f5d6d46181bd48fa9e888dc7c318629e0d356c80bc7b8ce)(expo@54.0.33):
     dependencies:
       expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
 
@@ -8004,7 +8012,7 @@ snapshots:
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0)
 
-  expo-notifications@0.32.16(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3):
+  expo-notifications@0.32.16(patch_hash=6b798dd81fa6509abfc06080a4a98d46f1dee0a09b8acd4f7e33c21398904504)(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3):
     dependencies:
       '@expo/image-utils': 0.8.13(typescript@5.9.3)
       '@ide/backoff': 1.0.0
@@ -8012,7 +8020,7 @@ snapshots:
       assert: 2.1.0
       badgin: 1.2.3
       expo: 54.0.33(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
-      expo-application: 7.0.8(expo@54.0.33)
+      expo-application: 7.0.8(patch_hash=078321bc9e5c5a656f5d6d46181bd48fa9e888dc7c318629e0d356c80bc7b8ce)(expo@54.0.33)
       expo-constants: 18.0.13(expo@54.0.33)(react-native@0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0))
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.29.0)(@react-native/metro-config@0.85.1(@babel/core@7.29.0))(@types/react@19.1.17)(react@19.1.0)

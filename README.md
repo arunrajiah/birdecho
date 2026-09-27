@@ -112,7 +112,7 @@ See [ROADMAP.md](ROADMAP.md) for the full, living roadmap.
 
 **Prefer to sideload?** Grab the latest signed APK from [GitHub Releases](https://github.com/arunrajiah/birdecho/releases/latest). No Play account needed: enable "Install from unknown sources" in Android Settings, download the APK, and install.
 
-**Staying up to date:** the Google Play build updates automatically through Play. GitHub and F-Droid builds instead self-update from v0.8.0 onward, showing an in-app banner when a newer version is on GitHub Releases (tap **Download & install** and confirm the Android install prompt).
+**Staying up to date:** the Google Play build updates automatically through Play. GitHub builds instead self-update from v0.8.0 onward, showing an in-app banner when a newer version is on GitHub Releases (tap **Download & install** and confirm the Android install prompt).
 
 **iOS** — App Store / TestFlight distribution is currently **on hold** while development focuses on Android. The codebase stays cross-platform, so community builds are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for how to build locally with EAS.
 
@@ -171,7 +171,7 @@ Your station may not have any detections yet. Pull down to refresh. If your stat
 Check that you granted notification permission when prompted. On Android, also check that battery optimisation isn't killing the app in the background. Note: alerts are local-only (no server-side push yet) and fire while the app polls — when a **favourited** species is detected, or, if you enable **Rare species alerts** in Settings, when a species rarely seen at your station shows up.
 
 **The Android Map tab says "Map not available in this build."**
-The Android map needs a Google Maps API key set at build time (`EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`). Builds compiled without one — including F-Droid/IzzyOnDroid builds — show this fallback instead of the map, because mounting the native map without a key crashes the app. iOS uses Apple Maps and needs no key.
+The Android map needs a Google Maps API key set at build time (`EXPO_PUBLIC_GOOGLE_MAPS_API_KEY`). Builds compiled without one — including F-Droid/IzzyOnDroid builds — show a station list with "Open in Maps" links instead of the map, because mounting the native map without a key crashes the app. iOS uses Apple Maps and needs no key.
 
 **Is my token stored securely?**
 Yes. BirdEcho uses `expo-secure-store`, which maps to iOS Keychain and Android Keystore. Your token is never logged, cached to disk in plain text, or sent anywhere other than the BirdWeather API.
