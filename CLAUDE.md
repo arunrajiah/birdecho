@@ -7,6 +7,9 @@ Expo (React Native) + TypeScript, expo-router, NativeWind/Tailwind, TanStack Que
 ## Layout
 - `app/` - expo-router routes: `(tabs)`, `connect`, `record`, `species`
 - `src/` - api, components, hooks, lib, stores, theme, types, widgets (Android widget via react-native-android-widget)
+- `wear/` - standalone native Kotlin Wear OS app (tile + app); built only in CI (`wear.yml`), no Gradle wrapper committed
+- `modules/wear-sync/` - Expo local module, sends active station to the watch (Play Services; excluded from F-Droid)
+- `patches/` - pnpm patches stripping Firebase / Install Referrer; `scripts/fdroid-prepare.mjs` - F-Droid autolinking config
 - `assets/`, `docs/`, `fastlane/` - media, docs, store automation
 - Config: `app.config.ts`, `eas.json`, `tailwind.config.js`, `metro.config.js`
 
