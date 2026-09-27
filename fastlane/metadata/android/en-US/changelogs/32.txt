@@ -1,0 +1,5 @@
+BirdEcho no longer depends on any proprietary Google library, so it can be built from source by F-Droid.
+
+- Removed Firebase Cloud Messaging and the Play Install Referrer client. BirdEcho only uses local notifications, so nothing changes for you.
+- Map tab: builds without a Google Maps key (including F-Droid) now show a station list with Open in Maps links.
+- F-Droid builds ship without the Sentry SDK and without the in-app updater.
