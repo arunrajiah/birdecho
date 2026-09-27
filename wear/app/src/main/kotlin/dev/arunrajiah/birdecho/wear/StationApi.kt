@@ -18,7 +18,6 @@ import java.time.format.DateTimeParseException
  */
 object StationApi {
     private const val BIRDWEATHER_BASE = "https://app.birdweather.com/api/v1"
-    private const val BW_TODAY_LIMIT = 100
 
     /** Blocking. Call from a background dispatcher. */
     @Throws(IOException::class)
@@ -35,15 +34,15 @@ object StationApi {
 
         val latest = JSONObject(get("$base/detections?limit=1", headers))
             .optJSONArray("detections").firstOrNull()
-        // The REST API has no per-day count, so count one page of today's detections.
-        val today = JSONObject(get("$base/detections?period=day&limit=$BW_TODAY_LIMIT", headers))
-            .optJSONArray("detections")?.length() ?: 0
+        // /stats defaults to period=day. Do not count a /detections page instead:
+        // that endpoint ignores ?period= and returns the latest rows of any date.
+        val today = JSONObject(get("$base/stats?period=day", headers)).optInt("detections", 0)
 
         return Glance(
             lastSpecies = latest?.optJSONObject("species")?.optString("commonName")?.takeIf { it.isNotBlank() },
             lastTime = latest?.optString("timestamp")?.let(::formatTimestamp),
             todayCount = today,
-            todayCapped = today >= BW_TODAY_LIMIT,
+            todayCapped = false,
             fetchedAtMillis = System.currentTimeMillis(),
         )
     }

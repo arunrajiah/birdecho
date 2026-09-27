@@ -2,21 +2,28 @@ import { apiFetch } from '../lib/apiClient';
 import type { Stats } from '../types/birdweather';
 
 /**
- * BirdWeather station stats: { success, detections, species } — all-time totals.
- * There is no per-day stats variant and no daily-counts endpoint in the REST v1
- * API, so "today" is derived by counting detections with ?period=day (one page,
- * capped at 100), and the daily chart is a today-only stub.
+ * BirdWeather station stats: { success, detections, species } for a period
+ * (day | week | month | all). The period defaults to `day`, so all-time totals
+ * must ask for `period=all` explicitly. There is no daily-counts endpoint in the
+ * REST v1 API, so the daily chart is a today-only stub.
+ *
+ * Note: `?period=` is ignored by the /detections endpoint (it returns the latest
+ * rows regardless of date), so never count "today" from a detections page.
  */
-export async function fetchStats(stationId: string): Promise<Stats> {
-  const data = await apiFetch<{ detections?: number; species?: number }>(
-    `/stations/${stationId}/stats`,
+async function fetchPeriodStats(
+  stationId: string,
+  period: 'day' | 'all',
+): Promise<{ detections?: number; species?: number }> {
+  return apiFetch<{ detections?: number; species?: number }>(
+    `/stations/${stationId}/stats?period=${period}`,
   );
+}
+
+export async function fetchStats(stationId: string): Promise<Stats> {
+  const data = await fetchPeriodStats(stationId, 'all');
   let recordsToday = 0;
   try {
-    const today = await apiFetch<{ detections?: unknown[] }>(
-      `/stations/${stationId}/detections?period=day&limit=100`,
-    );
-    recordsToday = today.detections?.length ?? 0;
+    recordsToday = (await fetchPeriodStats(stationId, 'day')).detections ?? 0;
   } catch {
     // best-effort — leave today at 0 rather than failing the whole stats screen
   }
@@ -31,15 +38,12 @@ export async function fetchDailyCounts(
   stationId: string,
   days: number,
 ): Promise<{ date: string; count: number }[]> {
-  // BirdWeather REST has no daily-count endpoint; populate today only (counted
-  // from ?period=day) and zero-fill the rest so the chart renders consistently.
+  // BirdWeather REST has no daily-count endpoint; populate today only and
+  // zero-fill the rest so the chart renders consistently.
   const today = new Date().toISOString().slice(0, 10);
   let todayCount = 0;
   try {
-    const r = await apiFetch<{ detections?: unknown[] }>(
-      `/stations/${stationId}/detections?period=day&limit=100`,
-    );
-    todayCount = r.detections?.length ?? 0;
+    todayCount = (await fetchPeriodStats(stationId, 'day')).detections ?? 0;
   } catch {
     // ignore — chart simply shows zeros
   }

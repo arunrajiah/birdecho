@@ -1,5 +1,6 @@
 package dev.arunrajiah.birdecho.wear
 
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -42,6 +43,7 @@ private val Grey = Color(0xFFB0B0B0)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        applyDebugStation()
         setContent {
             MaterialTheme {
                 AppScaffold {
@@ -52,6 +54,25 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+}
+
+/**
+ * Debuggable builds only: lets an emulator without a paired phone be pointed at
+ * a station, e.g.
+ *   adb shell am start -n dev.arunrajiah.birdecho/.wear.MainActivity \
+ *     --es connectionType birdweather --es bwStationId 1000 --es stationName Test
+ */
+private fun MainActivity.applyDebugStation() {
+    val debuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    val type = intent?.getStringExtra("connectionType")
+    if (!debuggable || type == null) return
+    Store(applicationContext).station = StationConfig(
+        connectionType = type,
+        stationName = intent.getStringExtra("stationName") ?: "",
+        bwStationId = intent.getStringExtra("bwStationId"),
+        token = intent.getStringExtra("token"),
+        hostUrl = intent.getStringExtra("hostUrl"),
+    )
 }
 
 @Composable

@@ -10,7 +10,8 @@ import type { Detection, RecordsPage } from '../types/birdweather';
  *
  * The list endpoint returns { success, detections: [...] } (NOT a paged wrapper).
  * Pagination is by `?cursor=<id>` — passing a detection id returns rows older
- * than it. Per-species filtering is `?species=<id>`; today is `?period=day`.
+ * than it. Per-species filtering is `?species=<id>`. `?period=` is ignored here;
+ * use `/stats?period=day` for today's count (see stats.ts).
  */
 export interface BwDetection {
   id: number;
