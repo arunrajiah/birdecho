@@ -78,6 +78,30 @@ jobs:
       - name: Rename APK
         run: mv android/app/build/outputs/apk/release/app-release.apk birdecho.apk
 
+      # ── Wear OS app (wear/) ────────────────────────────────────────────────
+      # Signed with the same key as the phone APK: the Wearable Data Layer only
+      # delivers the station config between apps that share package and signature.
+      - name: Setup Gradle (Wear OS)
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb  # v6.3.0
+        with:
+          gradle-version: '8.14.3'
+
+      - name: Build signed Wear OS APK
+        working-directory: wear
+        env:
+          WEAR_KEYSTORE_FILE: ${{ runner.temp }}/birdecho-wear.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$WEAR_KEYSTORE_FILE"
+          gradle :app:assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/birdecho-wear.apk"
+
+      - name: Delete Wear OS keystore
+        if: always()
+        run: rm -f "${{ runner.temp }}/birdecho-wear.keystore"
+
       - name: Extract changelog for this tag
         id: changelog
         run: |
@@ -94,6 +118,8 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: BirdEcho ${{ github.ref_name }}
           body: ${{ steps.changelog.outputs.notes }}
-          files: birdecho.apk
+          files: |
+            birdecho.apk
+            birdecho-wear.apk
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}

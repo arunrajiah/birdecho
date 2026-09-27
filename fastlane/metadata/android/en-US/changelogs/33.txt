@@ -1,0 +1,3 @@
+New: Wear OS glance. A tile and watch app show your station's latest detection and today's count (BirdWeather and BirdNET-Go; GitHub and Play builds).
+
+Fixed: BirdWeather "today" count and all-time totals were wrong, and today's count is no longer capped at 100.

@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] — 2026-09-27
+
+### Added
+
+- **Wear OS glance** (Wear OS 3 and newer). A tile and a small watch app show your station's latest detection, when it happened, and today's count. The watch fetches on its own about every 15 minutes, so it keeps working with the phone app closed.
+  - Setup is automatic: BirdEcho on your phone sends the active station to the watch whenever you add or switch stations.
+  - Supports BirdWeather and BirdNET-Go stations. BirdNET-Pi is not supported on the watch yet.
+  - Install `birdecho-wear.apk` from the GitHub release on the watch. Not part of F-Droid builds, because phone to watch sync needs Google Play Services.
+
+### Fixed
+
+- **BirdWeather: "today" count and all-time totals were wrong.** The app counted a page of detections using a filter the API ignores, so "today" could show up to 100 on a day with no detections, and the all-time totals were really the last day's. Both now come from the station stats endpoint, and today's count is no longer capped at 100.
+
+---
+
 ## [0.9.2] — 2026-09-27
 
 ### Changed

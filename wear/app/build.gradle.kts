@@ -42,9 +42,9 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+            // Not minified: the release APK then runs the same code that is tested
+            // in debug builds (release builds cannot use the debug station hook).
+            isMinifyEnabled = false
             if (System.getenv("WEAR_KEYSTORE_FILE") != null) {
                 signingConfig = signingConfigs.getByName("release")
             }
