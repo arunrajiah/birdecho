@@ -37,6 +37,8 @@ Builds:
     gradle:
       - yes
     rm:
+      - wear
+      - modules/wear-sync/android
       - node_modules/.pnpm/react-native-maps@*/node_modules/react-native-maps/android
       - node_modules/.pnpm/@sentry+react-native@*/node_modules/@sentry/react-native/android
       - node_modules/.pnpm/@sentry+cli-*/node_modules/@sentry/cli-*/bin
@@ -72,6 +74,10 @@ MaintainerNotes: |-
     and Sentry is a no-op without a DSN, so neither native module is needed.
   * every expo-* module is compiled from source instead of the prebuilt AARs that
     Expo SDK 54 ships in node_modules/expo-*/local-maven-repo (deleted in rm:).
+
+  wear/ (the Wear OS app) and modules/wear-sync (phone to watch sync) both use the
+  Wearable Data Layer from Google Play Services. Neither is part of this build:
+  the module is excluded from autolinking and both directories are removed in rm:.
 
   expo-application (transitive via expo-notifications) is patched by the repo's
   pnpm patch (patches/expo-application@7.0.8.patch) to drop the proprietary

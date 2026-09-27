@@ -1,0 +1,21 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'dev.arunrajiah.birdecho'
+version = '1.0.0'
+
+android {
+  namespace "dev.arunrajiah.birdecho.wearsync"
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.0"
+  }
+}
+
+dependencies {
+  // Proprietary (Google Play Services). This whole module is excluded from
+  // F-Droid builds by scripts/fdroid-prepare.mjs and removed in the recipe's rm:.
+  implementation 'com.google.android.gms:play-services-wearable:20.0.1'
+}

@@ -25,6 +25,14 @@ fdroidserver fails if a glob matches nothing, so every entry must exist on a fre
 Reproducible builds are not attempted (Expo + Hermes output is not deterministic), so F-Droid
 signs with its own key. Users who installed the GitHub APK must reinstall to switch.
 
+## Recipe drift after v0.9.2
+
+The recipe in this directory is ahead of the one in the fdroiddata merge request. It adds two
+`rm:` entries (`wear`, `modules/wear-sync/android`) for the Wear OS work, which uses Google Play
+Services. Those paths do not exist at v0.9.2, and fdroidserver fails on an `rm:` path that matches
+nothing, so the MR must keep the v0.9.2 recipe. Add the two entries to fdroiddata when the first
+release containing `wear/` is tagged; without them the F-Droid scanner will reject that release.
+
 ## Opening the merge request
 
 1. Fork https://gitlab.com/fdroid/fdroiddata and clone it (`--depth 1` is fine).

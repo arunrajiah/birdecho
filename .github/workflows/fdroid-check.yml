@@ -13,6 +13,7 @@ on:
       - main
     paths:
       - 'patches/**'
+      - 'modules/**'
       - 'scripts/fdroid-prepare.mjs'
       - 'docs/fdroid/**'
       - 'package.json'
@@ -24,6 +25,7 @@ on:
   pull_request:
     paths:
       - 'patches/**'
+      - 'modules/**'
       - 'scripts/fdroid-prepare.mjs'
       - 'docs/fdroid/**'
       - 'package.json'
@@ -78,6 +80,7 @@ jobs:
       - name: Remove prebuilt binaries
         run: |
           shopt -s failglob
+          rm -rf wear modules/wear-sync/android
           rm -rf node_modules/.pnpm/react-native-maps@*/node_modules/react-native-maps/android
           rm -rf node_modules/.pnpm/@sentry+react-native@*/node_modules/@sentry/react-native/android
           rm -rf node_modules/.pnpm/@sentry+cli-*/node_modules/@sentry/cli-*/bin

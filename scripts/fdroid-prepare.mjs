@@ -5,8 +5,9 @@
  * F-Droid builds everything from source and rejects proprietary dependencies, so
  * this script rewrites package.json's Expo autolinking config to:
  *   - exclude react-native-maps (pulls in Google Play Services) and
- *     @sentry/react-native (ships prebuilt stub jars); the JS side handles both
- *     being absent when Constants.expoConfig.extra.fdroidBuild is true, and
+ *     @sentry/react-native (ships prebuilt stub jars) and the local wear-sync
+ *     module (Wearable Data Layer, also Play Services); the JS side handles all
+ *     three being absent, and
  *   - compile every expo-* module from source instead of using the prebuilt
  *     AARs that Expo SDK 54 ships in node_modules/expo-*\/local-maven-repo.
  *
@@ -21,7 +22,7 @@ pkg.expo = {
   ...(pkg.expo ?? {}),
   autolinking: {
     ...(pkg.expo?.autolinking ?? {}),
-    exclude: ['react-native-maps', '@sentry/react-native'],
+    exclude: ['react-native-maps', '@sentry/react-native', 'birdecho-wear-sync'],
     android: { ...(pkg.expo?.autolinking?.android ?? {}), buildFromSource: ['.*'] },
   },
 };

@@ -1,5 +1,5 @@
 import '../global.css';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Stack } from 'expo-router';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
@@ -7,6 +7,7 @@ import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persi
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useColorScheme } from 'nativewind';
 import { useStationStore } from '../src/stores/stationStore';
+import { syncStationToWatch } from '../src/lib/wearSync';
 import { useFavoritesStore } from '../src/stores/favoritesStore';
 import { useThemeStore } from '../src/stores/themeStore';
 import { useSettingsStore } from '../src/stores/settingsStore';
@@ -46,16 +47,29 @@ export default function RootLayout() {
   const themeMode = useThemeStore((s) => s.mode);
   const { colorScheme, setColorScheme } = useColorScheme();
   const hydrated = useRef(false);
+  const [stationsReady, setStationsReady] = useState(false);
+  const activeStation = useStationStore(
+    (st) => st.stations.find((x) => x.id === st.activeStationId) ?? null,
+  );
 
   useEffect(() => {
     if (hydrated.current) return;
     hydrated.current = true;
-    hydrateStation().catch(captureException);
+    hydrateStation()
+      .then(() => setStationsReady(true))
+      .catch(captureException);
     hydrateFavorites().catch(captureException);
     hydrateTheme().catch(captureException);
     hydrateSettings().catch(captureException);
     hydrateRare().catch(captureException);
   }, [hydrateStation, hydrateFavorites, hydrateTheme, hydrateSettings, hydrateRare]);
+
+  // Keep the Wear OS app pointed at the active station. Waits for hydration so
+  // the empty pre-hydrate state is never mistaken for "no station".
+  useEffect(() => {
+    if (!stationsReady) return;
+    void syncStationToWatch(activeStation);
+  }, [stationsReady, activeStation]);
 
   useEffect(() => {
     setColorScheme(themeMode);
