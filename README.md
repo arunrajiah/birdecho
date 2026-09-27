@@ -82,6 +82,7 @@ BirdEcho is **not** a bird-identification app. It does not listen to audio or id
 > **Android-first.** iOS distribution is on hold while the Android app matures (the code stays cross-platform, so local iOS builds remain possible).
 
 **Recently shipped**
+- ⌚ Wear OS glance (tile + watch app) — v0.10.0
 - 🔔 Rare-species detection alerts — v0.7.0
 - 🏷️ Species rarity badge — v0.6.0
 - 📊 Detection CSV export & 🗺️ station map — v0.5.0
@@ -89,7 +90,6 @@ BirdEcho is **not** a bird-identification app. It does not listen to audio or id
 - 🐦 Direct BirdNET-Pi & BirdNET-Go, 📴 offline cache, 🔲 home-screen widget — v0.3.x
 
 **Planned (Android)**
-- ⌚ Wear OS glance — last detection & daily count on your wrist
 - 🎵 Spectrogram view on the sighting detail screen
 - 📦 F-Droid listing
 
@@ -113,6 +113,19 @@ See [ROADMAP.md](ROADMAP.md) for the full, living roadmap.
 **Prefer to sideload?** Grab the latest signed APK from [GitHub Releases](https://github.com/arunrajiah/birdecho/releases/latest). No Play account needed: enable "Install from unknown sources" in Android Settings, download the APK, and install.
 
 **Staying up to date:** the Google Play build updates automatically through Play. GitHub builds instead self-update from v0.8.0 onward, showing an in-app banner when a newer version is on GitHub Releases (tap **Download & install** and confirm the Android install prompt).
+
+### Wear OS (new in v0.10.0)
+
+BirdEcho has a Wear OS companion: a **tile** and a small **watch app** that show your station's latest detection, when it happened, and today's count.
+
+- **Works on its own.** The watch fetches from your station about every 15 minutes (and when you open the tile or tap Refresh), so it keeps updating with the phone app closed.
+- **No typing on the watch.** BirdEcho on your phone sends the active station to the watch whenever you add or switch stations.
+- **Stations:** BirdWeather and BirdNET-Go. BirdNET-Pi is not supported on the watch yet.
+- **Requires:** Wear OS 3 or newer, and BirdEcho v0.10.0 or newer on the phone.
+
+**Install:** download `birdecho-wear.apk` from [GitHub Releases](https://github.com/arunrajiah/birdecho/releases/latest) and sideload it onto the watch (for example with `adb install` over wireless debugging). Use it together with the **GitHub** phone APK: the phone and watch apps must be signed with the same key to talk to each other, so the watch app cannot yet receive a station from the Google Play or F-Droid builds. A Google Play release of the watch app is planned.
+
+**Good to know:** a BirdNET-Go station on your home network only updates while the watch can reach that network. This is a first release and has been tested on the Wear OS emulator, not yet on a wide range of watches, so [bug reports](https://github.com/arunrajiah/birdecho/issues) are very welcome.
 
 **iOS** — App Store / TestFlight distribution is currently **on hold** while development focuses on Android. The codebase stays cross-platform, so community builds are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for how to build locally with EAS.
 
