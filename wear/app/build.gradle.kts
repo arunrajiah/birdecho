@@ -28,6 +28,11 @@ android {
         versionName = phoneVersionName
     }
 
+    // Two ways to sign a release:
+    //  - CI (GitHub Releases): WEAR_KEYSTORE_FILE + ANDROID_* env vars, the GitHub release key.
+    //  - Google Play: ../credentials.json downloaded with `eas credentials` (the Play upload
+    //    key that EAS manages). Gitignored; never commit it.
+    val easCredentials = rootProject.file("../credentials.json")
     signingConfigs {
         create("release") {
             val store = System.getenv("WEAR_KEYSTORE_FILE")
@@ -36,6 +41,14 @@ android {
                 storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("ANDROID_KEY_ALIAS")
                 keyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+            } else if (easCredentials.exists()) {
+                @Suppress("UNCHECKED_CAST")
+                val ks = ((JsonSlurper().parse(easCredentials) as Map<String, Any>)["android"]
+                    as Map<String, Any>)["keystore"] as Map<String, String>
+                storeFile = rootProject.file("../" + ks["keystorePath"])
+                storePassword = ks["keystorePassword"]
+                keyAlias = ks["keyAlias"]
+                keyPassword = ks["keyPassword"]
             }
         }
     }
@@ -45,7 +58,7 @@ android {
             // Not minified: the release APK then runs the same code that is tested
             // in debug builds (release builds cannot use the debug station hook).
             isMinifyEnabled = false
-            if (System.getenv("WEAR_KEYSTORE_FILE") != null) {
+            if (System.getenv("WEAR_KEYSTORE_FILE") != null || easCredentials.exists()) {
                 signingConfig = signingConfigs.getByName("release")
             }
         }

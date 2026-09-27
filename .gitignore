@@ -47,3 +47,8 @@ package-lock.json
 # generated native folders
 /ios
 /android
+
+# EAS credentials downloaded with `eas credentials` (Play upload keystore + passwords)
+credentials.json
+credentials/
+*.jks
