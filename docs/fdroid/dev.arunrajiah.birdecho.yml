@@ -18,7 +18,6 @@ Builds:
   - versionName: 0.10.1
     versionCode: 36
     commit: 27744360dbedf96b358b07dedfc59953a181bdab
-    subdir: android/app
     sudo:
       - apt-get update
       - apt-get install -y g++ make python3 xz-utils
@@ -29,12 +28,11 @@ Builds:
       - cp -a node-v24.21.0-linux-x64/. /usr/local/
       - npm install -g pnpm@10
     init:
-      - cd ../.. && pnpm install --frozen-lockfile
-      - cd ../.. && node scripts/fdroid-prepare.mjs
-      - cd ../.. && EXPO_PUBLIC_FDROID=1 CI=1 npx expo prebuild --platform android
+      - pnpm install --frozen-lockfile
+      - node scripts/fdroid-prepare.mjs
+      - EXPO_PUBLIC_FDROID=1 CI=1 npx expo prebuild --platform android
         --clean --no-install
-    gradle:
-      - yes
+    output: android/app/build/outputs/apk/release/app-release-unsigned.apk
     rm:
       - wear
       - modules/wear-sync/android
@@ -48,8 +46,8 @@ Builds:
       - node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc/win64-bin
       - node_modules/.pnpm/react-native-svg@*/node_modules/react-native-svg/android/.gradle
     prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts
+      - sed -i '/signingConfig signingConfigs/d' android/app/build.gradle
+      - sed -i '/projectId/d' app.config.ts
     scanignore:
       - node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
       - node_modules/.pnpm/react-native@*/node_modules/react-native/ReactAndroid/publish.gradle
@@ -60,10 +58,14 @@ Builds:
       - node_modules/.pnpm/react-native-screens@*/node_modules/react-native-screens/android/build.gradle
       - node_modules/.pnpm/react-native-svg@*/node_modules/react-native-svg/android/build.gradle
       - node_modules/.pnpm/react-native-view-shot@*/node_modules/react-native-view-shot/android/build.gradle
+    build:
+      - cd android
+      - gradle assembleRelease
 
 MaintainerNotes: |-
   Expo SDK 54 / React Native 0.81 app. android/ is not committed; init: generates
-  it with `npx expo prebuild`, so subdir points at android/app.
+  it with `npx expo prebuild` (same layout as io.evcc.android), so there is no
+  subdir and build: runs gradle in the generated android/ project.
 
   Node 24 LTS and pnpm 10 are required. Node is downloaded in sudo: because
   Debian's packaged Node is too old. Bump the tarball URL and SHA-256 together.
