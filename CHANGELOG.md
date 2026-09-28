@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.2] — 2026-09-29
+
+### Fixed
+
+- **No bird pictures on Android** for BirdNET-Pi stations, and for any picture hosted by Wikipedia (#28). Wikimedia refuses image requests that don't identify the app, and Android's default client doesn't. Every image and Wikipedia request now identifies itself as BirdEcho.
+- **BirdNET-Pi: detections never had a picture.** Feed rows, the Species tab, species pages and sighting pages now show one on both forks. Nachtzuster's Flickr pictures are used when the station is set to Flickr; otherwise a small Wikipedia thumbnail is used instead of the full-size original (often several MB).
+- **BirdNET-Pi (Nachtzuster): species counts were rounded** ("13,600 detections" for 13,643). Species pages and Stats' top species now show the exact number.
+- **A picture that fails to load no longer leaves a grey box** at the top of the species page.
+
+---
+
 ## [0.10.1] — 2026-09-28
 
 ### Fixed

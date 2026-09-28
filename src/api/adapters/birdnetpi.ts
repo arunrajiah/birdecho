@@ -16,6 +16,7 @@
  */
 
 import { ApiError } from '../../lib/apiClient';
+import { USER_AGENT } from '../../lib/remoteImage';
 import type { StationAdapter } from '../adapter';
 import type { Detection, RecordsPage, Species, Stats } from '../../types/birdweather';
 
@@ -195,6 +196,8 @@ export interface SpeciesButton {
   commonName: string;
   /** Present only when the page was requested with sort=occurrences on Nachtzuster. */
   count?: number;
+  /** True when the label rounded the count ("13.6k"). */
+  approximate?: boolean;
 }
 
 /**
@@ -219,7 +222,7 @@ export function parseSpeciesButtons(html: string): SpeciesButton[] {
     const counted = label.match(/^(.*\S)\s*\((\d+(?:\.\d+)?)(k?)\)$/i);
     if (counted) {
       const n = parseFloat(counted[2]!) * (counted[3] ? 1000 : 1);
-      out.push({ value, commonName: counted[1]!, count: Math.round(n) });
+      out.push({ value, commonName: counted[1]!, count: Math.round(n), approximate: !!counted[3] });
     } else {
       out.push({ value, commonName: label });
     }
@@ -274,6 +277,39 @@ async function fetchAllTodaysDetections(
   return all;
 }
 
+// ── Images ───────────────────────────────────────────────────────────────────
+
+const WIKIMEDIA_HOST_RE = /^https?:\/\/[^/]*\.wikimedia\.org\//i;
+
+/** Wikipedia's 330px lead image for a scientific name (the full original can be many MB). */
+async function wikipediaThumbnail(scientificName: string): Promise<string | undefined> {
+  const title = encodeURIComponent(scientificName.trim().replace(/\s+/g, '_'));
+  try {
+    const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${title}`, {
+      headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+    });
+    if (!response.ok) return undefined;
+    const data = (await response.json()) as { thumbnail?: { source?: string } };
+    return data.thumbnail?.source || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Run `fn` over `items` with at most `limit` in flight. */
+async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const results: R[] = new Array(items.length);
+  let next = 0;
+  const worker = async () => {
+    while (next < items.length) {
+      const i = next++;
+      results[i] = await fn(items[i]!);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
+}
+
 // ── Adapter factory ─────────────────────────────────────────────────────────
 
 export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
@@ -290,6 +326,7 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
       fetchAllTodaysDetections(base),
     ]);
     const buttons = listResult.status === 'fulfilled' ? listResult.value : [];
+    for (const b of buttons) if (b.approximate) approximate.add(b.commonName);
     const today = todayResult.status === 'fulfilled' ? todayResult.value : [];
     if (listResult.status === 'rejected' && todayResult.status === 'rejected') {
       throw todayResult.reason;
@@ -335,6 +372,8 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
     return counted ? species.sort((a, b) => b.count - a.count) : species;
   }
 
+  const approximate = new Set<string>();
+
   // The species list backs the Species tab, every species page and every
   // favourite row, so share one load between callers that arrive together.
   let speciesListCache: { at: number; list: Promise<Species[]> } | null = null;
@@ -350,18 +389,76 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
     return speciesListCache.list;
   }
 
-  /** Nachtzuster only: Flickr/Wikipedia image for a scientific name. */
-  async function fetchImageUrl(scientificName: string): Promise<string | undefined> {
-    if (!scientificName) return undefined;
-    try {
-      const img = await bpiGetJson<{ data?: { image_url?: string } }>(
-        base,
-        `/api/v1/image/${encodeURIComponent(scientificName)}`,
-      );
-      return img.data?.image_url || undefined;
-    } catch {
-      return undefined; // mcguirepr89, or no image for this species
+  /**
+   * Picture for a species. Nachtzuster's /api/v1/image returns the station's
+   * configured provider: a Flickr URL is used as is, but its Wikipedia answer
+   * is the full-size original, so Wikipedia's thumbnail is used instead. That
+   * thumbnail is also the fallback for mcguirepr89, which has no image API.
+   */
+  const imageCache = new Map<string, Promise<string | undefined>>();
+  function fetchImageUrl(scientificName: string, commonName = ''): Promise<string | undefined> {
+    // mcguirepr89 only names species by common name unless they were heard
+    // today; Wikipedia resolves either.
+    if (!scientificName) {
+      return commonName ? wikipediaThumbnail(commonName) : Promise.resolve(undefined);
     }
+    let cached = imageCache.get(scientificName);
+    if (!cached) {
+      cached = (async () => {
+        try {
+          const img = await bpiGetJson<{ data?: { image_url?: string } }>(
+            base,
+            `/api/v1/image/${encodeURIComponent(scientificName)}`,
+          );
+          const url = img.data?.image_url;
+          if (url && !WIKIMEDIA_HOST_RE.test(url)) return url;
+        } catch {
+          // mcguirepr89, or no image for this species on the station
+        }
+        return wikipediaThumbnail(scientificName);
+      })();
+      imageCache.set(scientificName, cached);
+    }
+    return cached;
+  }
+
+  async function withImages<
+    T extends { scientificName: string; commonName: string; imageUrl?: string },
+  >(items: T[]): Promise<T[]> {
+    const key = (i: T) => i.scientificName || i.commonName;
+    const unique = [...new Map(items.map((i) => [key(i), i])).values()];
+    const urls = await mapLimit(unique, 6, (i) => fetchImageUrl(i.scientificName, i.commonName));
+    const byKey = new Map(unique.map((i, n) => [key(i), urls[n]]));
+    return items.map((i) => ({ ...i, imageUrl: i.imageUrl ?? byKey.get(key(i)) }));
+  }
+
+  /**
+   * Exact all-time count for a species (Nachtzuster). The species page prints
+   * "(13.6k)" from 1000 up; the per-day chart endpoint has exact numbers, and
+   * `days` far in the past covers every day the station has recorded.
+   */
+  async function exactCount(commonName: string): Promise<number | undefined> {
+    try {
+      const text = await bpiGetHtml(
+        base,
+        `/todays_detections.php?comname=${encodeURIComponent(commonName)}&days=36500`,
+      );
+      const days = JSON.parse(text) as { count?: number | string }[];
+      if (!Array.isArray(days)) return undefined;
+      return days.reduce((n, d) => n + (Number(d.count) || 0), 0);
+    } catch {
+      return undefined;
+    }
+  }
+
+  async function withExactCounts(list: Species[]): Promise<Species[]> {
+    const counts = await mapLimit(list, 4, (sp) =>
+      approximate.has(sp.commonName) ? exactCount(sp.commonName) : Promise.resolve(undefined),
+    );
+    return list.map((sp, i) => {
+      const exact = counts[i];
+      return exact && exact > 0 ? { ...sp, count: exact } : sp;
+    });
   }
 
   return {
@@ -372,7 +469,7 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
     // per request. The cursor is the display_limit we just used.
     async fetchRecentRecords(cursor?: string): Promise<RecordsPage> {
       const displayLimit = cursor ? parseInt(cursor, 10) + PAGE_SIZE : PAGE_SIZE;
-      const page = await fetchTodaysPage(base, displayLimit);
+      const page = await withImages(await fetchTodaysPage(base, displayLimit));
       return {
         records: page,
         cursor: page.length >= PAGE_SIZE ? String(displayLimit) : undefined,
@@ -387,7 +484,7 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
       if (time) {
         try {
           const hit = (await fetchTodaysPage(base, PAGE_SIZE, time)).find((d) => d.id === id);
-          if (hit) return hit;
+          if (hit) return (await withImages([hit]))[0]!;
         } catch {
           // fall through to the full scan
         }
@@ -397,21 +494,26 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
       if (!found) {
         throw new Error('This detection is no longer in today\'s list on the station.');
       }
-      return found;
+      return (await withImages([found]))[0]!;
     },
 
     // ── Per-species detections ────────────────────────────────────────────────
     // searchterm matches common name, sci name, confidence, filename, or time
     async fetchRecordsForSpecies(speciesId: string, limit = 20): Promise<Detection[]> {
       const detections = await fetchAllTodaysDetections(base, speciesId, Math.max(limit, 40));
-      return detections
-        .filter((d) => d.scientificName === speciesId || d.commonName === speciesId)
-        .slice(0, limit);
+      return withImages(
+        detections
+          .filter((d) => d.scientificName === speciesId || d.commonName === speciesId)
+          .slice(0, limit),
+      );
     },
 
     // ── Species list ──────────────────────────────────────────────────────────
     async fetchTopSpecies(limit: number): Promise<Species[]> {
-      return (await fetchSpeciesList()).slice(0, limit);
+      // Short lists (Stats' top 10) get exact counts; the full Species tab
+      // keeps the station's rounded ones rather than a request per species.
+      const top = (await fetchSpeciesList()).slice(0, limit);
+      return withImages(limit <= 20 ? await withExactCounts(top) : top);
     },
 
     // ── Single species ────────────────────────────────────────────────────────
@@ -425,7 +527,11 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
         imageUrl: undefined,
         count: 0,
       };
-      return { ...species, imageUrl: await fetchImageUrl(species.scientificName) };
+      const [withCount] = await withExactCounts([species]);
+      return {
+        ...withCount!,
+        imageUrl: await fetchImageUrl(species.scientificName, species.commonName),
+      };
     },
 
     // ── Stats ─────────────────────────────────────────────────────────────────

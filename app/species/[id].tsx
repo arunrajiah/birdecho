@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { View, Text, Image, ScrollView, ActivityIndicator, Pressable } from 'react-native';
+import { remoteImage } from '../../src/lib/remoteImage';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { useApiAdapter } from '../../src/hooks/useApiAdapter';
@@ -27,6 +29,8 @@ export default function SpeciesDetailScreen() {
   });
 
   const favorited = has(id);
+  const [imgFailed, setImgFailed] = useState(false);
+  useEffect(() => setImgFailed(false), [species?.imageUrl]);
 
   if (isLoading) {
     return (
@@ -46,8 +50,13 @@ export default function SpeciesDetailScreen() {
 
   return (
     <ScrollView className="flex-1 bg-white">
-      {species.imageUrl ? (
-        <Image source={{ uri: species.imageUrl }} className="h-52 w-full bg-gray-100" resizeMode="cover" />
+      {species.imageUrl && !imgFailed ? (
+        <Image
+          source={remoteImage(species.imageUrl)}
+          onError={() => setImgFailed(true)}
+          className="h-52 w-full bg-gray-100"
+          resizeMode="cover"
+        />
       ) : null}
 
       <View className="px-5 pt-4">

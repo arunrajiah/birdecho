@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Image, Pressable } from 'react-native';
+import { remoteImage } from '../lib/remoteImage';
 import { router } from 'expo-router';
 import type { Detection } from '../types/birdweather';
 import { formatTime } from '../lib/formatDate';
@@ -29,7 +30,7 @@ export default function RecordCard({ record, timezone }: Props) {
       onPress={() => router.push({ pathname: '/record/[id]', params: { id: record.id } })}
     >
       <Image
-        source={record.imageUrl && !imgFailed ? { uri: record.imageUrl } : PLACEHOLDER}
+        source={record.imageUrl && !imgFailed ? remoteImage(record.imageUrl) : PLACEHOLDER}
         onError={() => setImgFailed(true)}
         className="h-14 w-14 rounded-lg bg-gray-100 dark:bg-gray-800"
         resizeMode="cover"

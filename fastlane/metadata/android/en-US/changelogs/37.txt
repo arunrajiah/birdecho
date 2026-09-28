@@ -1,0 +1,3 @@
+- Bird pictures now load on Android (Wikipedia images were refused)
+- BirdNET-Pi: pictures in the feed, species list and species pages
+- BirdNET-Pi (Nachtzuster): exact species counts instead of rounded ones

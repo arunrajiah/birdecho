@@ -64,8 +64,9 @@ for (const fork of FORKS) {
       const first = await adapter.fetchRecentRecords();
       assert.equal(first.records.length, 40);
       await adapter.fetchRecentRecords(first.cursor);
-      assert.match(requested[0]!, /display_limit=40$/);
-      assert.match(requested[1]!, /display_limit=80$/);
+      const pages = requested.filter((u) => u.includes('ajax_detections'));
+      assert.match(pages[0]!, /display_limit=40$/);
+      assert.match(pages[1]!, /display_limit=80$/);
     });
 
     it('reads the headline stats', () => {
@@ -117,8 +118,8 @@ describe('BirdNET-Pi parser safety net', () => {
       '<button type="submit" name="species" value="Turdus migratorius">American Robin (1.2k)</button>' +
       '<button type="submit" name="species" value="Parus major">Great Tit (95)</button>';
     assert.deepEqual(parseSpeciesButtons(html), [
-      { value: 'Turdus migratorius', commonName: 'American Robin', count: 1200 },
-      { value: 'Parus major', commonName: 'Great Tit', count: 95 },
+      { value: 'Turdus migratorius', commonName: 'American Robin', count: 1200, approximate: true },
+      { value: 'Parus major', commonName: 'Great Tit', count: 95, approximate: false },
     ]);
   });
 
@@ -132,5 +133,57 @@ describe('BirdNET-Pi parser safety net', () => {
       days.map((d) => d.count),
       [95, 95, 95],
     );
+  });
+
+  it('replaces rounded "13.6k" counts with the exact total', async () => {
+    const species =
+      '<button type="submit" name="species" value="Chaetura pelagica">Chimney Swift (13.6k)</button>';
+    const perDay = JSON.stringify([
+      { date: '2026-09-27', count: 13000 },
+      { date: '2026-09-28', count: 643 },
+    ]);
+    mockFetch([
+      { match: 'play.php?byspecies', body: species },
+      { match: 'ajax_detections', body: fixture('pi-nachtzuster-empty.html') },
+      { match: 'comname=Chimney%20Swift', body: perDay, contentType: 'text/html' },
+      { match: '/api/v1/image/', body: '<html>dashboard</html>' },
+      { match: 'wikipedia.org', body: '{}' },
+    ]);
+    const sp = await createBirdNetPiAdapter(BASE).fetchSpecies('Chaetura pelagica');
+    assert.equal(sp.count, 13643);
+  });
+
+  it('uses the Wikipedia thumbnail, with a User-Agent, instead of a full-size original', async () => {
+    let userAgent: string | null = null;
+    mockFetch([
+      { match: 'ajax_detections', body: fixture('pi-nachtzuster-detections.html') },
+      {
+        match: '/api/v1/image/',
+        body: JSON.stringify({ data: { image_url: 'https://upload.wikimedia.org/wikipedia/commons/9/97/Big.jpg' } }),
+      },
+      {
+        match: 'wikipedia.org/api/rest_v1/page/summary/',
+        body: JSON.stringify({ thumbnail: { source: 'https://upload.wikimedia.org/thumb/330px-Big.jpg' } }),
+      },
+    ]);
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: string, init?: RequestInit) => {
+      if (String(input).includes('wikipedia.org')) {
+        userAgent = new Headers(init?.headers).get('User-Agent');
+      }
+      return realFetch(input, init);
+    }) as typeof fetch;
+    const page = await createBirdNetPiAdapter(BASE).fetchRecentRecords();
+    assert.ok(page.records.every((r) => r.imageUrl === 'https://upload.wikimedia.org/thumb/330px-Big.jpg'));
+    assert.match(userAgent ?? '', /^BirdEcho/);
+  });
+
+  it('keeps a Flickr image from the station as is', async () => {
+    mockFetch([
+      { match: 'ajax_detections', body: fixture('pi-nachtzuster-detections.html') },
+      { match: '/api/v1/image/', body: JSON.stringify({ data: { image_url: 'https://live.staticflickr.com/1/2_b.jpg' } }) },
+    ]);
+    const page = await createBirdNetPiAdapter(BASE).fetchRecentRecords();
+    assert.equal(page.records[0]!.imageUrl, 'https://live.staticflickr.com/1/2_b.jpg');
   });
 });

@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Dimensions,
 } from 'react-native';
+import { remoteImage } from '../../src/lib/remoteImage';
 import { useLocalSearchParams } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Audio } from 'expo-av';
@@ -120,7 +121,7 @@ export default function RecordDetailScreen() {
     <ScrollView className="flex-1 bg-white">
       <ViewShot ref={cardRef} options={{ format: 'png', quality: 1 }}>
         <Image
-          source={record.imageUrl ? { uri: record.imageUrl } : require('../../assets/icon.png')}
+          source={record.imageUrl ? remoteImage(record.imageUrl) : require('../../assets/icon.png')}
           style={{ width, height: 240 }}
           resizeMode="cover"
         />

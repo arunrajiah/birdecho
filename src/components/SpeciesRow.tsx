@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Image, Pressable } from 'react-native';
+import { remoteImage } from '../lib/remoteImage';
 import { router } from 'expo-router';
 import type { Species } from '../types/birdweather';
 import { useRareStore } from '../stores/rareStore';
@@ -23,7 +24,7 @@ export default function SpeciesRow({ species }: { species: Species }) {
       onPress={() => router.push({ pathname: '/species/[id]', params: { id: species.id } })}
     >
       <Image
-        source={species.imageUrl && !imgFailed ? { uri: species.imageUrl } : PLACEHOLDER}
+        source={species.imageUrl && !imgFailed ? remoteImage(species.imageUrl) : PLACEHOLDER}
         onError={() => setImgFailed(true)}
         className="h-12 w-12 rounded-lg bg-gray-100 dark:bg-gray-800"
         resizeMode="cover"

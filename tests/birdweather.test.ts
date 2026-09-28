@@ -5,11 +5,17 @@ import { fetchStation } from '../src/api/station';
 import { fixture, mockFetch } from './helpers';
 
 // Fixtures are real app.birdweather.com/api/v1 responses (coordinates scrubbed).
+function ymd(daysAgo: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 const DAILY = JSON.stringify({
   data: {
     dailyDetectionCounts: [
-      { date: '2026-09-28', total: 342 },
-      { date: '2026-09-27', total: 385 },
+      { date: ymd(0), total: 342 },
+      { date: ymd(1), total: 385 },
     ],
   },
 });
@@ -70,9 +76,9 @@ describe('BirdWeather', () => {
     mockFetch([{ match: '/graphql', body: DAILY }]);
     const days = await createBirdWeatherAdapter('2000').fetchDailyCounts(3);
     assert.deepEqual(days, [
-      { date: '2026-09-26', count: 0 },
-      { date: '2026-09-27', count: 385 },
-      { date: '2026-09-28', count: 342 },
+      { date: ymd(2), count: 0 },
+      { date: ymd(1), count: 385 },
+      { date: ymd(0), count: 342 },
     ]);
   });
 
