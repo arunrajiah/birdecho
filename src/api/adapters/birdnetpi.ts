@@ -64,15 +64,17 @@ async function bpiGetJson<T>(base: string, path: string): Promise<T> {
  * Nachtzuster format (when display_limit is numeric) — single cell per <tr>:
  *   <td><div class="centered_image_container">HH:MM:SS<br><b><a class="a2">Common</a></b><br>
  *   <i>Sci Name</i>...<b>Confidence:</b> 87%</div><div data-audio-src="..."></div></td>
+ *
+ * Both templates close </tr> only once, after the last row.
  */
 function parseDetectionRows(html: string, base: string): Detection[] {
   const detections: Detection[] = [];
-  // Match each table row
-  const rowRegex = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
-  let rowMatch: RegExpExecArray | null;
+  // Split on <tr> openings rather than matching <tr>...</tr> pairs: the PHP
+  // template emits a single </tr> after the whole loop, not one per row, so a
+  // pair-matching regex swallows every row into one and nothing parses.
+  const rows = html.split(/<tr\b[^>]*>/i).slice(1);
 
-  while ((rowMatch = rowRegex.exec(html)) !== null) {
-    const row = rowMatch[1] ?? '';
+  for (const row of rows) {
 
     // Extract the audio file path.  BirdNET-Pi versions differ in how audio is embedded:
     //   Newer (custom audio player component): data-audio-src="/By_Date/..."
@@ -114,7 +116,11 @@ function parseDetectionRows(html: string, base: string): Detection[] {
       time = row.match(/\b(\d{2}:\d{2}:\d{2})\b/)?.[1] ?? '';
       comName = (row.match(/<b><a[^>]*class=["']a2["'][^>]*>([^<]+)<\/a><\/b>/)?.[1] ?? '').trim();
       sciName = (row.match(/<i>([^<]+)<\/i>/)?.[1] ?? '').trim();
-      const pct = row.match(/(\d{1,3}(?:\.\d+)?)\s*%/)?.[1] ?? '0';
+      // Anchor on the label: image onclick attributes carry URL-encoded text (%2C...)
+      const pct =
+        row.match(/Confidence:<\/b>\s*(\d{1,3}(?:\.\d+)?)\s*%/)?.[1] ??
+        row.match(/(\d{1,3}(?:\.\d+)?)\s*%/)?.[1] ??
+        '0';
       confRaw = pct + '%';
     } else {
       continue;
