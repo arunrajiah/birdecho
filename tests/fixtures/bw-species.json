@@ -1,0 +1,62 @@
+{
+ "success": true,
+ "species": [
+  {
+   "id": 1,
+   "commonName": "House Sparrow",
+   "scientificName": "Passer domesticus",
+   "color": "#d16ff8",
+   "classification": "avian",
+   "imageUrl": "https://media.birdweather.com/species/1/HouseSparrow-standard-b861184cf45c092cdb45fd689dd676ef.jpg",
+   "thumbnailUrl": "https://media.birdweather.com/species/1/HouseSparrow-thumbnail-e9cbc91763a1579de8ef04880678b5e3.jpg",
+   "pngUrl": "https://media.birdweather.com/species/1/HouseSparrow-png200-125e8603e1efe9d7a18316b94f06a65e.png",
+   "thumbhash": "XAgCDwD8qpukuHiqtLZ9mImnmPFcDO4E",
+   "detections": {
+    "total": 97295,
+    "almostCertain": 97295,
+    "veryLikely": 0,
+    "uncertain": 0,
+    "unlikely": 0
+   },
+   "latestDetectionAt": "2026-09-27T13:32:25.500-04:00"
+  },
+  {
+   "id": 144,
+   "commonName": "Northern Cardinal",
+   "scientificName": "Cardinalis cardinalis",
+   "color": "#0161b0",
+   "classification": "avian",
+   "imageUrl": "https://media.birdweather.com/species/144/NorthernCardinal-standard-823c8a4c9a2440b918aeee186d795296.jpg",
+   "thumbnailUrl": "https://media.birdweather.com/species/144/NorthernCardinal-thumbnail-a7b853614903f78e58b41703c018e9e2.jpg",
+   "pngUrl": "https://media.birdweather.com/species/144/NorthernCardinal-png200-d68d6f45eca62963a8aaf95a1515df52.png",
+   "thumbhash": "2woGFwaadolAh3ZtmAeIx5h2V/cIAYED",
+   "detections": {
+    "total": 80292,
+    "almostCertain": 80292,
+    "veryLikely": 0,
+    "uncertain": 0,
+    "unlikely": 0
+   },
+   "latestDetectionAt": "2026-09-28T09:52:14.000-04:00"
+  },
+  {
+   "id": 134,
+   "commonName": "House Finch",
+   "scientificName": "Haemorhous mexicanus",
+   "color": "#ff5a86",
+   "classification": "avian",
+   "imageUrl": "https://media.birdweather.com/species/134/HouseFinch-standard-3329463dada4a864431241d37400ba54.jpg",
+   "thumbnailUrl": "https://media.birdweather.com/species/134/HouseFinch-thumbnail-ea7d4c693d0ac395d440407b51951f22.jpg",
+   "pngUrl": "https://media.birdweather.com/species/134/HouseFinch-png200-0c6bee888739d6b864bbd220329501d8.png",
+   "thumbhash": "JtcFJwb4eIhclZiMhVmqlYeJtjBJC6MD",
+   "detections": {
+    "total": 50786,
+    "almostCertain": 50786,
+    "veryLikely": 0,
+    "uncertain": 0,
+    "unlikely": 0
+   },
+   "latestDetectionAt": "2026-09-27T09:03:24.500-04:00"
+  }
+ ]
+}

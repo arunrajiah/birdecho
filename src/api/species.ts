@@ -6,7 +6,7 @@ import type { Species } from '../types/birdweather';
  *   { id, commonName, scientificName, imageUrl, thumbnailUrl,
  *     detections: { total, ... } }
  * The endpoint returns { success, species: [...] }. Per-station detection count
- * lives at species.detections.total.
+ * lives at species.detections.total (absent on the global /species/{id}).
  */
 interface BwSpecies {
   id: number;
@@ -27,20 +27,53 @@ function mapBwSpecies(s: BwSpecies): Species {
   };
 }
 
+const PAGE_SIZE = 100; // server maximum
+const MAX_PAGES = 10;
+
+/**
+ * Station species, most detected first. The endpoint defaults to `period=day`
+ * (only species heard today), so ask for `period=all`; it returns at most 100
+ * per page.
+ */
+async function fetchStationSpecies(
+  stationId: string,
+  limit: number,
+  until?: (s: BwSpecies) => boolean,
+): Promise<BwSpecies[]> {
+  const all: BwSpecies[] = [];
+  for (let page = 1; page <= MAX_PAGES && all.length < limit; page++) {
+    const data = await apiFetch<{ species?: BwSpecies[] }>(
+      `/stations/${stationId}/species?period=all&limit=${PAGE_SIZE}&page=${page}`,
+    );
+    const rows = data.species ?? [];
+    all.push(...rows);
+    if (rows.length < PAGE_SIZE || (until && rows.some(until))) break;
+  }
+  return all;
+}
+
 export async function fetchTopSpecies(stationId: string, limit: number): Promise<Species[]> {
-  const data = await apiFetch<{ species?: BwSpecies[] }>(
-    `/stations/${stationId}/species?limit=${limit}`,
-  );
-  return (data.species ?? []).map(mapBwSpecies).sort((a, b) => b.count - a.count);
+  const rows = await fetchStationSpecies(stationId, limit);
+  return rows
+    .map(mapBwSpecies)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
 }
 
 export async function fetchSpecies(stationId: string, id: string): Promise<Species> {
-  // The station species list carries the per-station count and images; the
-  // global /species/{id} endpoint does not, so resolve from the station list.
-  const data = await apiFetch<{ species?: BwSpecies[] }>(`/stations/${stationId}/species`);
-  const match = (data.species ?? []).find(
-    (s) => String(s.id) === id || s.scientificName === id,
-  );
+  // The station species list carries the per-station count; the global
+  // /species/{id} endpoint does not, so it is only the fallback.
+  const isMatch = (s: BwSpecies) => String(s.id) === id || s.scientificName === id;
+  let match: BwSpecies | undefined;
+  try {
+    match = (await fetchStationSpecies(stationId, PAGE_SIZE * MAX_PAGES, isMatch)).find(isMatch);
+  } catch (e) {
+    if (!/^\d+$/.test(id)) throw e;
+  }
+  if (!match && /^\d+$/.test(id)) {
+    const data = await apiFetch<{ species?: BwSpecies }>(`/species/${id}`);
+    match = data.species;
+  }
   if (!match) throw new Error(`Species not found: ${id}`);
   return mapBwSpecies(match);
 }

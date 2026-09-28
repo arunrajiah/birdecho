@@ -1,0 +1,101 @@
+{
+ "success": true,
+ "detections": [
+  {
+   "id": 11425512523,
+   "stationId": 2000,
+   "timestamp": "2026-09-28T10:49:46.000-04:00",
+   "confidence": 0.5790911316871643,
+   "probability": 0.9408248662948608,
+   "score": 8.595736412492753,
+   "certainty": "almost_certain",
+   "algorithm": "BirdNET",
+   "metadata": null,
+   "species": {
+    "id": 77,
+    "commonName": "Blue Jay",
+    "scientificName": "Cyanocitta cristata",
+    "color": "#0286d9",
+    "classification": "avian",
+    "imageUrl": "https://media.birdweather.com/species/77/BlueJay-standard-ea70bbf50f71808c6a48964d46aef881.jpg",
+    "thumbnailUrl": "https://media.birdweather.com/species/77/BlueJay-thumbnail-abdffb6ab0341e1264d77d71db6c185f.jpg",
+    "pngUrl": "https://media.birdweather.com/species/77/BlueJay-png200-3623e9a21a5bae21b0209cf2baae54ed.png",
+    "thumbhash": "3ggGHwRoumeJg2iNdPaZd5V7PI/J/G4L"
+   },
+   "lat": 0,
+   "lon": 0,
+   "favorite": false,
+   "soundscape": {
+    "id": 17489643924,
+    "url": "https://media.birdweather.com/soundscapes/2000/2000-20260928-144940.flac",
+    "startTime": 6.0,
+    "endTime": 9.0,
+    "mode": "live"
+   }
+  },
+  {
+   "id": 11424325052,
+   "stationId": 2000,
+   "timestamp": "2026-09-28T09:53:17.000-04:00",
+   "confidence": 0.7694863677024841,
+   "probability": 0.940825879573822,
+   "score": 9.308276101493345,
+   "certainty": "almost_certain",
+   "algorithm": "BirdNET",
+   "metadata": null,
+   "species": {
+    "id": 77,
+    "commonName": "Blue Jay",
+    "scientificName": "Cyanocitta cristata",
+    "color": "#0286d9",
+    "classification": "avian",
+    "imageUrl": "https://media.birdweather.com/species/77/BlueJay-standard-ea70bbf50f71808c6a48964d46aef881.jpg",
+    "thumbnailUrl": "https://media.birdweather.com/species/77/BlueJay-thumbnail-abdffb6ab0341e1264d77d71db6c185f.jpg",
+    "pngUrl": "https://media.birdweather.com/species/77/BlueJay-png200-3623e9a21a5bae21b0209cf2baae54ed.png",
+    "thumbhash": "3ggGHwRoumeJg2iNdPaZd5V7PI/J/G4L"
+   },
+   "lat": 0,
+   "lon": 0,
+   "favorite": false,
+   "soundscape": {
+    "id": 17487922184,
+    "url": "https://media.birdweather.com/soundscapes/2000/2000-20260928-135314.flac",
+    "startTime": 3.0,
+    "endTime": 6.0,
+    "mode": "live"
+   }
+  },
+  {
+   "id": 11424325046,
+   "stationId": 2000,
+   "timestamp": "2026-09-28T09:53:15.500-04:00",
+   "confidence": 0.6925816535949707,
+   "probability": 0.940825879573822,
+   "score": 9.063190345743466,
+   "certainty": "almost_certain",
+   "algorithm": "BirdNET",
+   "metadata": null,
+   "species": {
+    "id": 77,
+    "commonName": "Blue Jay",
+    "scientificName": "Cyanocitta cristata",
+    "color": "#0286d9",
+    "classification": "avian",
+    "imageUrl": "https://media.birdweather.com/species/77/BlueJay-standard-ea70bbf50f71808c6a48964d46aef881.jpg",
+    "thumbnailUrl": "https://media.birdweather.com/species/77/BlueJay-thumbnail-abdffb6ab0341e1264d77d71db6c185f.jpg",
+    "pngUrl": "https://media.birdweather.com/species/77/BlueJay-png200-3623e9a21a5bae21b0209cf2baae54ed.png",
+    "thumbhash": "3ggGHwRoumeJg2iNdPaZd5V7PI/J/G4L"
+   },
+   "lat": 0,
+   "lon": 0,
+   "favorite": false,
+   "soundscape": {
+    "id": 17487922184,
+    "url": "https://media.birdweather.com/soundscapes/2000/2000-20260928-135314.flac",
+    "startTime": 1.5,
+    "endTime": 4.5,
+    "mode": "live"
+   }
+  }
+ ]
+}

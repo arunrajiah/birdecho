@@ -1,15 +1,12 @@
 /**
  * BirdNET-Pi direct HTTP adapter.
  *
- * BirdNET-Pi runs an Apache/Caddy + PHP web server; detections are stored in
- * SQLite. Unlike BirdNET-Go there is no JSON REST API — the primary endpoints
- * return HTML table fragments, which we parse with regex. One endpoint
- * (per-species daily counts) returns real JSON.
- *
- * Two forks are supported:
- *   - mcguirepr89/BirdNET-Pi   — HTML-only, no images API
- *   - Nachtzuster/BirdNET-Pi   — adds /api/v1/image/{Sci_Name} (Flickr); detection
- *                                rows use a single-cell layout when display_limit is set
+ * BirdNET-Pi runs a Caddy + PHP web server; detections are stored in SQLite.
+ * Unlike BirdNET-Go there is no JSON REST API: the endpoints return HTML
+ * fragments, which we parse. Every parser here is checked against the real PHP
+ * output of both supported forks (recorded in tests/fixtures, run `pnpm test`):
+ *   - mcguirepr89/BirdNET-Pi   (original)
+ *   - Nachtzuster/BirdNET-Pi   (maintained fork; adds /api/v1/image/{Sci_Name})
  *
  * Auth: HTTP Basic Auth is required only for admin/write paths (/scripts/*,
  * /stream, /Processed/*, etc.). All read endpoints used here are public.
@@ -49,8 +46,48 @@ async function bpiGetJson<T>(base: string, path: string): Promise<T> {
   if (!response.ok) {
     throw new ApiError(response.status, `BirdNET-Pi error ${response.status}`);
   }
+  // Caddy falls back to index.php for unknown paths, so a fork without this
+  // endpoint answers 200 with the HTML dashboard. Never parse that as JSON.
+  const ct = response.headers.get('content-type') ?? '';
+  if (!ct.includes('json')) {
+    throw new ApiError(response.status, 'BirdNET-Pi returned a non-JSON response');
+  }
   return response.json() as Promise<T>;
 }
+
+// ── HTML helpers ─────────────────────────────────────────────────────────────
+
+const ENTITIES: Record<string, string> = {
+  '&amp;': '&',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&#039;': "'",
+  '&#39;': "'",
+  '&apos;': "'",
+  '&nbsp;': ' ',
+};
+
+function decodeEntities(text: string): string {
+  return text.replace(/&(?:amp|lt|gt|quot|apos|nbsp|#0?39);/g, (m) => ENTITIES[m] ?? m);
+}
+
+/** Visible text of an HTML fragment: tags dropped, entities decoded, whitespace collapsed. */
+function textOf(html: string): string {
+  return decodeEntities(html.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+}
+
+/** Local calendar date as YYYY-MM-DD (the station reports local dates, not UTC). */
+function ymd(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+const AUDIO_PATH_RE =
+  /=\s*["']([^"']*\/By_Date\/[^"']+?\.(?:mp3|wav|flac|ogg|opus|m4a|aac))["']/i;
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // ── HTML parsers ─────────────────────────────────────────────────────────────
 
@@ -58,100 +95,76 @@ async function bpiGetJson<T>(base: string, path: string): Promise<T> {
  * Parse detection rows from the HTML fragment returned by
  * /todays_detections.php?ajax_detections=true&display_limit=N
  *
- * mcguirepr89 format — 4+ cells per <tr>:
- *   <td>{Time}</td><td>{Common Name}</td><td>{Sci Name}</td><td>{Confidence}</td><td>..audio..</td>
- *
- * Nachtzuster format (when display_limit is numeric) — single cell per <tr>:
- *   <td><div class="centered_image_container">HH:MM:SS<br><b><a class="a2">Common</a></b><br>
- *   <i>Sci Name</i>...<b>Confidence:</b> 87%</div><div data-audio-src="..."></div></td>
- *
- * Both templates close </tr> only once, after the last row.
+ * Each row is one <tr> holding the time, the common name (element with
+ * class="a2"), the scientific name (<i>), "Confidence: NN%" and an audio
+ * player. The forks differ in the details, so fields are located by what they
+ * are rather than by column position:
+ *   - rows are NOT closed individually; the template emits one </tr> after the
+ *     whole loop, so we split on <tr> openings
+ *   - audio is a data-audio-src attribute (Nachtzuster), a <video><source src>
+ *     (mcguirepr89) or an <audio src> (legacy layout)
+ * A row without a recognisable audio player is still a detection; it just has
+ * no soundscapeUrl.
  */
-function parseDetectionRows(html: string, base: string): Detection[] {
+export function parseDetectionRows(html: string, base: string): Detection[] {
   const detections: Detection[] = [];
-  // Split on <tr> openings rather than matching <tr>...</tr> pairs: the PHP
-  // template emits a single </tr> after the whole loop, not one per row, so a
-  // pair-matching regex swallows every row into one and nothing parses.
   const rows = html.split(/<tr\b[^>]*>/i).slice(1);
 
   for (const row of rows) {
+    const comName = textOf(
+      row.match(/<(a|button)\b[^>]*class=["']a2["'][^>]*>([\s\S]*?)<\/\1>/i)?.[2] ?? '',
+    );
+    const sciName = textOf(row.match(/<i\b[^>]*>([\s\S]*?)<\/i>/i)?.[1] ?? '');
+    const text = textOf(row);
+    const timeMatch = text.match(/\b(\d{1,2}):(\d{2}):(\d{2})\b/);
 
-    // Extract the audio file path.  BirdNET-Pi versions differ in how audio is embedded:
-    //   Newer (custom audio player component): data-audio-src="/By_Date/..."
-    //   Older / some forks:                   <audio ... src="/By_Date/..." ...>
-    const audioSrcMatch =
-      row.match(/data-audio-src=['"]([^'"]+)['"]/) ??
-      row.match(/<audio[^>]*\bsrc=['"]([^'"]+)['"]/i);
-    if (!audioSrcMatch) continue;
-    const audioRelPath = audioSrcMatch[1] ?? '';
-    if (!audioRelPath) continue;
+    // Skip header/summary rows that aren't real detections.
+    if (!timeMatch || !comName) continue;
+    const time = `${timeMatch[1]!.padStart(2, '0')}:${timeMatch[2]}:${timeMatch[3]}`;
 
-    // Extract date from audio path: /By_Date/YYYY-MM-DD/...
-    const pathParts = audioRelPath.split('/').filter(Boolean);
-    // pathParts: ['By_Date', '2024-03-15', 'American_Robin', '2024-03-15-birdnet-14:23:05.mp3']
-    // Guard: some BirdNET-Pi forks use a different directory layout (e.g. species
-    // folder before date).  Scan all path segments for the first one that looks
-    // like a date so we don't accidentally use a species name as the date value.
-    const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-    const date =
-      pathParts.find((p) => ISO_DATE_RE.test(p)) ?? new Date().toISOString().slice(0, 10);
+    // Anchor on the label first: image onclick attributes carry URL-encoded
+    // text (%2C...) that would otherwise be read as a percentage.
+    const confRaw =
+      row.match(/Confidence:?\s*(?:<\/b>)?\s*(\d{1,3}(?:\.\d+)?)\s*%/i)?.[1] ??
+      text.match(/(\d{1,3}(?:\.\d+)?)\s*%/)?.[1] ??
+      '0';
+    const confNum = parseFloat(confRaw);
+    const confidence = isNaN(confNum) ? 0 : Math.min(confNum / 100, 1);
 
-    // Extract td text content (strip inner HTML tags)
-    const cells = Array.from(row.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi))
-      .map((m) => (m[1] ?? '').replace(/<[^>]+>/g, '').trim());
-
-    let time: string;
-    let comName: string;
-    let sciName: string;
-    let confRaw: string;
-
-    if (cells.length >= 4) {
-      // Standard mcguirepr89 format: 4+ cells (time | common | sci | confidence | audio)
-      time = cells[0] ?? '';
-      comName = cells[1] ?? '';
-      sciName = cells[2] ?? '';
-      confRaw = cells[3] ?? '0';
-    } else if (cells.length >= 1) {
-      // Nachtzuster single-cell format: all content packed into one <td> when display_limit is set
-      time = row.match(/\b(\d{2}:\d{2}:\d{2})\b/)?.[1] ?? '';
-      comName = (row.match(/<b><a[^>]*class=["']a2["'][^>]*>([^<]+)<\/a><\/b>/)?.[1] ?? '').trim();
-      sciName = (row.match(/<i>([^<]+)<\/i>/)?.[1] ?? '').trim();
-      // Anchor on the label: image onclick attributes carry URL-encoded text (%2C...)
-      const pct =
-        row.match(/Confidence:<\/b>\s*(\d{1,3}(?:\.\d+)?)\s*%/)?.[1] ??
-        row.match(/(\d{1,3}(?:\.\d+)?)\s*%/)?.[1] ??
-        '0';
-      confRaw = pct + '%';
-    } else {
-      continue;
-    }
-
-    // Sanity-check: skip template/placeholder/summary rows that aren't real detections.
-    // A real detection must have a HH:MM:SS time and a non-empty, non-placeholder species name.
-    const TIME_RE = /^\d{2}:\d{2}:\d{2}$/;
-    if (!TIME_RE.test(time)) continue;
-    if (!comName || comName === '...' || comName === '—') continue;
-    // Confidence may be "0.87" or "87%" — normalise to 0–1
-    const confNum = parseFloat(confRaw.replace('%', ''));
-    const confidence = confNum > 1 ? confNum / 100 : confNum;
-
-    const fileName = pathParts[pathParts.length - 1] ?? '';
-    const id = `${date}_${time}_${fileName}`;
+    const audioRelPath = row.match(AUDIO_PATH_RE)?.[1];
+    const pathParts = (audioRelPath ?? '').split('/').filter(Boolean);
+    // /By_Date/YYYY-MM-DD/Species/file.mp3, but scan for the date segment
+    // rather than trusting its position.
+    const date = pathParts.find((p) => ISO_DATE_RE.test(p)) ?? ymd(new Date());
+    const fileName = pathParts[pathParts.length - 1] ?? comName.replace(/\s+/g, '_');
 
     detections.push({
-      id,
-      speciesId: sciName,
+      id: `${date}_${time}_${fileName}`,
+      speciesId: sciName || comName,
       commonName: comName,
       scientificName: sciName,
       timestamp: `${date}T${time}`,
-      confidence: isNaN(confidence) ? 0 : confidence,
-      soundscapeUrl: `${base}${audioRelPath}`,
-      imageUrl: undefined, // filled in separately for Nachtzuster
+      confidence,
+      soundscapeUrl: audioRelPath ? `${base}${encodeURI(audioRelPath)}` : undefined,
+      imageUrl: undefined,
     });
   }
 
   return detections;
 }
+
+/**
+ * True when the station sent detection rows but none could be read. That is a
+ * parser/format mismatch, not an empty day, and must not be shown as
+ * "no sightings yet".
+ */
+function looksUnparsed(html: string, parsed: Detection[]): boolean {
+  return parsed.length === 0 && /<tr\b/i.test(html) && /\d{1,2}:\d{2}:\d{2}/.test(textOf(html));
+}
+
+const UNPARSED_MESSAGE =
+  'BirdEcho could not read the detection list from this BirdNET-Pi station. ' +
+  'Please report this at github.com/arunrajiah/birdecho/issues with your BirdNET-Pi version.';
 
 /**
  * Parse the five headline stats from
@@ -160,16 +173,12 @@ function parseDetectionRows(html: string, base: string): Detection[] {
  * The HTML table columns (in order):
  *   Total | Today | Last Hour | Species Total | Species Today
  *
- * Some BirdNET-Pi forks/versions wrap values in inner elements (e.g. <b>)
- * or omit the species columns entirely.  We strip inner tags before parsing
- * and handle the missing-column case with a fallback in fetchStats().
+ * Values may be wrapped in inner elements (<button>, <form>), so inner tags
+ * are stripped before parsing.
  */
-function parseStatsHtml(html: string): Stats {
-  // Strip inner HTML from every <td> cell, then keep only cells whose text
-  // content is a bare integer — tolerates <td><b>48531</b></td> as well as
-  // <td class="...">48531</td>.
+export function parseStatsHtml(html: string): Stats {
   const numbers = Array.from(html.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi))
-    .map((m) => (m[1] ?? '').replace(/<[^>]+>/g, '').trim())
+    .map((m) => textOf(m[1] ?? ''))
     .filter((text) => /^\d+$/.test(text))
     .map((text) => parseInt(text, 10));
   // [0] = Total detections, [1] = Today, [2] = Last Hour, [3] = Species Total, [4] = Species Today
@@ -180,80 +189,86 @@ function parseStatsHtml(html: string): Stats {
   };
 }
 
-/**
- * Parse species buttons from /play.php?byspecies=1 HTML.
- * Each species appears as a button or link with the common name as text
- * and ?species=... in the href. Scientific name is not directly in this view.
- * Returns { commonName } entries; caller fills sciName from detection history.
- */
-function parseSpeciesListHtml(html: string): Pick<Species, 'commonName' | 'id'>[] {
-  const results: Pick<Species, 'commonName' | 'id'>[] = [];
-  const linkRegex = /href=['"][^'"]*\?species=([^'"&]+)['"]/gi;
-  let m: RegExpExecArray | null;
-  while ((m = linkRegex.exec(html)) !== null) {
-    const comName = decodeURIComponent((m[1] ?? '').replace(/\+/g, ' '));
-    if (comName) {
-      results.push({ id: comName, commonName: comName });
-    }
-  }
-  // Deduplicate by commonName
-  return results.filter(
-    (s, i, arr) => arr.findIndex((x) => x.commonName === s.commonName) === i,
-  );
+export interface SpeciesButton {
+  /** Form value: scientific name on Nachtzuster, common name on mcguirepr89. */
+  value: string;
+  commonName: string;
+  /** Present only when the page was requested with sort=occurrences on Nachtzuster. */
+  count?: number;
 }
 
-// ── Nachtzuster detection ────────────────────────────────────────────────────
-
 /**
- * Check whether this installation is the Nachtzuster fork, which adds a real
- * image API (/api/v1/image/{Sci_Name}) and a JSON labels endpoint.
- * Returns true if Nachtzuster, false if mcguirepr89 (or unknown).
+ * Parse the species buttons of /play.php (byspecies or date view):
+ *   <button type="submit" name="species" value="Turdus migratorius">American Robin (95)</button>
+ * The "(95)" suffix is the detection count ("(1.2k)" from 1000 up) and only
+ * Nachtzuster prints it; mcguirepr89 prints the bare name.
  */
-async function detectNachtzuster(base: string): Promise<boolean> {
-  try {
-    const r = await fetch(`${base}/api/v1/image/Turdus_migratorius`);
-    // 200 or 404 both mean the endpoint exists (Nachtzuster); connection error means it doesn't
-    return r.status === 200 || r.status === 404;
-  } catch {
-    return false;
+export function parseSpeciesButtons(html: string): SpeciesButton[] {
+  const out: SpeciesButton[] = [];
+  const seen = new Set<string>();
+  const re = /<button\b[^>]*\bname=["']species["'][^>]*>([\s\S]*?)<\/button>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) !== null) {
+    const tag = m[0].slice(0, m[0].indexOf('>') + 1);
+    const value = decodeEntities(
+      tag.match(/\bvalue="([^"]*)"/i)?.[1] ?? tag.match(/\bvalue='([^']*)'/i)?.[1] ?? '',
+    ).trim();
+    const label = textOf(m[1] ?? '');
+    if (!value || !label || seen.has(value)) continue;
+    seen.add(value);
+    const counted = label.match(/^(.*\S)\s*\((\d+(?:\.\d+)?)(k?)\)$/i);
+    if (counted) {
+      const n = parseFloat(counted[2]!) * (counted[3] ? 1000 : 1);
+      out.push({ value, commonName: counted[1]!, count: Math.round(n) });
+    } else {
+      out.push({ value, commonName: label });
+    }
   }
+  return out;
 }
 
 // ── Pagination helper ────────────────────────────────────────────────────────
 
+const PAGE_SIZE = 40;
+
 /**
  * `todays_detections.php?ajax_detections=true&display_limit=N` is NOT "return
- * up to N rows". The server always runs
- * `LIMIT (display_limit-40),40` — i.e. `display_limit` is a running cursor
- * that must climb in steps of exactly 40 (40, 80, 120, ...) to line up with a
- * fixed 40-row page, matching the site's own "Load 40 More" button. A single
- * request with a large `display_limit` (e.g. 500, previously used here to
- * "get everything") computes an offset of 460 and comes back completely empty
- * unless the station logged 461+ detections that same day — which is true for
- * almost no station. That's what made every tab except Stats (which queries
- * separate summary counters, unaffected by this) show "No recent sightings".
- *
- * To fetch a full day's detections we instead walk `display_limit` in steps
- * of 40, matching the page's own pagination, stopping once a page comes back
- * with fewer than 40 rows (end of data) or `maxRows` is reached.
+ * up to N rows". The server always runs `LIMIT (display_limit-40),40`, so
+ * `display_limit` is a running cursor that must climb in steps of exactly 40
+ * (40, 80, 120, ...), matching the site's own "Load 40 More" button.
+ */
+async function fetchTodaysPage(
+  base: string,
+  displayLimit: number,
+  searchterm?: string,
+): Promise<Detection[]> {
+  const query = searchterm ? `&searchterm=${encodeURIComponent(searchterm)}` : '';
+  const html = await bpiGetHtml(
+    base,
+    `/todays_detections.php?ajax_detections=true${query}&display_limit=${displayLimit}`,
+  );
+  const page = parseDetectionRows(html, base);
+  if (looksUnparsed(html, page)) throw new Error(UNPARSED_MESSAGE);
+  return page;
+}
+
+/**
+ * Walk today's detections page by page, stopping at the end of data, at
+ * `maxRows`, or as soon as `until` matches a row.
  */
 async function fetchAllTodaysDetections(
   base: string,
   searchterm?: string,
   maxRows = 500,
+  until?: (d: Detection) => boolean,
 ): Promise<Detection[]> {
-  const PAGE_SIZE = 40;
   const all: Detection[] = [];
   let displayLimit = PAGE_SIZE;
-  const query = searchterm ? `&searchterm=${encodeURIComponent(searchterm)}` : '';
   for (;;) {
-    const html = await bpiGetHtml(
-      base,
-      `/todays_detections.php?ajax_detections=true${query}&display_limit=${displayLimit}`,
-    );
-    const page = parseDetectionRows(html, base);
+    const page = await fetchTodaysPage(base, displayLimit, searchterm);
     all.push(...page);
     if (page.length < PAGE_SIZE || all.length >= maxRows) break;
+    if (until && page.some(until)) break;
     displayLimit += PAGE_SIZE;
   }
   return all;
@@ -264,45 +279,124 @@ async function fetchAllTodaysDetections(
 export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
   const base = hostUrl.replace(/\/$/, '');
 
-  // Nachtzuster flag: resolved lazily on first species fetch, cached
-  let isNachtzuster: boolean | null = null;
-  async function getNachtzuster(): Promise<boolean> {
-    if (isNachtzuster === null) {
-      isNachtzuster = await detectNachtzuster(base);
+  /**
+   * Every species the station has ever detected, most detected first, from
+   * /play.php?byspecies=1&sort=occurrences. Today's detections fill in what
+   * that page lacks on mcguirepr89 (scientific names, counts).
+   */
+  async function loadSpeciesList(): Promise<Species[]> {
+    const [listResult, todayResult] = await Promise.allSettled([
+      bpiGetHtml(base, '/play.php?byspecies=1&sort=occurrences').then(parseSpeciesButtons),
+      fetchAllTodaysDetections(base),
+    ]);
+    const buttons = listResult.status === 'fulfilled' ? listResult.value : [];
+    const today = todayResult.status === 'fulfilled' ? todayResult.value : [];
+    if (listResult.status === 'rejected' && todayResult.status === 'rejected') {
+      throw todayResult.reason;
     }
-    return isNachtzuster;
+
+    const todayByCommon = new Map<string, { scientificName: string; count: number }>();
+    for (const d of today) {
+      const entry = todayByCommon.get(d.commonName);
+      if (entry) entry.count += 1;
+      else todayByCommon.set(d.commonName, { scientificName: d.scientificName, count: 1 });
+    }
+
+    const species: Species[] = buttons.map((b) => {
+      const seenToday = todayByCommon.get(b.commonName);
+      // The button value is the scientific name on Nachtzuster and the common
+      // name on mcguirepr89; only trust it as scientific when it differs.
+      const scientificName =
+        b.value !== b.commonName ? b.value : (seenToday?.scientificName ?? '');
+      return {
+        id: scientificName || b.commonName,
+        commonName: b.commonName,
+        scientificName,
+        imageUrl: undefined,
+        count: b.count ?? seenToday?.count ?? 0,
+      };
+    });
+
+    // Species page unavailable or unreadable: fall back to what was heard today.
+    if (species.length === 0) {
+      for (const [commonName, v] of todayByCommon) {
+        species.push({
+          id: v.scientificName || commonName,
+          commonName,
+          scientificName: v.scientificName,
+          imageUrl: undefined,
+          count: v.count,
+        });
+      }
+    }
+
+    // Stable sort: keeps the server's all-time order where counts are unknown.
+    const counted = buttons.some((b) => b.count !== undefined) || buttons.length === 0;
+    return counted ? species.sort((a, b) => b.count - a.count) : species;
+  }
+
+  // The species list backs the Species tab, every species page and every
+  // favourite row, so share one load between callers that arrive together.
+  let speciesListCache: { at: number; list: Promise<Species[]> } | null = null;
+  function fetchSpeciesList(): Promise<Species[]> {
+    const now = Date.now();
+    if (!speciesListCache || now - speciesListCache.at > 30_000) {
+      const list = loadSpeciesList();
+      speciesListCache = { at: now, list };
+      list.catch(() => {
+        if (speciesListCache?.list === list) speciesListCache = null;
+      });
+    }
+    return speciesListCache.list;
+  }
+
+  /** Nachtzuster only: Flickr/Wikipedia image for a scientific name. */
+  async function fetchImageUrl(scientificName: string): Promise<string | undefined> {
+    if (!scientificName) return undefined;
+    try {
+      const img = await bpiGetJson<{ data?: { image_url?: string } }>(
+        base,
+        `/api/v1/image/${encodeURIComponent(scientificName)}`,
+      );
+      return img.data?.image_url || undefined;
+    } catch {
+      return undefined; // mcguirepr89, or no image for this species
+    }
   }
 
   return {
     cacheKey: `bnpi:${base}`,
 
     // ── Recent detections ────────────────────────────────────────────────────
-    // BirdNET-Pi's todays_detections.php only shows today's detections. Each
-    // request is already a single, server-windowed page of up to 40 rows (see
-    // fetchAllTodaysDetections' doc comment) — the cursor is simply the
-    // display_limit value we just used, so the next call can request the next
-    // 40-row window.
+    // todays_detections.php only shows today's detections, one 40-row window
+    // per request. The cursor is the display_limit we just used.
     async fetchRecentRecords(cursor?: string): Promise<RecordsPage> {
-      const PAGE_SIZE = 40;
       const displayLimit = cursor ? parseInt(cursor, 10) + PAGE_SIZE : PAGE_SIZE;
-      const html = await bpiGetHtml(
-        base,
-        `/todays_detections.php?ajax_detections=true&display_limit=${displayLimit}`,
-      );
-      const page = parseDetectionRows(html, base);
-      const hasMore = page.length >= PAGE_SIZE;
+      const page = await fetchTodaysPage(base, displayLimit);
       return {
         records: page,
-        cursor: hasMore ? String(displayLimit) : undefined,
+        cursor: page.length >= PAGE_SIZE ? String(displayLimit) : undefined,
       };
     },
 
     // ── Single detection ─────────────────────────────────────────────────────
-    // BirdNET-Pi has no single-record endpoint; scan today's list.
+    // BirdNET-Pi has no single-record endpoint. The id embeds the time, which
+    // the search matches, so this is normally a single one-row request.
     async fetchRecord(id: string): Promise<Detection> {
-      const detections = await fetchAllTodaysDetections(base);
+      const time = id.match(/_(\d{2}:\d{2}:\d{2})_/)?.[1];
+      if (time) {
+        try {
+          const hit = (await fetchTodaysPage(base, PAGE_SIZE, time)).find((d) => d.id === id);
+          if (hit) return hit;
+        } catch {
+          // fall through to the full scan
+        }
+      }
+      const detections = await fetchAllTodaysDetections(base, undefined, 2000, (d) => d.id === id);
       const found = detections.find((d) => d.id === id);
-      if (!found) throw new Error(`Detection not found: ${id}`);
+      if (!found) {
+        throw new Error('This detection is no longer in today\'s list on the station.');
+      }
       return found;
     },
 
@@ -310,112 +404,28 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
     // searchterm matches common name, sci name, confidence, filename, or time
     async fetchRecordsForSpecies(speciesId: string, limit = 20): Promise<Detection[]> {
       const detections = await fetchAllTodaysDetections(base, speciesId, Math.max(limit, 40));
-      return detections.slice(0, limit);
+      return detections
+        .filter((d) => d.scientificName === speciesId || d.commonName === speciesId)
+        .slice(0, limit);
     },
 
     // ── Species list ──────────────────────────────────────────────────────────
     async fetchTopSpecies(limit: number): Promise<Species[]> {
-      const nachtzuster = await getNachtzuster();
-
-      // Build the candidate species list first (name only; no count yet)
-      let candidates: Pick<Species, 'id' | 'commonName' | 'scientificName'>[] = [];
-
-      if (nachtzuster) {
-        // Nachtzuster: getlabels returns raw BirdNET model sci names with spaces and no common names,
-        // so we can't use it for a usable species list. Derive species from today's detections instead.
-        const detections = await fetchAllTodaysDetections(base);
-        const speciesMap = new Map<
-          string,
-          { commonName: string; scientificName: string; count: number }
-        >();
-        for (const d of detections) {
-          const entry = speciesMap.get(d.commonName);
-          if (entry) {
-            entry.count += 1;
-          } else {
-            speciesMap.set(d.commonName, {
-              commonName: d.commonName,
-              scientificName: d.scientificName,
-              count: 1,
-            });
-          }
-        }
-        return Array.from(speciesMap.values())
-          .sort((a, b) => b.count - a.count)
-          .slice(0, limit)
-          .map((s) => ({
-            id: s.scientificName,
-            commonName: s.commonName,
-            scientificName: s.scientificName,
-            imageUrl: undefined as string | undefined,
-            count: s.count,
-          }));
-      } else {
-        // mcguirepr89: parse HTML from /play.php?byspecies=1
-        const html = await bpiGetHtml(base, '/play.php?byspecies=1');
-        const partials = parseSpeciesListHtml(html);
-        candidates = partials.map((p) => ({
-          id: p.id,
-          commonName: p.commonName,
-          scientificName: p.id, // sci name not available here; fall back to common name
-        }));
-      }
-
-      // BirdNET-Pi has no bulk "count per species" endpoint.  Use today's full
-      // detection list to derive per-species counts, then sort descending so the
-      // stats screen shows meaningful "top species" rather than all-zero counts.
-      // We fetch up to 500 of today's detections — enough for an accurate ranking
-      // on any normal day.
-      let countMap: Record<string, number> = {};
-      try {
-        const detections = await fetchAllTodaysDetections(base);
-        for (const d of detections) {
-          const key = d.commonName;
-          countMap[key] = (countMap[key] ?? 0) + 1;
-        }
-      } catch {
-        // If the fetch fails, fall back to count: 0 (still renders a species list)
-      }
-
-      // Sort by today's count descending, then slice to the requested limit
-      return candidates
-        .map((c) => ({
-          ...c,
-          imageUrl: undefined as string | undefined,
-          count: countMap[c.commonName] ?? 0,
-        }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, limit);
+      return (await fetchSpeciesList()).slice(0, limit);
     },
 
     // ── Single species ────────────────────────────────────────────────────────
     async fetchSpecies(id: string): Promise<Species> {
-      const nachtzuster = await getNachtzuster();
-
-      let imageUrl: string | undefined;
-      if (nachtzuster) {
-        try {
-          const img = await bpiGetJson<{
-            status: string;
-            data?: { image_url?: string };
-          }>(base, `/api/v1/image/${encodeURIComponent(id)}`);
-          imageUrl = img.data?.image_url;
-        } catch {
-          // image not found — continue without it
-        }
-      }
-
-      // Get detection count from the per-species search
-      const detections = await fetchAllTodaysDetections(base, id);
-      const sample = detections[0];
-
-      return {
+      const list = await fetchSpeciesList();
+      const match = list.find((s) => s.id === id || s.scientificName === id || s.commonName === id);
+      const species: Species = match ?? {
         id,
-        commonName: sample?.commonName ?? id,
-        scientificName: sample?.scientificName ?? id,
-        imageUrl,
-        count: detections.length,
+        commonName: id,
+        scientificName: '',
+        imageUrl: undefined,
+        count: 0,
       };
+      return { ...species, imageUrl: await fetchImageUrl(species.scientificName) };
     },
 
     // ── Stats ─────────────────────────────────────────────────────────────────
@@ -423,13 +433,12 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
       const html = await bpiGetHtml(base, '/todays_detections.php?today_stats=true');
       const stats = parseStatsHtml(html);
 
-      // Some BirdNET-Pi versions omit or differently format the species columns,
-      // causing uniqueSpecies to parse as 0 even when there are thousands of
-      // total records.  Fall back to counting species from the species-list page.
+      // Some BirdNET-Pi versions omit or differently format the species columns.
+      // Fall back to counting species from the species-list page.
       if (stats.uniqueSpecies === 0 && stats.totalRecords > 0) {
         try {
           const speciesHtml = await bpiGetHtml(base, '/play.php?byspecies=1');
-          const speciesList = parseSpeciesListHtml(speciesHtml);
+          const speciesList = parseSpeciesButtons(speciesHtml);
           if (speciesList.length > 0) {
             stats.uniqueSpecies = speciesList.length;
           }
@@ -442,23 +451,28 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
     },
 
     // ── Daily detection counts ────────────────────────────────────────────────
-    // BirdNET-Pi's daily-count endpoint is per-species (requires a comname param).
-    // We can't easily get overall daily counts without querying each species.
-    // Return today's single data point as a stub so the chart renders something.
+    // There is no daily-totals endpoint. Today comes from the stats table. On
+    // Nachtzuster, past days come from the per-date species page, whose labels
+    // carry counts; mcguirepr89 prints no counts, so its past days stay empty.
     async fetchDailyCounts(days: number): Promise<{ date: string; count: number }[]> {
-      try {
-        const stats = await this.fetchStats();
-        const today = new Date().toISOString().slice(0, 10);
-        // Build a stub array of `days` entries, only today is populated
-        return Array.from({ length: days }, (_, i) => {
-          const d = new Date();
-          d.setDate(d.getDate() - (days - 1 - i));
-          const dateStr = d.toISOString().slice(0, 10);
-          return { date: dateStr, count: dateStr === today ? stats.recordsToday : 0 };
-        });
-      } catch {
-        return [];
-      }
+      const today = ymd(new Date());
+      const dates = Array.from({ length: days }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (days - 1 - i));
+        return ymd(d);
+      });
+      const counts = await Promise.all(
+        dates.map(async (date) => {
+          try {
+            if (date === today) return (await this.fetchStats()).recordsToday;
+            const html = await bpiGetHtml(base, `/play.php?date=${date}&sort=occurrences`);
+            return parseSpeciesButtons(html).reduce((n, b) => n + (b.count ?? 0), 0);
+          } catch {
+            return 0;
+          }
+        }),
+      );
+      return dates.map((date, i) => ({ date, count: counts[i] ?? 0 }));
     },
   };
 }

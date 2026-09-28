@@ -3,12 +3,12 @@ import { getToken } from './secureStorage';
 const BASE_URL = 'https://app.birdweather.com/api/v1';
 
 export class ApiError extends Error {
-  constructor(
-    public readonly status: number,
-    message: string,
-  ) {
+  readonly status: number;
+
+  constructor(status: number, message: string) {
     super(message);
     this.name = 'ApiError';
+    this.status = status;
   }
 
   get isAuthError(): boolean {

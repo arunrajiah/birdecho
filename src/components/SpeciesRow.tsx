@@ -20,7 +20,7 @@ export default function SpeciesRow({ species }: { species: Species }) {
   return (
     <Pressable
       className="flex-row items-center gap-3 px-4 py-3 active:bg-gray-50 dark:active:bg-gray-800"
-      onPress={() => router.push(`/species/${species.id}`)}
+      onPress={() => router.push({ pathname: '/species/[id]', params: { id: species.id } })}
     >
       <Image
         source={species.imageUrl && !imgFailed ? { uri: species.imageUrl } : PLACEHOLDER}

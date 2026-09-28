@@ -10,7 +10,8 @@ import type { Detection, RecordsPage } from '../types/birdweather';
  *
  * The list endpoint returns { success, detections: [...] } (NOT a paged wrapper).
  * Pagination is by `?cursor=<id>` — passing a detection id returns rows older
- * than it. Per-species filtering is `?species=<id>`. `?period=` is ignored here;
+ * than it. Per-species filtering is `?speciesId=<id>` (`?species=` is silently
+ * ignored and returns every species). `?period=` is ignored here;
  * use `/stats?period=day` for today's count (see stats.ts).
  */
 export interface BwDetection {
@@ -38,7 +39,7 @@ export function mapBwDetection(d: BwDetection): Detection {
     scientificName: sp.scientificName ?? '',
     timestamp: d.timestamp,
     confidence: typeof d.confidence === 'number' ? d.confidence : 0,
-    soundscapeUrl: d.soundscape?.url,
+    soundscapeUrl: d.soundscape?.url ?? undefined,
     imageUrl: sp.thumbnailUrl ?? sp.imageUrl,
   };
 }
@@ -73,9 +74,11 @@ export async function fetchRecordsForSpecies(
   speciesId: string,
   limit = 10,
 ): Promise<Detection[]> {
-  const params = new URLSearchParams({ limit: String(limit), species: speciesId });
+  const params = new URLSearchParams({ limit: String(limit), speciesId });
   const data = await apiFetch<{ detections?: BwDetection[] }>(
     `/stations/${stationId}/detections?${params}`,
   );
-  return (data.detections ?? []).map(mapBwDetection);
+  return (data.detections ?? [])
+    .map(mapBwDetection)
+    .filter((d) => d.speciesId === speciesId || d.scientificName === speciesId);
 }

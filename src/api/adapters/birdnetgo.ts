@@ -82,9 +82,10 @@ function mapDetection(d: BngDetection, base: string): Detection {
     scientificName: d.scientificName,
     timestamp: d.timestamp,
     confidence: d.confidence,
-    soundscapeUrl: d.clipName
-      ? `${base}/api/v2/media/audio/${encodeURIComponent(d.clipName)}`
-      : undefined,
+    // Serve the clip by detection id. /media/audio/{clipName} 404s because the
+    // API reports only the clip's base name while clips are stored in
+    // year/month subfolders.
+    soundscapeUrl: d.clipName ? `${base}/api/v2/audio/${d.id}` : undefined,
     imageUrl: `${base}/api/v2/media/image/${encodeURIComponent(d.scientificName)}`,
   };
 }
@@ -115,6 +116,17 @@ function ymd(d: Date): string {
 export function createBirdNetGoAdapter(hostUrl: string): StationAdapter {
   const base = hostUrl.replace(/\/$/, '');
 
+  async function resolveScientificName(id: string): Promise<string> {
+    // Species codes are single tokens ("amerob"); scientific names have a space.
+    if (id.includes(' ')) return id;
+    try {
+      const summary = await bngFetch<BngSpeciesSummary[]>(base, `/analytics/species/summary`);
+      return summary.find((s) => s.species_code === id)?.scientific_name ?? id;
+    } catch {
+      return id;
+    }
+  }
+
   return {
     cacheKey: `bng:${base}`,
 
@@ -125,7 +137,7 @@ export function createBirdNetGoAdapter(hostUrl: string): StationAdapter {
         base,
         `/detections?limit=${limit}&offset=${offset}&order=desc`,
       );
-      const records = data.data.map((d) => mapDetection(d, base));
+      const records = (data.data ?? []).map((d) => mapDetection(d, base));
       const nextOffset = offset + records.length;
       return {
         records,
@@ -139,14 +151,19 @@ export function createBirdNetGoAdapter(hostUrl: string): StationAdapter {
     },
 
     async fetchRecordsForSpecies(speciesId: string, limit = 10): Promise<Detection[]> {
-      // Use search endpoint — supports scientific_name and species_code filtering
+      // The species filter matches the scientific name exactly, while our ids
+      // are eBird species codes where the station provides them.
+      const scientificName = await resolveScientificName(speciesId);
       const params = new URLSearchParams({
+        queryType: 'species',
+        species: scientificName,
         limit: String(limit),
-        scientific_name: speciesId,
-        order: 'desc',
       });
       const data = await bngFetch<BngPaginated>(base, `/detections?${params}`);
-      return data.data.map((d) => mapDetection(d, base));
+      // Older servers ignore filters they don't know and return every species.
+      return (data.data ?? [])
+        .filter((d) => d.scientificName === scientificName)
+        .map((d) => mapDetection(d, base));
     },
 
     async fetchTopSpecies(limit: number): Promise<Species[]> {

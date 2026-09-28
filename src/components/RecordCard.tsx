@@ -26,7 +26,7 @@ export default function RecordCard({ record, timezone }: Props) {
   return (
     <Pressable
       className="flex-row items-center gap-3 bg-white dark:bg-gray-900 px-4 py-3 active:bg-gray-50 dark:active:bg-gray-800"
-      onPress={() => router.push(`/record/${record.id}`)}
+      onPress={() => router.push({ pathname: '/record/[id]', params: { id: record.id } })}
     >
       <Image
         source={record.imageUrl && !imgFailed ? { uri: record.imageUrl } : PLACEHOLDER}

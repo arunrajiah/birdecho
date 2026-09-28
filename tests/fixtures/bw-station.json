@@ -1,0 +1,25 @@
+{
+ "id": 2000,
+ "name": "Example Station",
+ "live": true,
+ "type": "puc",
+ "latestDetectionAt": "2026-09-28T12:28:30.000-04:00",
+ "latestValidDetectionAt": "2026-09-28T12:21:26.000-04:00",
+ "coords": {
+  "lat": 0,
+  "lon": 0
+ },
+ "puc": {
+  "edition": "standard",
+  "configUpdatedAt": "",
+  "reboot": false,
+  "currentFirmware": "",
+  "latestFirmware": ""
+ },
+ "locationPrivacy": false,
+ "minConfidence": 0.5,
+ "minProbability": 0.02,
+ "minScore": null,
+ "hasProbabilities": true,
+ "openWeather": false
+}

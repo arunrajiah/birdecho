@@ -1,0 +1,101 @@
+{
+ "success": true,
+ "detections": [
+  {
+   "id": 11427318530,
+   "stationId": 2000,
+   "timestamp": "2026-09-28T12:21:26.000-04:00",
+   "confidence": 0.5441989898681641,
+   "probability": 0.3170008063316345,
+   "score": 6.9504730099840994,
+   "certainty": "almost_certain",
+   "algorithm": "BirdNET",
+   "metadata": null,
+   "species": {
+    "id": 167,
+    "commonName": "Red-breasted Nuthatch",
+    "scientificName": "Sitta canadensis",
+    "color": "#a0b1ff",
+    "classification": "avian",
+    "imageUrl": "https://media.birdweather.com/species/167/Red-breastedNuthatch-standard-396a5949d33703385d4e0f9b629444c5.jpg",
+    "thumbnailUrl": "https://media.birdweather.com/species/167/Red-breastedNuthatch-thumbnail-8fd06f8a985b64676909612a9b548479.jpg",
+    "pngUrl": "https://media.birdweather.com/species/167/Red-breastedNuthatch-png200-478eb6d13bfa83757618eb5c5d2c6ccf.png",
+    "thumbhash": "FggGHwRVqEZbd4dwmliHmWh391qWr2YJ"
+   },
+   "lat": 0,
+   "lon": 0,
+   "favorite": false,
+   "soundscape": {
+    "id": 17492448717,
+    "url": "https://media.birdweather.com/soundscapes/2000/2000-20260928-162123.flac",
+    "startTime": 3.0,
+    "endTime": 6.0,
+    "mode": "live"
+   }
+  },
+  {
+   "id": 11426772845,
+   "stationId": 2000,
+   "timestamp": "2026-09-28T11:53:18.000-04:00",
+   "confidence": 0.572481095790863,
+   "probability": 0.7409822940826416,
+   "score": 8.239650204634668,
+   "certainty": "almost_certain",
+   "algorithm": "BirdNET",
+   "metadata": null,
+   "species": {
+    "id": 24,
+    "commonName": "Downy Woodpecker",
+    "scientificName": "Dryobates pubescens",
+    "color": "#178c00",
+    "classification": "avian",
+    "imageUrl": "https://media.birdweather.com/species/24/DownyWoodpecker-standard-aac7c2b5dc2951fbe7d7cf3ec6c57f62.jpg",
+    "thumbnailUrl": "https://media.birdweather.com/species/24/DownyWoodpecker-thumbnail-df846ad17e8b14828be5fb2d06f97e50.jpg",
+    "pngUrl": "https://media.birdweather.com/species/24/DownyWoodpecker-png200-53ec26ec58fa8443444a106cec07e48a.png",
+    "thumbhash": "nwgKFwQFZJlVmoiXeJdniIh3xwJaGHAE"
+   },
+   "lat": 0,
+   "lon": 0,
+   "favorite": false,
+   "soundscape": {
+    "id": 17491588851,
+    "url": "https://media.birdweather.com/soundscapes/2000/2000-20260928-155318.flac",
+    "startTime": 0.0,
+    "endTime": 3.0,
+    "mode": "live"
+   }
+  },
+  {
+   "id": 11426729133,
+   "stationId": 2000,
+   "timestamp": "2026-09-28T11:51:03.000-04:00",
+   "confidence": 0.592333197593689,
+   "probability": 0.7409788966178894,
+   "score": 8.335989257962872,
+   "certainty": "almost_certain",
+   "algorithm": "BirdNET",
+   "metadata": null,
+   "species": {
+    "id": 24,
+    "commonName": "Downy Woodpecker",
+    "scientificName": "Dryobates pubescens",
+    "color": "#178c00",
+    "classification": "avian",
+    "imageUrl": "https://media.birdweather.com/species/24/DownyWoodpecker-standard-aac7c2b5dc2951fbe7d7cf3ec6c57f62.jpg",
+    "thumbnailUrl": "https://media.birdweather.com/species/24/DownyWoodpecker-thumbnail-df846ad17e8b14828be5fb2d06f97e50.jpg",
+    "pngUrl": "https://media.birdweather.com/species/24/DownyWoodpecker-png200-53ec26ec58fa8443444a106cec07e48a.png",
+    "thumbhash": "nwgKFwQFZJlVmoiXeJdniIh3xwJaGHAE"
+   },
+   "lat": 0,
+   "lon": 0,
+   "favorite": false,
+   "soundscape": {
+    "id": 17491519919,
+    "url": "https://media.birdweather.com/soundscapes/2000/2000-20260928-155103.flac",
+    "startTime": 0.0,
+    "endTime": 3.0,
+    "mode": "live"
+   }
+  }
+ ]
+}

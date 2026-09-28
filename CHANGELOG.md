@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.1] — 2026-09-28
+
+### Fixed
+
+A full check of all three station types against real BirdNET-Pi (both forks), BirdNET-Go and BirdWeather servers.
+
+- **BirdNET-Pi: Feed, Species and Favorites were empty while Stats worked** (#28). The station's detection list closes table rows only once, after the last row, and the app read the whole list as one unreadable row. Affected every station with 4 or more detections in a day, on both the Nachtzuster and mcguirepr89 forks.
+- **BirdNET-Pi (mcguirepr89): Feed was empty even after that fix.** This fork plays recordings through a `<video>` element the app did not recognise, so every row was skipped. Rows without a recognised player are now kept too.
+- **BirdNET-Pi: species pages showed "Species not found" or a count of 0,** and species names with an apostrophe (Anna's Hummingbird) were garbled. The Species tab now lists every species the station has detected, with all-time counts on Nachtzuster, and pictures on Nachtzuster.
+- **BirdNET-Pi: the 14-day chart showed only today.** On Nachtzuster it now shows every day.
+- **BirdNET-Go: tapping play on a detection did nothing.** Recordings are now requested by detection id; the old path always returned "not found".
+- **BirdNET-Go and BirdWeather: a species page listed recent detections of other species.** Both used a filter the server ignores. The correct filter is used now, and other species are dropped if a server ignores it anyway.
+- **BirdWeather: the Species tab showed only species heard today** (empty in the morning), and only the top 100. It now lists all species, with all-time counts.
+- **BirdWeather: the 14-day chart showed only today.** It now shows every day, and "Today" matches the chart.
+- **If a station's page format ever changes again, the app now says it could not read the station** instead of showing "No recent sightings", so the problem is visible and reportable.
+
+### Added
+
+- Automated tests that replay recorded responses from each station type (`pnpm test`), run on every push.
+
+---
+
 ## [0.10.0] — 2026-09-27
 
 ### Added

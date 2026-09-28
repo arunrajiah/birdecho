@@ -37,3 +37,6 @@ jobs:
 
       - name: Type check
         run: pnpm typecheck
+
+      - name: Station adapter tests
+        run: pnpm test

@@ -1,0 +1,6 @@
+Fixes for stations that showed no detections:
+- BirdNET-Pi: Feed, Species and Favorites empty while Stats worked (both forks)
+- BirdNET-Pi: species pages, all-time species list, 14-day chart
+- BirdNET-Go: detection audio did not play
+- BirdNET-Go and BirdWeather: species pages mixed in other species
+- BirdWeather: Species tab only showed today's species; 14-day chart
