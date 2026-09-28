@@ -1,6 +1,6 @@
 Categories:
-  - Science & Education
   - Internet
+  - Science & Education
 License: MIT
 AuthorName: Arun Rajiah
 AuthorWebSite: https://github.com/arunrajiah
@@ -21,19 +21,18 @@ Builds:
     subdir: android/app
     sudo:
       - apt-get update
-      - apt-get install -y g++ make python3
+      - apt-get install -y g++ make python3 xz-utils
       - curl -Lo node.tar.xz https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
-      - echo "fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6  node.tar.xz" | sha256sum -c -
+      - echo "fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6  node.tar.xz"
+        | sha256sum -c -
       - tar xJf node.tar.xz
       - cp -a node-v24.21.0-linux-x64/. /usr/local/
       - npm install -g pnpm@10
     init:
       - cd ../.. && pnpm install --frozen-lockfile
       - cd ../.. && node scripts/fdroid-prepare.mjs
-      - cd ../.. && EXPO_PUBLIC_FDROID=1 CI=1 npx expo prebuild --platform android --clean --no-install
-    prebuild:
-      - sed -i '/signingConfig signingConfigs/d' build.gradle
-      - sed -i '/projectId/d' ../../app.config.ts
+      - cd ../.. && EXPO_PUBLIC_FDROID=1 CI=1 npx expo prebuild --platform android
+        --clean --no-install
     gradle:
       - yes
     rm:
@@ -48,6 +47,9 @@ Builds:
       - node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc/osx-bin
       - node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc/win64-bin
       - node_modules/.pnpm/react-native-svg@*/node_modules/react-native-svg/android/.gradle
+    prebuild:
+      - sed -i '/signingConfig signingConfigs/d' build.gradle
+      - sed -i '/projectId/d' ../../app.config.ts
     scanignore:
       - node_modules/.pnpm/react-native@*/node_modules/react-native/sdks/hermesc/linux64-bin/hermesc
       - node_modules/.pnpm/react-native@*/node_modules/react-native/ReactAndroid/publish.gradle
@@ -103,6 +105,7 @@ MaintainerNotes: |-
   stations over plain HTTP on the user's LAN.
 
 AutoUpdateMode: Version
-UpdateCheckMode: Tags
+UpdateCheckMode: Tags ^v[0-9.]+$
+UpdateCheckData: app.json|"versionCode":\s*(\d+)|.|"version":\s*"([\d.]+)"
 CurrentVersion: 0.9.2
 CurrentVersionCode: 32
