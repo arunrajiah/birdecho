@@ -15,12 +15,14 @@ Expo (React Native) + TypeScript, expo-router, NativeWind/Tailwind, TanStack Que
 
 ## Commands
 - `pnpm start` - expo dev server; `pnpm ios` / `pnpm android` - run on device
-- `pnpm lint` - expo lint; `pnpm typecheck` - tsc --noEmit
+- `pnpm lint` - expo lint; `pnpm typecheck` - tsc --noEmit; `pnpm test` - adapter tests (node:test) replaying real station responses in `tests/fixtures/`
 - `pnpm build:android|build:ios|build:all` - EAS production builds (side effect: cloud builds, store credentials)
 
 ## Conventions
 - Tailwind classes via NativeWind; routes are file-based under `app/`.
 - No em dashes in user-facing copy.
+- Station adapters (`src/api/adapters/`, `src/api/*.ts`): verify API claims against the station's source or a live server, never from memory; add a fixture test for each fix. BirdNET-Pi HTML differs by fork (Nachtzuster vs mcguirepr89).
+- Release: bump `app.json` version + versionCode, CHANGELOG entry, fastlane changelog `<versionCode>.txt`, then push tag `vX.Y.Z` (GitHub Actions builds the APK).
 
 ## Token efficiency
 - Grep/Glob to the target file; read only the relevant section, never whole large files.
