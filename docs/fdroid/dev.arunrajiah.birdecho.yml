@@ -21,6 +21,10 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y g++ make python3 xz-utils
+      - echo "deb https://deb.debian.org/debian bookworm main" > /etc/apt/sources.list.d/bookworm.list
+      - apt-get update
+      - apt-get install -y -t bookworm openjdk-17-jdk-headless
+      - update-java-alternatives -s java-1.17.0-openjdk-amd64
       - curl -Lo node.tar.xz https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
       - echo "fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6  node.tar.xz"
         | sha256sum -c -
@@ -30,8 +34,7 @@ Builds:
     init:
       - pnpm install --frozen-lockfile
       - node scripts/fdroid-prepare.mjs
-      - EXPO_PUBLIC_FDROID=1 CI=1 npx expo prebuild --platform android
-        --clean --no-install
+      - EXPO_PUBLIC_FDROID=1 CI=1 npx expo prebuild --platform android --clean --no-install
     output: android/app/build/outputs/apk/release/app-release-unsigned.apk
     rm:
       - wear
@@ -69,6 +72,9 @@ MaintainerNotes: |-
 
   Node 24 LTS and pnpm 10 are required. Node is downloaded in sudo: because
   Debian's packaged Node is too old. Bump the tarball URL and SHA-256 together.
+
+  React Native 0.81's Gradle plugins require a Java 17 toolchain, installed from
+  bookworm in sudo: (same approach as io.evcc.android).
 
   scripts/fdroid-prepare.mjs (in the app repo) rewrites package.json's Expo
   autolinking config so that:
