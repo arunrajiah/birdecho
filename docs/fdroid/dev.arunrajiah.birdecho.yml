@@ -15,9 +15,9 @@ RepoType: git
 Repo: https://github.com/arunrajiah/birdecho.git
 
 Builds:
-  - versionName: 0.10.1
-    versionCode: 36
-    commit: 27744360dbedf96b358b07dedfc59953a181bdab
+  - versionName: 0.10.2
+    versionCode: 37
+    commit: 3cfaa13466ad0582ec1d225db831ed3fa7bb2604
     sudo:
       - apt-get update
       - apt-get install -y g++ make python3 xz-utils
@@ -115,5 +115,5 @@ MaintainerNotes: |-
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
 UpdateCheckData: app.json|"versionCode":\s*(\d+)|.|"version":\s*"([\d.]+)"
-CurrentVersion: 0.10.1
-CurrentVersionCode: 36
+CurrentVersion: 0.10.2
+CurrentVersionCode: 37
