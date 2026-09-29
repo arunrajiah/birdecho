@@ -14,7 +14,8 @@ import java.time.format.DateTimeParseException
 /**
  * Minimal Kotlin port of the two calls the glance needs from the phone app's
  * adapters (src/api/records.ts + stats.ts for BirdWeather,
- * src/api/adapters/birdnetgo.ts for BirdNET-Go). Keep the endpoints in sync.
+ * src/api/adapters/birdnetgo.ts for BirdNET-Go, src/api/adapters/birdnetpi.ts for
+ * BirdNET-Pi). Keep the endpoints in sync.
  */
 object StationApi {
     private const val BIRDWEATHER_BASE = "https://app.birdweather.com/api/v1"
@@ -24,6 +25,8 @@ object StationApi {
     fun fetchGlance(station: StationConfig): Glance = when (station.connectionType) {
         StationConfig.TYPE_BIRDWEATHER -> birdWeather(station)
         StationConfig.TYPE_BIRDNETGO -> birdNetGo(station)
+        StationConfig.TYPE_BIRDNETPI -> birdNetPi(station)
+        StationConfig.TYPE_DEMO -> DemoGlance.at(LocalDateTime.now())
         else -> throw IOException("Unsupported station type: ${station.connectionType}")
     }
 
@@ -58,6 +61,23 @@ object StationApi {
         return Glance(
             lastSpecies = latest?.optString("commonName")?.takeIf { it.isNotBlank() },
             lastTime = latest?.optString("timestamp")?.let(::formatTimestamp),
+            todayCount = today,
+            todayCapped = false,
+            fetchedAtMillis = System.currentTimeMillis(),
+        )
+    }
+
+    private fun birdNetPi(station: StationConfig): Glance {
+        val base = station.hostUrl!!.trimEnd('/')
+        val latest = BirdNetPiHtml.latest(
+            get("$base/todays_detections.php?ajax_detections=true&display_limit=40"),
+        )
+        val today = BirdNetPiHtml.todayCount(get("$base/todays_detections.php?today_stats=true"))
+            ?: throw IOException("Unrecognised BirdNET-Pi stats page")
+        return Glance(
+            lastSpecies = latest?.first,
+            // BirdNET-Pi only lists today's detections, in the station's local time.
+            lastTime = latest?.second?.let { formatTimestamp("${LocalDate.now()}T$it") },
             todayCount = today,
             todayCapped = false,
             fetchedAtMillis = System.currentTimeMillis(),
@@ -99,7 +119,7 @@ object StationApi {
         try {
             conn.connectTimeout = 10_000
             conn.readTimeout = 15_000
-            conn.setRequestProperty("Accept", "application/json")
+            conn.setRequestProperty("Accept", "application/json, text/html")
             headers.forEach { (k, v) -> conn.setRequestProperty(k, v) }
             val code = conn.responseCode
             if (code !in 200..299) throw IOException("HTTP $code")

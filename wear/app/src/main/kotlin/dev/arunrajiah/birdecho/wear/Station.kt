@@ -16,13 +16,19 @@ data class StationConfig(
     val isSupported: Boolean
         get() = when (connectionType) {
             TYPE_BIRDWEATHER -> !bwStationId.isNullOrBlank()
-            TYPE_BIRDNETGO -> !hostUrl.isNullOrBlank()
+            TYPE_BIRDNETGO, TYPE_BIRDNETPI -> !hostUrl.isNullOrBlank()
+            TYPE_DEMO -> true
             else -> false
         }
 
     companion object {
         const val TYPE_BIRDWEATHER = "birdweather"
         const val TYPE_BIRDNETGO = "birdnetgo"
+        const val TYPE_BIRDNETPI = "birdnetpi"
+        const val TYPE_DEMO = "demo"
+
+        /** The demo station, available on the watch without a phone. */
+        val DEMO = StationConfig(TYPE_DEMO, "Demo station", null, null, null)
     }
 }
 

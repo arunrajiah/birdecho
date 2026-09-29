@@ -120,7 +120,8 @@ BirdEcho has a Wear OS companion: a **tile** and a small **watch app** that show
 
 - **Works on its own.** The watch fetches from your station about every 15 minutes (and when you open the tile or tap Refresh), so it keeps updating with the phone app closed.
 - **No typing on the watch.** BirdEcho on your phone sends the active station to the watch whenever you add or switch stations.
-- **Stations:** BirdWeather and BirdNET-Go. BirdNET-Pi is not supported on the watch yet.
+- **Stations:** BirdWeather, BirdNET-Go and BirdNET-Pi, plus the demo station.
+- **Try it without a station:** tap **Try demo** on the watch, or pick the demo station on your phone.
 - **Requires:** Wear OS 3 or newer, and BirdEcho v0.10.0 or newer on the phone.
 
 **Install:** download `birdecho-wear.apk` from [GitHub Releases](https://github.com/arunrajiah/birdecho/releases/latest) and sideload it onto the watch (for example with `adb install` over wireless debugging). Use it together with the **GitHub** phone APK: the phone and watch apps must be signed with the same key to talk to each other, so the watch app cannot yet receive a station from the Google Play or F-Droid builds. The watch app and BirdEcho 0.10.0 for phones were submitted to Google Play on 27 September 2026 and are in review; once approved, you will be able to install both from Play and they will pair with each other.

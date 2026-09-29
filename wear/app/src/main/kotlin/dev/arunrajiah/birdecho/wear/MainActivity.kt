@@ -129,6 +129,17 @@ private fun GlanceScreen() {
                 Text(stringResource(R.string.setup_title), fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
                 Spacer(Modifier.height(6.dp))
                 Text(stringResource(R.string.setup_body), color = Grey, fontSize = 12.sp, textAlign = TextAlign.Center)
+                Spacer(Modifier.height(10.dp))
+                Button(onClick = {
+                    store.station = StationConfig.DEMO
+                    station = store.station
+                    scope.launch {
+                        RefreshWorker.schedule(context)
+                        refresh()
+                    }
+                }) {
+                    Text(stringResource(R.string.try_demo))
+                }
             }
             !current.isSupported -> {
                 Text(current.stationName, color = Green, fontSize = 12.sp, textAlign = TextAlign.Center)

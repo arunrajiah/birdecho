@@ -1,0 +1,3 @@
+- Wear OS: BirdNET-Pi stations now work on the watch
+- Wear OS: Try demo on the watch, no phone or station needed
+- Wear OS: the phone's demo station now works on the watch

@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.3] — 2026-09-29
+
+### Fixed
+
+- **Wear OS: the watch app was stuck on "No station yet"** unless the phone was connected to a BirdWeather or BirdNET-Go station. The phone's demo station and BirdNET-Pi stations showed "not supported" on the watch. Google Play rejected the Wear OS update for this.
+
+### Added
+
+- **Wear OS: BirdNET-Pi stations** (both forks) now work on the watch, with the latest detection and today's count.
+- **Wear OS: Try demo** on the watch shows sample data with no phone, station or network. Choosing the demo station on the phone also works on the watch.
+
+---
+
 ## [0.10.2] — 2026-09-29
 
 ### Fixed

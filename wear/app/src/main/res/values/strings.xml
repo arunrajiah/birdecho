@@ -3,8 +3,9 @@
     <string name="app_name">BirdEcho</string>
     <string name="tile_label">Latest detection</string>
     <string name="setup_title">No station yet</string>
-    <string name="setup_body">Open BirdEcho on your phone to send your station to this watch.</string>
-    <string name="unsupported_body">This station type is not supported on the watch yet. Switch to a BirdWeather or BirdNET-Go station on your phone.</string>
+    <string name="setup_body">Open BirdEcho on your phone to send your station to this watch, or try the demo.</string>
+    <string name="try_demo">Try demo</string>
+    <string name="unsupported_body">This station type is not supported on the watch. Update BirdEcho on your phone and watch.</string>
     <string name="no_detections">No detections yet</string>
     <string name="refresh">Refresh</string>
     <string name="refreshing">Refreshing</string>
