@@ -223,6 +223,24 @@ Copy `.env.example` to `.env.local` at the project root and fill in the values y
 
 ---
 
+## Part of an open wildlife toolkit
+
+This project is one of seven open source tools by [Arun Rajiah](https://www.arunrajiah.com) for listening to, identifying and mapping wildlife. They are independent, and each is useful alone, but they are built to work together.
+
+| Project | Role | What it does |
+|---|---|---|
+| [WDX](https://github.com/arunrajiah/wildlife-detection-exchange) | The shared format | An open JSON format for one wildlife detection: what was detected, where, when, by which classifier and with what confidence. Maps field by field to Darwin Core. |
+| [wdx-agent](https://github.com/arunrajiah/wdx-agent) | Share what your device detects | One dependency free Python file for a Raspberry Pi or any computer. Sends detections from BirdNET-Pi, BirdNET-Go, camera traps and bat detectors as WDX. |
+| [WildNetwork](https://github.com/arunrajiah/wildnetwork) | See the whole picture | A live, open map of bird, bat and other animal movement, built from WDX events and public networks. [wildnetwork.arunrajiah.com](https://wildnetwork.arunrajiah.com) |
+| **BirdEcho** (this project) | Follow your own station | Android companion app for BirdNET-Pi, BirdNET-Go and BirdWeather stations: today's detections, alerts for species you care about, history. |
+| [WildEcho](https://github.com/arunrajiah/wildecho) | Identify a sound on your phone | Record a short clip and get ranked species candidates. |
+| [wildecho-api](https://github.com/arunrajiah/wildecho-api) | The identification service | Self-hosted species identification from audio, using Google's open Perch 2.0 model. Runs on CPU, no API keys. Powers WildEcho. |
+| [SpeciesNet Studio](https://github.com/arunrajiah/speciesnet-studio) | Review camera trap results | Self-hosted interface for checking and correcting SpeciesNet classifier predictions before they are used. |
+
+**How this one fits.** BirdEcho is how you follow your own station. To add that station to the global map, install [wdx-agent](https://github.com/arunrajiah/wdx-agent) on it, or do nothing if it already reports to BirdWeather: those stations are included in [WildNetwork](https://wildnetwork.arunrajiah.com) automatically. Exporting detections from BirdEcho itself in WDX is planned.
+
+**Connected today:** wdx-agent sends to WildNetwork in the WDX format, and WildEcho uses wildecho-api. **Planned:** WDX export from BirdEcho, wildecho-api and SpeciesNet Studio.
+
 ## Contributing
 
 Pull requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening one.
