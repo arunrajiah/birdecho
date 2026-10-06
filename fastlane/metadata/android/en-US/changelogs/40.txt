@@ -1,0 +1,1 @@
+BirdWeather stations: species names now appear in your phone's language (Italian, German, French and others BirdWeather supports). English is unchanged. BirdNET-Pi and BirdNET-Go keep the language set on the station.
