@@ -78,6 +78,11 @@ jobs:
       - name: Rename APK
         run: mv android/app/build/outputs/apk/release/app-release.apk birdecho.apk
 
+      # R8 is enabled (expo-build-properties), so keep the mapping file with the
+      # release: it is needed to read stack traces from this APK.
+      - name: Collect R8 mapping file
+        run: cp android/app/build/outputs/mapping/release/mapping.txt birdecho-mapping.txt
+
       # ── Wear OS app (wear/) ────────────────────────────────────────────────
       # Signed with the same key as the phone APK: the Wearable Data Layer only
       # delivers the station config between apps that share package and signature.
@@ -121,5 +126,6 @@ jobs:
           files: |
             birdecho.apk
             birdecho-wear.apk
+            birdecho-mapping.txt
           draft: false
           prerelease: ${{ contains(github.ref_name, '-') }}

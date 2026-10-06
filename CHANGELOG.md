@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **Smaller, optimised Android builds.** Release builds now run R8 code shrinking and resource shrinking (Google Play flagged the app for having none). Tested on the emulator: feed, sighting pages, Species, Favorites, Stats, Map, Settings and the home-screen widget provider all work on a minified build.
+
+---
+
 ## [0.10.4] — 2026-10-06
 
 ### Added
