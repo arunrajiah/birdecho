@@ -52,3 +52,4 @@ package-lock.json
 credentials.json
 credentials/
 *.jks
+modules/wear-sync/android/build/
