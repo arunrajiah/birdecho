@@ -91,4 +91,26 @@ describe('BirdWeather', () => {
     assert.equal(days.length, 2);
     assert.equal(days[1]!.count, 12);
   });
+
+  it('asks for localized common names in the device language', async () => {
+    const original = Intl.DateTimeFormat;
+    // Pretend the device runs in Italian; node tests otherwise run as en-US.
+    (Intl as { DateTimeFormat: unknown }).DateTimeFormat = () => ({
+      resolvedOptions: () => ({ locale: 'it-IT' }),
+    });
+    try {
+      const requested = mockFetch([{ match: '/detections?', body: fixture('bw-detections-it.json') }]);
+      const page = await createBirdWeatherAdapter('2000').fetchRecentRecords();
+      assert.ok(requested[0]?.includes('&locale=it'), requested[0]);
+      assert.equal(page.records[0]?.commonName, 'Ballerina bianca');
+    } finally {
+      Intl.DateTimeFormat = original;
+    }
+  });
+
+  it('sends no locale for English devices', async () => {
+    const requested = mockFetch([{ match: '/detections?', body: fixture('bw-detections.json') }]);
+    await createBirdWeatherAdapter('2000').fetchRecentRecords();
+    assert.ok(!requested[0]?.includes('locale='), requested[0]);
+  });
 });

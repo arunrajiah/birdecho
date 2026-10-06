@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "detections": [
+    {
+      "id": 11322297419,
+      "ref": "1790163054-11322297419",
+      "stationId": 2000,
+      "timestamp": "2026-09-23T13:30:54.951+02:00",
+      "confidence": 0.665647,
+      "probability": 0.6709076,
+      "score": 8.50836705686105,
+      "certainty": "almost_certain",
+      "algorithm": "v2.4",
+      "metadata": null,
+      "species": {
+        "id": 95,
+        "commonName": "Ballerina bianca",
+        "scientificName": "Motacilla alba",
+        "color": "#457700",
+        "classification": "avian",
+        "imageUrl": "https://media.birdweather.com/species/95/WhiteWagtail-standard-c3e712d95481fd4c30012b3afc4ee61f.jpg",
+        "thumbnailUrl": "https://media.birdweather.com/species/95/WhiteWagtail-thumbnail-645080e5b8667eaccbc9a938f781f907.jpg",
+        "pngUrl": "https://media.birdweather.com/species/95/WhiteWagtail-png200-38e3473b44d59c0f49a722ef0b7250cd.png",
+        "thumbhash": "2PcFJwZKpplweXdymnZouGiofwaoZ4AL"
+      },
+      "favorite": false,
+      "soundscape": {
+        "id": 17267672151,
+        "url": "https://media.birdweather.com/soundscapes/1000/1000-20260923-113055.mp4",
+        "startTime": 0.0,
+        "endTime": 3.0,
+        "mode": "recorded"
+      }
+    }
+  ]
+}

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Species names in your language for BirdWeather stations.** BirdWeather's API returns localized common names when asked, so the app now requests them in the device language (Italian, German, French and the other languages BirdWeather supports). English devices are unchanged. BirdNET-Pi and BirdNET-Go stations keep using the language the station itself is configured for (requested in Discussions #29).
+
+---
+
 ## [0.10.3] — 2026-09-29
 
 ### Fixed

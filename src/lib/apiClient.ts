@@ -1,4 +1,5 @@
 import { getToken } from './secureStorage';
+import { deviceLanguage } from './locale';
 
 const BASE_URL = 'https://app.birdweather.com/api/v1';
 
@@ -36,7 +37,10 @@ export async function apiFetch<T>(
     headers['X-Auth-Token'] = token;
   }
 
-  const url = `${BASE_URL}${path}`;
+  // Localized species names (verified: /detections, /species and
+  // /stations/{id}/species honour ?locale=xx; /stats ignores it harmlessly).
+  const lang = deviceLanguage();
+  const url = `${BASE_URL}${path}${lang ? `${path.includes('?') ? '&' : '?'}locale=${lang}` : ''}`;
   let response: Response;
   try {
     response = await fetch(url, { ...init, headers });
