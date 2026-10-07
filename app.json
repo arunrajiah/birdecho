@@ -15,7 +15,7 @@
     },
     "android": {
       "package": "dev.arunrajiah.birdecho",
-      "versionCode": 48,
+      "versionCode": 49,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundImage": "./assets/adaptive-icon-bg.png",
