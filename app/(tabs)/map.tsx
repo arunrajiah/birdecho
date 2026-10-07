@@ -62,7 +62,7 @@ function StationList({
   onSwitch: (id: string) => void;
 }) {
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-gray-950" contentContainerClassName="p-4 gap-3">
+    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950" contentContainerClassName="p-4 gap-3">
       <Text className="text-xs text-gray-500 dark:text-gray-400 mb-1">
         The interactive map is not available in this build. Tap a station to open its location
         in your maps app.

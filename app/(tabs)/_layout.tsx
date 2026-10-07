@@ -2,6 +2,7 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'nativewind';
 import { useStationStore } from '../../src/stores/stationStore';
+import { chrome } from '../../src/theme/colors';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -22,21 +23,25 @@ export default function TabsLayout() {
   // Show the active station name as the Feed tab title.
   const feedTitle = stationName ?? 'BirdEcho';
 
-  const headerBg = isDark ? '#111827' : '#ffffff';
-  const headerText = isDark ? '#f9fafb' : '#111827';
+  const ui = chrome(isDark);
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#15803d',
-        tabBarInactiveTintColor: isDark ? '#6b7280' : '#9ca3af',
+        tabBarActiveTintColor: ui.tint,
+        tabBarInactiveTintColor: ui.inactive,
         headerShown: true,
-        headerStyle: { backgroundColor: headerBg },
-        headerTintColor: headerText,
+        headerStyle: { backgroundColor: ui.canvas },
+        headerTintColor: ui.text,
+        headerTitleStyle: { fontWeight: '700', fontSize: 20 },
+        headerTitleAlign: 'left',
         headerShadowVisible: false,
+        sceneStyle: { backgroundColor: ui.canvas },
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         tabBarStyle: {
-          backgroundColor: isDark ? '#111827' : '#ffffff',
-          borderTopColor: isDark ? '#374151' : '#e5e7eb',
+          backgroundColor: ui.surface,
+          borderTopColor: ui.border,
+          borderTopWidth: 0.5,
         },
       }}
     >

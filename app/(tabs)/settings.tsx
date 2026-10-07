@@ -15,6 +15,7 @@ const CONNECTION_LABEL: Record<string, string> = {
   birdweather: 'BirdWeather',
   birdnetgo: 'BirdNET-Go',
   birdnetpi: 'BirdNET-Pi',
+  demo: 'Demo',
 };
 
 function StationRow({
@@ -31,26 +32,28 @@ function StationRow({
   const typeLabel = CONNECTION_LABEL[station.connectionType] ?? station.connectionType;
   const subLabel =
     station.connectionType === 'birdweather'
-      ? `${typeLabel} · ID ${station.bwStationId ?? '—'}`
-      : `${typeLabel} · ${station.hostUrl ?? '—'}`;
+      ? `${typeLabel} · ID ${station.bwStationId ?? '?'}`
+      : station.hostUrl
+        ? `${typeLabel} · ${station.hostUrl}`
+        : `${typeLabel} · sample data`;
 
   return (
     <Pressable
-      className={`flex-row items-center px-4 py-3 active:bg-gray-50 ${
-        isActive ? 'bg-green-50' : 'bg-white'
+      className={`flex-row items-center px-4 py-3 active:opacity-80 ${
+        isActive ? 'bg-green-50 dark:bg-green-950' : ''
       }`}
       onPress={onSwitch}
     >
       {/* Active indicator */}
       <View
-        className={`mr-3 h-2.5 w-2.5 rounded-full ${isActive ? 'bg-green-600' : 'bg-gray-200'}`}
+        className={`mr-3 h-2.5 w-2.5 rounded-full ${isActive ? 'bg-green-500' : 'bg-gray-300 dark:bg-gray-600'}`}
       />
 
       {/* Station info */}
       <View className="flex-1">
         <Text
           className={`text-sm font-semibold ${
-            isActive ? 'text-green-800' : 'text-gray-900'
+            isActive ? 'text-green-800 dark:text-green-300' : 'text-gray-900 dark:text-gray-50'
           }`}
           numberOfLines={1}
         >
@@ -139,26 +142,25 @@ export default function SettingsScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-gray-950">
-      <View className="px-5 pt-6 pb-8">
-        <Text className="mb-6 text-xl font-bold text-gray-900 dark:text-white">Settings</Text>
+    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950">
+      <View className="px-4 pt-2 pb-8">
 
         {/* ── Appearance ──────────────────────────────────────────────────── */}
-        <Text className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
+        <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
           Appearance
         </Text>
-        <View className="mb-6 flex-row rounded-xl border border-gray-200 overflow-hidden">
+        <View className="mb-6 flex-row rounded-2xl bg-gray-200 dark:bg-gray-800 p-1">
           {MODES.map((m) => (
             <Pressable
               key={m}
-              className={`flex-1 items-center py-2.5 active:opacity-75 ${
-                mode === m ? 'bg-green-700' : 'bg-white dark:bg-gray-900'
+              className={`flex-1 items-center rounded-xl py-2.5 active:opacity-75 ${
+                mode === m ? 'bg-white dark:bg-gray-600' : ''
               }`}
               onPress={() => setMode(m)}
             >
               <Text
                 className={`text-sm font-medium capitalize ${
-                  mode === m ? 'text-white' : 'text-gray-600 dark:text-gray-300'
+                  mode === m ? 'text-gray-900 dark:text-gray-50' : 'text-gray-600 dark:text-gray-300'
                 }`}
               >
                 {m}
@@ -168,12 +170,12 @@ export default function SettingsScreen() {
         </View>
 
         {/* ── Notifications ────────────────────────────────────────────────── */}
-        <Text className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
+        <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
           Notifications
         </Text>
-        <View className="mb-1 flex-row items-center justify-between rounded-xl border border-gray-200 bg-gray-50 dark:bg-gray-900 px-4 py-3">
+        <View className="mb-1 flex-row items-center justify-between rounded-2xl bg-white dark:bg-gray-900 px-4 py-3">
           <View className="flex-1 mr-3">
-            <Text className="text-sm text-gray-700 dark:text-gray-300">Rare species alerts</Text>
+            <Text className="text-[15px] font-medium text-gray-900 dark:text-gray-50">Rare species alerts</Text>
             <Text className="text-xs text-gray-400 mt-0.5">
               Notify me when a species I marked as rare is detected
             </Text>
@@ -181,7 +183,7 @@ export default function SettingsScreen() {
           <Switch
             value={rareAlertsEnabled}
             onValueChange={handleRareAlertsToggle}
-            trackColor={{ true: '#15803d' }}
+            trackColor={{ true: '#347F57' }}
           />
         </View>
         <Text className="mb-6 px-1 text-xs text-gray-400">
@@ -192,14 +194,14 @@ export default function SettingsScreen() {
         {/* ── WildNetwork ──────────────────────────────────────────────────── */}
         {isConnected && wildNetworkSource(activeType) && (
           <>
-            <Text className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
+            <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               WildNetwork
             </Text>
             <Pressable
-              className="mb-6 rounded-xl border border-gray-200 bg-gray-50 dark:bg-gray-900 px-4 py-3 active:opacity-75"
+              className="mb-6 rounded-2xl bg-white dark:bg-gray-900 px-4 py-3.5 active:opacity-75"
               onPress={() => router.push('/wildnetwork')}
             >
-              <Text className="text-sm text-gray-700 dark:text-gray-300">Share this station with WildNetwork</Text>
+              <Text className="text-[15px] font-medium text-gray-900 dark:text-gray-50">Share this station with WildNetwork</Text>
               <Text className="text-xs text-gray-400 mt-0.5">
                 Add your detections to the open map of where birds are moving
               </Text>
@@ -208,15 +210,15 @@ export default function SettingsScreen() {
         )}
 
         {/* ── Stations ─────────────────────────────────────────────────────── */}
-        <Text className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
+        <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
           Stations
         </Text>
 
         {isConnected && stations.length > 0 ? (
-          <View className="mb-3 rounded-xl border border-gray-200 overflow-hidden">
+          <View className="mb-3 rounded-2xl bg-white dark:bg-gray-900 overflow-hidden">
             {stations.map((station, idx) => (
               <View key={station.id}>
-                {idx > 0 && <View className="h-px bg-gray-100 ml-9" />}
+                {idx > 0 && <View className="h-px bg-gray-100 dark:bg-gray-800 ml-9" />}
                 <StationRow
                   station={station}
                   isActive={station.id === activeStationId}
@@ -231,14 +233,14 @@ export default function SettingsScreen() {
             ))}
           </View>
         ) : (
-          <View className="mb-3 rounded-xl border border-gray-200 bg-gray-50 p-4">
-            <Text className="text-sm text-gray-500">No stations connected.</Text>
+          <View className="mb-3 rounded-2xl bg-white dark:bg-gray-900 p-4">
+            <Text className="text-sm text-gray-500 dark:text-gray-400">No stations connected.</Text>
           </View>
         )}
 
         {/* Add station */}
         <Pressable
-          className="mb-3 flex-row items-center justify-center rounded-xl bg-green-700 py-3 active:opacity-75"
+          className="mb-3 flex-row items-center justify-center rounded-2xl bg-green-700 py-3.5 active:opacity-75"
           onPress={() => router.push('/connect')}
         >
           <Text className="text-sm font-semibold text-white">+ Add station</Text>
@@ -247,10 +249,10 @@ export default function SettingsScreen() {
         {/* Disconnect all — only show when connected */}
         {isConnected ? (
           <Pressable
-            className="items-center rounded-xl border border-red-200 bg-red-50 py-3 active:opacity-75"
+            className="items-center rounded-2xl bg-white dark:bg-gray-900 py-3.5 active:opacity-75"
             onPress={confirmDisconnectAll}
           >
-            <Text className="text-sm font-semibold text-red-600">Disconnect all stations</Text>
+            <Text className="text-sm font-semibold text-red-600 dark:text-red-300">Disconnect all stations</Text>
           </Pressable>
         ) : null}
 

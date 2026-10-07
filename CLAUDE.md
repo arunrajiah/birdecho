@@ -15,11 +15,12 @@ Expo (React Native) + TypeScript, expo-router, NativeWind/Tailwind, TanStack Que
 
 ## Commands
 - `pnpm start` - expo dev server; `pnpm ios` / `pnpm android` - run on device
+- Local emulator: AVD `wildecho_test` works; build with `JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home npx expo run:android` (first build ~20 min, machine gets slow)
 - `pnpm lint` - expo lint; `pnpm typecheck` - tsc --noEmit; `pnpm test` - adapter tests (node:test) replaying real station responses in `tests/fixtures/`
 - `pnpm build:android|build:ios|build:all` - EAS production builds (side effect: cloud builds, store credentials)
 
 ## Conventions
-- Tailwind classes via NativeWind; routes are file-based under `app/`.
+- Tailwind classes via NativeWind; routes are file-based under `app/`. `gray`/`green` are remapped to the brand palette in tailwind.config.js (mirror in src/theme/colors.ts, `chrome()` for nav colors): screens use `bg-gray-50 dark:bg-gray-950` canvas with `rounded-2xl bg-white dark:bg-gray-900` cards.
 - No em dashes in user-facing copy.
 - Station adapters (`src/api/adapters/`, `src/api/*.ts`): verify API claims against the station's source or a live server, never from memory; add a fixture test for each fix. BirdNET-Pi HTML differs by fork (Nachtzuster vs mcguirepr89).
 - Release: bump `app.json` version + versionCode, CHANGELOG entry, fastlane changelog `<versionCode>.txt`, then push tag `vX.Y.Z` (GitHub Actions builds the APK).

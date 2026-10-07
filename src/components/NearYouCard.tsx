@@ -18,7 +18,7 @@ function SpeciesLine({ name, sci, detail, heardHere }: { name: string; sci: stri
     >
       <Text className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100">
         {name}
-        {heardHere ? <Text className="text-xs font-normal text-green-700">{'  '}heard here</Text> : null}
+        {heardHere ? <Text className="text-xs font-normal text-green-700 dark:text-green-300">{'  '}heard here</Text> : null}
       </Text>
       <Text className="text-xs text-gray-500 dark:text-gray-400">{detail}</Text>
     </Pressable>
@@ -37,14 +37,14 @@ export default function NearYouCard({ heardHere }: { heardHere: Set<string> }) {
 
   if (!loc) {
     return (
-      <View className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-        <Text className="mb-1 text-base font-semibold text-gray-800 dark:text-gray-200">Near you on WildNetwork</Text>
+      <View className="mt-3 rounded-2xl bg-white dark:bg-gray-900 p-4">
+        <Text className="mb-1 text-base font-semibold text-gray-900 dark:text-gray-50">Near you on WildNetwork</Text>
         <Text className="mb-3 text-sm text-gray-400 dark:text-gray-500">
           See which birds are arriving and leaving around your station. Set your station&apos;s
           approximate area first.
         </Text>
         <Pressable
-          className="items-center rounded-xl border border-gray-200 dark:border-gray-700 py-3 active:opacity-75"
+          className="items-center rounded-2xl border border-gray-200 dark:border-gray-700 py-3.5 active:opacity-75"
           onPress={() => router.push('/wildnetwork')}
         >
           <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300">Set station area</Text>
@@ -69,7 +69,7 @@ export default function NearYouCard({ heardHere }: { heardHere: Set<string> }) {
   const list = (title: string, items: CellArrival[], week: (a: CellArrival) => string | null) =>
     items.length > 0 ? (
       <View className="mb-3">
-        <Text className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400">{title}</Text>
+        <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">{title}</Text>
         {items.map((a) => (
           <SpeciesLine
             key={a.scientificName}
@@ -83,8 +83,8 @@ export default function NearYouCard({ heardHere }: { heardHere: Set<string> }) {
     ) : null;
 
   return (
-    <View className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-      <Text className="mb-1 text-base font-semibold text-gray-800 dark:text-gray-200">Near you on WildNetwork</Text>
+    <View className="mt-3 rounded-2xl bg-white dark:bg-gray-900 p-4">
+      <Text className="mb-1 text-base font-semibold text-gray-900 dark:text-gray-50">Near you on WildNetwork</Text>
       <Text className="mb-3 text-sm text-gray-400 dark:text-gray-500">
         Across all stations in the 5 degree square around yours, effort corrected.
       </Text>
@@ -101,7 +101,7 @@ export default function NearYouCard({ heardHere }: { heardHere: Set<string> }) {
 
       {moving.length > 0 ? (
         <View className="mb-3">
-          <Text className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-400">Moving in {region}</Text>
+          <Text className="mb-1 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Moving in {region}</Text>
           {moving.map((d) => (
             <SpeciesLine
               key={d.scientificName}
@@ -115,7 +115,7 @@ export default function NearYouCard({ heardHere }: { heardHere: Set<string> }) {
       ) : null}
 
       <Pressable onPress={() => void Linking.openURL(WILDNETWORK_BASE)}>
-        <Text className="text-sm font-medium text-green-700">Open the WildNetwork map</Text>
+        <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Open the WildNetwork map</Text>
       </Pressable>
     </View>
   );

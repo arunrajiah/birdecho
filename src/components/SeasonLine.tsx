@@ -15,15 +15,15 @@ export default function SeasonLine({ scientificName }: { scientificName: string 
     : [];
 
   return (
-    <View className="mt-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
-      <Text className="text-xs font-medium uppercase tracking-wide text-gray-400">In your area</Text>
+    <View className="mt-4 rounded-2xl bg-white dark:bg-gray-900 px-4 py-3.5">
+      <Text className="ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">In your area</Text>
       {parts.length > 0 ? (
-        <Text className="mt-1 text-sm text-gray-700">
+        <Text className="mt-1 text-sm text-gray-700 dark:text-gray-200">
           This season around your station it {parts.join(', ')}.
         </Text>
       ) : null}
       <Pressable className="mt-1" onPress={() => void Linking.openURL(speciesUrl(scientificName))}>
-        <Text className="text-sm font-medium text-green-700">See its movement on WildNetwork</Text>
+        <Text className="text-sm font-semibold text-green-700 dark:text-green-300">See its movement on WildNetwork</Text>
       </Pressable>
     </View>
   );

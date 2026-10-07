@@ -71,10 +71,10 @@ function StationCallout({
   return (
     <Callout onPress={() => {}} tooltip={false} style={{ width: 200 }}>
       <View style={{ padding: 10, gap: 6 }}>
-        <Text style={{ fontWeight: '700', fontSize: 14, color: '#111827' }} numberOfLines={1}>
+        <Text style={{ fontWeight: '700', fontSize: 14, color: '#19231E' }} numberOfLines={1}>
           {station.stationName}
         </Text>
-        <Text style={{ fontSize: 12, color: '#6b7280' }}>
+        <Text style={{ fontSize: 12, color: '#7A766B' }}>
           {CONNECTION_BADGE[station.connectionType] ?? station.connectionType}
         </Text>
 
@@ -84,7 +84,7 @@ function StationCallout({
               onPress={onSwitch}
               style={{
                 flex: 1,
-                backgroundColor: '#15803d',
+                backgroundColor: '#1D5339',
                 borderRadius: 6,
                 paddingVertical: 5,
                 alignItems: 'center',
@@ -102,7 +102,7 @@ function StationCallout({
                 alignItems: 'center',
               }}
             >
-              <Text style={{ color: '#15803d', fontSize: 12, fontWeight: '600' }}>Active</Text>
+              <Text style={{ color: '#1D5339', fontSize: 12, fontWeight: '600' }}>Active</Text>
             </View>
           )}
 
@@ -117,7 +117,7 @@ function StationCallout({
               alignItems: 'center',
             }}
           >
-            <Text style={{ color: '#374151', fontSize: 12, fontWeight: '600' }}>Maps ↗</Text>
+            <Text style={{ color: '#3F433C', fontSize: 12, fontWeight: '600' }}>Maps ↗</Text>
           </Pressable>
         </View>
       </View>
@@ -162,7 +162,7 @@ export default function StationMap({
             <Marker
               key={station.id}
               coordinate={{ latitude: station.latitude, longitude: station.longitude }}
-              pinColor={isActive ? '#15803d' : '#78716C'}
+              pinColor={isActive ? '#1D5339' : '#78716C'}
               title={station.stationName}
             >
               <StationCallout
@@ -194,12 +194,12 @@ export default function StationMap({
           }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#15803d' }} />
-            <Text style={{ fontSize: 12, color: '#374151' }}>Active station</Text>
+            <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#1D5339' }} />
+            <Text style={{ fontSize: 12, color: '#3F433C' }}>Active station</Text>
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#78716C' }} />
-            <Text style={{ fontSize: 12, color: '#374151' }}>Other stations</Text>
+            <Text style={{ fontSize: 12, color: '#3F433C' }}>Other stations</Text>
           </View>
         </View>
       )}

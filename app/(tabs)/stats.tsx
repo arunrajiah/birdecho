@@ -11,9 +11,9 @@ import NearYouCard from '../../src/components/NearYouCard';
 
 function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
-    <View className="flex-1 items-center rounded-xl bg-green-50 dark:bg-green-950 py-4">
-      <Text className="text-2xl font-bold text-green-800 dark:text-green-300">{value}</Text>
-      <Text className="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">{label}</Text>
+    <View className="flex-1 rounded-2xl bg-white dark:bg-gray-900 px-3 py-4">
+      <Text className="text-2xl font-bold text-gray-900 dark:text-gray-50" numberOfLines={1} adjustsFontSizeToFit>{value}</Text>
+      <Text className="mt-1 text-xs font-medium text-gray-500 dark:text-gray-400">{label}</Text>
     </View>
   );
 }
@@ -127,8 +127,8 @@ export default function StatsScreen() {
 
   if (statsLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-        <ActivityIndicator size="large" color="#15803d" />
+      <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <ActivityIndicator size="large" color="#1D5339" />
       </View>
     );
   }
@@ -148,9 +148,8 @@ export default function StatsScreen() {
   const recordCount = feedData?.pages.flatMap((p) => p.records).length ?? 0;
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-gray-900">
-      <View className="px-4 pt-6 pb-4">
-        <Text className="mb-4 text-xl font-bold text-gray-900 dark:text-white">Station stats</Text>
+    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950">
+      <View className="px-4 pt-2 pb-6">
 
         {/* Headline numbers */}
         <View className="flex-row gap-3">
@@ -161,20 +160,20 @@ export default function StatsScreen() {
 
         {/* 14-day bar chart */}
         {daily && daily.length > 0 ? (
-          <View className="mt-6">
-            <Text className="mb-2 text-base font-semibold text-gray-800 dark:text-gray-200">Last 14 days</Text>
+          <View className="mt-3 rounded-2xl bg-white dark:bg-gray-900 p-4">
+            <Text className="text-base font-semibold text-gray-900 dark:text-gray-50">Last 14 days</Text>
             <VictoryChart height={200} padding={{ top: 10, bottom: 40, left: 50, right: 20 }}>
               <VictoryAxis
                 tickFormat={(t: string) => t.slice(5)}
                 tickCount={4}
-                style={{ tickLabels: { fontSize: 9, fill: '#9ca3af' } }}
+                style={{ tickLabels: { fontSize: 9, fill: '#9C978B' } }}
               />
-              <VictoryAxis dependentAxis style={{ tickLabels: { fontSize: 9, fill: '#9ca3af' } }} />
+              <VictoryAxis dependentAxis style={{ tickLabels: { fontSize: 9, fill: '#9C978B' } }} />
               <VictoryBar
                 data={daily}
                 x="date"
                 y="count"
-                style={{ data: { fill: '#15803d' } }}
+                style={{ data: { fill: '#347F57' } }}
                 cornerRadius={{ top: 3 }}
               />
             </VictoryChart>
@@ -183,10 +182,10 @@ export default function StatsScreen() {
 
         {/* Top species */}
         {topSpecies && topSpecies.length > 0 ? (
-          <View className="mt-4">
-            <Text className="mb-3 text-base font-semibold text-gray-800 dark:text-gray-200">Top species</Text>
+          <View className="mt-3 rounded-2xl bg-white dark:bg-gray-900 p-4">
+            <Text className="mb-1 text-base font-semibold text-gray-900 dark:text-gray-50">Top species</Text>
             {topSpecies.map((sp, i) => (
-              <View key={sp.id} className="flex-row items-center py-2 border-b border-gray-100 dark:border-gray-800">
+              <View key={sp.id} className={`flex-row items-center py-2.5 ${i > 0 ? 'border-t border-gray-100 dark:border-gray-800' : ''}`}>
                 <Text className="w-7 text-sm text-gray-400 dark:text-gray-500">{i + 1}.</Text>
                 <Text className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100">{sp.commonName}</Text>
                 <Text className="text-sm text-gray-500 dark:text-gray-400">
@@ -200,20 +199,20 @@ export default function StatsScreen() {
         <NearYouCard heardHere={new Set((topSpecies ?? []).map((sp) => sp.scientificName))} />
 
         {/* CSV export */}
-        <View className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
-          <Text className="mb-1 text-base font-semibold text-gray-800 dark:text-gray-200">Export</Text>
+        <View className="mt-3 rounded-2xl bg-white dark:bg-gray-900 p-4">
+          <Text className="mb-1 text-base font-semibold text-gray-900 dark:text-gray-50">Export</Text>
           <Text className="mb-3 text-sm text-gray-400 dark:text-gray-500">
             {recordCount > 0
-              ? `${recordCount.toLocaleString()} detection${recordCount === 1 ? '' : 's'} loaded — exports the current feed page as CSV.`
+              ? `${recordCount.toLocaleString()} detection${recordCount === 1 ? '' : 's'} loaded. Exports the current feed page as CSV.`
               : 'Visit the Feed tab to load detections, then export here.'}
           </Text>
           <Pressable
-            className="flex-row items-center justify-center rounded-xl border border-gray-200 dark:border-gray-700 py-3 active:opacity-75 disabled:opacity-50"
+            className="flex-row items-center justify-center rounded-2xl border border-gray-200 dark:border-gray-700 py-3.5 active:opacity-75 disabled:opacity-50"
             onPress={handleExport}
             disabled={exportLoading || recordCount === 0}
           >
             {exportLoading ? (
-              <ActivityIndicator color="#4b5563" size="small" />
+              <ActivityIndicator color="#5B5A52" size="small" />
             ) : (
               <Text className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                 Export detections as CSV

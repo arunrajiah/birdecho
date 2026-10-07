@@ -35,76 +35,83 @@ export default function SpeciesDetailScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#15803d" />
+      <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <ActivityIndicator size="large" color="#1D5339" />
       </View>
     );
   }
 
   if (!species) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <Text className="text-gray-500">Species not found.</Text>
+      <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <Text className="text-gray-500 dark:text-gray-400">Species not found.</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950" contentContainerStyle={{ paddingBottom: 24 }}>
       {species.imageUrl && !imgFailed ? (
-        <Image
-          source={remoteImage(species.imageUrl)}
-          onError={() => setImgFailed(true)}
-          className="h-52 w-full bg-gray-100"
-          resizeMode="cover"
-        />
+        <View className="px-4 pt-2">
+          <Image
+            source={remoteImage(species.imageUrl)}
+            onError={() => setImgFailed(true)}
+            className="h-60 w-full rounded-3xl bg-gray-200 dark:bg-gray-800"
+            resizeMode="cover"
+          />
+        </View>
       ) : null}
 
-      <View className="px-5 pt-4">
+      <View className="px-4 pt-4">
         <View className="flex-row items-start justify-between">
           <View className="flex-1 mr-4">
             <View className="flex-row items-center gap-2">
-              <Text className="shrink text-2xl font-bold text-gray-900">{species.commonName}</Text>
+              <Text className="shrink text-[28px] font-bold leading-tight text-gray-900 dark:text-gray-50">{species.commonName}</Text>
               {rare ? <RareBadge /> : null}
             </View>
-            <Text className="text-base italic text-gray-400">{species.scientificName}</Text>
+            <Text className="mt-0.5 text-base italic text-gray-500 dark:text-gray-400">{species.scientificName}</Text>
           </View>
           <Pressable
-            className="mt-1 h-10 w-10 items-center justify-center rounded-full active:opacity-75"
+            className="mt-1 h-11 w-11 items-center justify-center rounded-full bg-white dark:bg-gray-900 active:opacity-75"
             onPress={() => toggle(id)}
           >
-            <Text className="text-2xl">{favorited ? '★' : '☆'}</Text>
+            <Text className={`text-2xl ${favorited ? 'text-gold-500' : 'text-gray-400'}`}>{favorited ? '★' : '☆'}</Text>
           </Pressable>
         </View>
 
-        <Text className="mt-3 text-sm text-gray-500">
-          {species.count.toLocaleString()} detections at this station
-        </Text>
-
-        {/* User-defined rarity (issue #24). Marked species show the Rare badge and,
-            when rare-species alerts are enabled, trigger a notification on detection. */}
-        <Pressable
-          onPress={() => toggleRare(id)}
-          className={`mt-3 self-start flex-row items-center rounded-full border px-3 py-1.5 active:opacity-75 ${
-            rare ? 'border-amber-300 bg-amber-50' : 'border-gray-200 bg-white'
-          }`}
-        >
-          <Text className={`text-sm ${rare ? 'text-amber-700' : 'text-gray-600'}`}>
-            {rare ? '⚑  Marked as rare' : '⚑  Mark as rare'}
-          </Text>
-        </Pressable>
+        <View className="mt-4 flex-row items-center gap-2">
+          <View className="rounded-full bg-green-100 dark:bg-green-900 px-3 py-1.5">
+            <Text className="text-sm font-semibold text-green-800 dark:text-green-200">
+              {species.count.toLocaleString()} detections here
+            </Text>
+          </View>
+          {/* User-defined rarity (issue #24). Marked species show the Rare badge and,
+              when rare-species alerts are enabled, trigger a notification on detection. */}
+          <Pressable
+            onPress={() => toggleRare(id)}
+            className={`flex-row items-center rounded-full px-3 py-1.5 active:opacity-75 ${
+              rare ? 'bg-amber-100 dark:bg-amber-950' : 'bg-white dark:bg-gray-900'
+            }`}
+          >
+            <Text className={`text-sm font-medium ${rare ? 'text-amber-800 dark:text-amber-300' : 'text-gray-600 dark:text-gray-300'}`}>
+              {rare ? '⚑  Marked as rare' : '⚑  Mark as rare'}
+            </Text>
+          </Pressable>
+        </View>
 
         <SeasonLine scientificName={species.scientificName} />
-
-        {recentRecords && recentRecords.length > 0 ? (
-          <View className="mt-5">
-            <Text className="mb-2 text-base font-semibold text-gray-800">Recent sightings</Text>
-            {recentRecords.map((r) => (
-              <RecordCard key={r.id} record={r} />
-            ))}
-          </View>
-        ) : null}
       </View>
+
+      {recentRecords && recentRecords.length > 0 ? (
+        <View className="mt-6">
+          <Text className="mx-5 mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            Recent sightings
+          </Text>
+          {recentRecords.map((r) => (
+            <RecordCard key={r.id} record={r} />
+          ))}
+        </View>
+      ) : null}
     </ScrollView>
   );
 }

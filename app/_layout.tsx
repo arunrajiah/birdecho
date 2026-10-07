@@ -14,6 +14,8 @@ import { useSettingsStore } from '../src/stores/settingsStore';
 import { useRareStore } from '../src/stores/rareStore';
 import { initSentry, captureException } from '../src/lib/sentry';
 import { QUERY_CACHE_STORAGE_KEY } from '../src/lib/queryCache';
+import { chrome } from '../src/theme/colors';
+import { StatusBar } from 'expo-status-bar';
 
 initSentry();
 
@@ -76,8 +78,7 @@ export default function RootLayout() {
   }, [themeMode, setColorScheme]);
 
   const isDark = colorScheme === 'dark';
-  const headerBg = isDark ? '#111827' : '#ffffff';
-  const headerText = isDark ? '#f9fafb' : '#111827';
+  const ui = chrome(isDark);
 
   return (
     <PersistQueryClientProvider
@@ -94,11 +95,14 @@ export default function RootLayout() {
         },
       }}
     >
+      <StatusBar style={isDark ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: headerBg },
-          headerTintColor: headerText,
+          headerStyle: { backgroundColor: ui.canvas },
+          headerTintColor: ui.text,
+          headerTitleStyle: { fontWeight: '700' },
           headerShadowVisible: false,
+          contentStyle: { backgroundColor: ui.canvas },
         }}
       >
         <Stack.Screen name="index" options={{ title: 'BirdEcho', headerShown: false }} />

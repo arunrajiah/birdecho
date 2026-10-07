@@ -72,13 +72,13 @@ export default function ConnectScreen() {
     } catch (e) {
       if (e instanceof Error) {
         if (/API error 40[13]/.test(e.message)) {
-          setError('Invalid token — check your BirdWeather API token and try again.');
+          setError('Invalid token. Check your BirdWeather API token and try again.');
         } else if (/API error 404/.test(e.message)) {
-          setError('Station not found — check your station ID and try again.');
+          setError('Station not found. Check your station ID and try again.');
         } else if (e.message.startsWith('API error')) {
           setError('The station returned an error. Please try again later.');
         } else {
-          setError('Network error — check your internet connection and try again.');
+          setError('Network error. Check your internet connection and try again.');
         }
       } else {
         setError('Could not connect. Check your token and station ID.');
@@ -153,15 +153,15 @@ export default function ConnectScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-white"
+      className="flex-1 bg-gray-50 dark:bg-gray-950"
       contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 40, paddingBottom: 32 }}
     >
-      <Text className="mb-6 text-2xl font-bold text-gray-900">
+      <Text className="mb-6 text-[28px] font-bold text-gray-900 dark:text-gray-50">
         {isFirstStation ? 'Connect your station' : 'Add a station'}
       </Text>
 
       {/* Mode toggle — three options */}
-      <View className="mb-8 flex-row rounded-xl border border-gray-200 overflow-hidden">
+      <View className="mb-8 flex-row rounded-2xl bg-gray-200 dark:bg-gray-800 p-1">
         {(['birdweather', 'birdnetgo', 'birdnetpi'] as Mode[]).map((m) => {
           const label =
             m === 'birdweather' ? 'BirdWeather' : m === 'birdnetgo' ? 'BirdNET-Go' : 'BirdNET-Pi';
@@ -169,14 +169,14 @@ export default function ConnectScreen() {
           return (
             <Pressable
               key={m}
-              className={`flex-1 py-2.5 items-center ${active ? 'bg-green-700' : 'bg-white'}`}
+              className={`flex-1 py-2.5 items-center rounded-xl ${active ? 'bg-white dark:bg-gray-600' : ''}`}
               onPress={() => {
                 setMode(m);
                 setError(null);
               }}
             >
               <Text
-                className={`text-xs font-semibold ${active ? 'text-white' : 'text-gray-600'}`}
+                className={`text-xs font-semibold ${active ? 'text-gray-900 dark:text-gray-50' : 'text-gray-600 dark:text-gray-300'}`}
               >
                 {label}
               </Text>
@@ -187,9 +187,9 @@ export default function ConnectScreen() {
 
       {mode === 'birdweather' ? (
         <>
-          <Text className="mb-1 text-sm font-medium text-gray-700">Station token</Text>
+          <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Station token</Text>
           <TextInput
-            className="mb-4 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900"
+            className="mb-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3.5 text-gray-900 dark:text-gray-50"
             value={token}
             onChangeText={setTokenValue}
             placeholder="Your BirdWeather API token"
@@ -198,9 +198,9 @@ export default function ConnectScreen() {
             secureTextEntry
           />
 
-          <Text className="mb-1 text-sm font-medium text-gray-700">Station ID</Text>
+          <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Station ID</Text>
           <TextInput
-            className="mb-2 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900"
+            className="mb-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3.5 text-gray-900 dark:text-gray-50"
             value={stationId}
             onChangeText={setStationId}
             placeholder="e.g. 12345"
@@ -215,11 +215,11 @@ export default function ConnectScreen() {
         </>
       ) : (
         <>
-          <Text className="mb-1 text-sm font-medium text-gray-700">
+          <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
             {mode === 'birdnetgo' ? 'BirdNET-Go host URL' : 'BirdNET-Pi host URL'}
           </Text>
           <TextInput
-            className="mb-2 rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-gray-900"
+            className="mb-2 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3.5 text-gray-900 dark:text-gray-50"
             value={hostUrl}
             onChangeText={setHostUrl}
             placeholder={
@@ -231,8 +231,8 @@ export default function ConnectScreen() {
           />
           <Text className="mb-6 text-xs text-gray-400">
             {mode === 'birdnetgo'
-              ? 'Enter the local URL of your BirdNET-Go instance. Plain HTTP is supported. No token required — read-only API access is public by default.'
-              : 'Enter the local URL of your BirdNET-Pi (usually http://birdnetpi.local or http://192.168.x.x). No token required — the detection pages are public by default.'}
+              ? 'Enter the local URL of your BirdNET-Go instance. Plain HTTP is supported. No token required: read-only API access is public by default.'
+              : 'Enter the local URL of your BirdNET-Pi (usually http://birdnetpi.local or http://192.168.x.x). No token required: the detection pages are public by default.'}
           </Text>
         </>
       )}
@@ -240,7 +240,7 @@ export default function ConnectScreen() {
       {error ? <Text className="mb-4 text-sm text-red-600">{error}</Text> : null}
 
       <Pressable
-        className="items-center rounded-xl bg-green-700 py-3 active:opacity-75 disabled:opacity-50"
+        className="items-center rounded-2xl bg-green-700 py-3.5 active:opacity-75 disabled:opacity-50"
         onPress={handleConnect}
         disabled={loading || !canSubmit}
       >
@@ -254,20 +254,20 @@ export default function ConnectScreen() {
       {/* Demo — lets anyone explore the app with sample data, no station,
           account, token, or network required. */}
       <View className="my-6 flex-row items-center">
-        <View className="h-px flex-1 bg-gray-200" />
+        <View className="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
         <Text className="mx-3 text-xs text-gray-400">or</Text>
-        <View className="h-px flex-1 bg-gray-200" />
+        <View className="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
       </View>
 
       <Pressable
-        className="items-center rounded-xl border border-green-700 py-3 active:opacity-75 disabled:opacity-50"
+        className="items-center rounded-2xl border border-green-700 dark:border-green-400 py-3.5 active:opacity-75 disabled:opacity-50"
         onPress={handleTryDemo}
         disabled={loading}
       >
-        <Text className="text-base font-semibold text-green-700">Try a demo station</Text>
+        <Text className="text-base font-semibold text-green-700 dark:text-green-300">Try a demo station</Text>
       </Pressable>
       <Text className="mt-2 text-center text-xs text-gray-400">
-        Explore BirdEcho with sample data — no station needed.
+        Explore BirdEcho with sample data, no station needed.
       </Text>
     </ScrollView>
   );

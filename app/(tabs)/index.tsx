@@ -3,7 +3,8 @@ import { Platform, View, Text, ActivityIndicator } from 'react-native';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { requestWidgetUpdate } from 'react-native-android-widget';
-import RecordCard from '../../src/components/RecordCard';
+import RecordCard, { RECORD_CARD_HEIGHT } from '../../src/components/RecordCard';
+import TodayCard from '../../src/components/TodayCard';
 import ErrorState from '../../src/components/ErrorState';
 import UpdateBanner from '../../src/components/UpdateBanner';
 import { useStationStore } from '../../src/stores/stationStore';
@@ -143,8 +144,8 @@ export default function FeedScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-        <ActivityIndicator size="large" color="#15803d" />
+      <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <ActivityIndicator size="large" color="#1D5339" />
       </View>
     );
   }
@@ -160,18 +161,19 @@ export default function FeedScreen() {
   }
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-900">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-950">
       <UpdateBanner />
       <FlashList
         data={records}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <RecordCard record={item} timezone={stationTimezone} />}
-        overrideItemLayout={(_layout, _item, _index) => ({ size: 80 })}
+        overrideItemLayout={(_layout, _item, _index) => ({ size: RECORD_CARD_HEIGHT })}
+        ListHeaderComponent={<TodayCard latest={records[0]} timezone={stationTimezone} />}
+        contentContainerStyle={{ paddingBottom: 16 }}
         onRefresh={onRefresh}
         refreshing={isRefetching}
         onEndReached={() => { if (hasNextPage && !isFetchingNextPage) fetchNextPage(); }}
         onEndReachedThreshold={0.3}
-        ItemSeparatorComponent={() => <View className="h-px bg-gray-100 dark:bg-gray-800 ml-20" />}
         ListEmptyComponent={() => (
           <View className="flex-1 items-center justify-center py-24">
             <Text className="text-center text-base text-gray-400 dark:text-gray-500">
@@ -182,7 +184,7 @@ export default function FeedScreen() {
         ListFooterComponent={
           isFetchingNextPage ? (
             <View className="py-4">
-              <ActivityIndicator color="#15803d" />
+              <ActivityIndicator color="#1D5339" />
             </View>
           ) : null
         }

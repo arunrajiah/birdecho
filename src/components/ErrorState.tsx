@@ -23,7 +23,7 @@ export default function ErrorState({ error, onRetry, subject = 'data' }: Props) 
           Reconnect your station to continue.
         </Text>
         <Pressable
-          className="mt-2 rounded-xl bg-green-700 px-6 py-3 active:opacity-75"
+          className="mt-2 rounded-2xl bg-green-700 px-6 py-3 active:opacity-75"
           onPress={() => router.replace('/connect')}
         >
           <Text className="font-semibold text-white">Reconnect station</Text>
@@ -38,7 +38,7 @@ export default function ErrorState({ error, onRetry, subject = 'data' }: Props) 
         Could not load {subject}. Check your connection and try again.
       </Text>
       <Pressable
-        className="rounded-xl bg-green-700 px-6 py-3 active:opacity-75"
+        className="rounded-2xl bg-green-700 px-6 py-3 active:opacity-75"
         onPress={onRetry}
       >
         <Text className="font-semibold text-white">Retry</Text>

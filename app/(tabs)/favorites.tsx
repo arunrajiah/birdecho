@@ -3,7 +3,7 @@ import { useQueries } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import { useFavoritesStore } from '../../src/stores/favoritesStore';
-import SpeciesRow from '../../src/components/SpeciesRow';
+import SpeciesRow, { SPECIES_ROW_HEIGHT } from '../../src/components/SpeciesRow';
 import type { Species } from '../../src/types/birdweather';
 
 export default function FavoritesScreen() {
@@ -23,13 +23,13 @@ export default function FavoritesScreen() {
     .map((r) => r.data as Species);
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-900">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-950">
       <FlashList
         data={loaded}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <SpeciesRow species={item} />}
-        overrideItemLayout={(_layout, _item, _index) => ({ size: 68 })}
-        ItemSeparatorComponent={() => <View className="h-px bg-gray-100 dark:bg-gray-800 ml-16" />}
+        overrideItemLayout={(_layout, _item, _index) => ({ size: SPECIES_ROW_HEIGHT })}
+        contentContainerStyle={{ paddingTop: 8, paddingBottom: 16 }}
         ListEmptyComponent={() => (
           <View className="flex-1 items-center justify-center py-24 px-8">
             <Text className="text-center text-gray-400 dark:text-gray-500">

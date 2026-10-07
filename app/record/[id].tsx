@@ -103,31 +103,31 @@ export default function RecordDetailScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#15803d" />
+      <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <ActivityIndicator size="large" color="#1D5339" />
       </View>
     );
   }
 
   if (isError || !record) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <Text className="text-gray-500">Could not load this sighting.</Text>
+      <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <Text className="text-gray-500 dark:text-gray-400">Could not load this sighting.</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950">
       <ViewShot ref={cardRef} options={{ format: 'png', quality: 1 }}>
         <Image
           source={record.imageUrl ? remoteImage(record.imageUrl) : require('../../assets/icon.png')}
           style={{ width, height: 240 }}
           resizeMode="cover"
         />
-        <View className="px-5 py-4 gap-1">
-          <Text className="text-2xl font-bold text-gray-900">{record.commonName}</Text>
-          <Text className="text-base italic text-gray-400">{record.scientificName}</Text>
+        <View className="px-5 py-4 gap-1 bg-white dark:bg-gray-900">
+          <Text className="text-[28px] font-bold leading-tight text-gray-900 dark:text-gray-50">{record.commonName}</Text>
+          <Text className="text-base italic text-gray-500 dark:text-gray-400">{record.scientificName}</Text>
           <View className="mt-3 flex-row items-center gap-3">
             <View className={`rounded-full px-3 py-1 ${confidenceColor(record.confidence)}`}>
               <Text className="text-sm font-semibold text-white">
@@ -135,17 +135,17 @@ export default function RecordDetailScreen() {
               </Text>
             </View>
           </View>
-          <Text className="mt-2 text-sm text-gray-400">
+          <Text className="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {formatDateTime(record.timestamp, stationTimezone)}
           </Text>
-          {stationName ? <Text className="text-sm text-gray-400">{stationName}</Text> : null}
+          {stationName ? <Text className="text-sm text-gray-500 dark:text-gray-400">{stationName}</Text> : null}
         </View>
       </ViewShot>
 
-      <View className="px-5 pb-6 gap-3">
+      <View className="px-4 pt-4 pb-6 gap-3">
         {record.soundscapeUrl ? (
           <Pressable
-            className="flex-row items-center justify-center gap-2 rounded-xl bg-green-700 py-3 active:opacity-75 disabled:opacity-50"
+            className="flex-row items-center justify-center gap-2 rounded-2xl bg-green-700 py-3.5 active:opacity-75 disabled:opacity-50"
             onPress={togglePlay}
             disabled={audioLoading}
           >
@@ -159,14 +159,14 @@ export default function RecordDetailScreen() {
           </Pressable>
         ) : null}
         <Pressable
-          className="flex-row items-center justify-center gap-2 rounded-xl border border-gray-200 py-3 active:opacity-75 disabled:opacity-50"
+          className="flex-row items-center justify-center gap-2 rounded-2xl border border-gray-200 dark:border-gray-700 py-3.5 active:opacity-75 disabled:opacity-50"
           onPress={handleShare}
           disabled={shareLoading}
         >
           {shareLoading ? (
-            <ActivityIndicator color="#4b5563" size="small" />
+            <ActivityIndicator color="#5B5A52" size="small" />
           ) : (
-            <Text className="text-base font-semibold text-gray-700">Share sighting</Text>
+            <Text className="text-base font-semibold text-gray-700 dark:text-gray-200">Share sighting</Text>
           )}
         </Pressable>
         {shareError ? (

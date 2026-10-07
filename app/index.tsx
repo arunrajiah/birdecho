@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, Text, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, Image } from 'react-native';
 import { router } from 'expo-router';
 import { useStationStore } from '../src/stores/stationStore';
 
@@ -21,45 +21,49 @@ export default function HomeScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#15803d" />
+      <View className="flex-1 items-center justify-center bg-green-900">
+        <ActivityIndicator size="large" color="#C8A94C" />
       </View>
     );
   }
 
   return (
-    <View className="flex-1 items-center justify-center bg-white px-6">
-      <Text className="text-4xl font-bold text-gray-900">BirdEcho</Text>
-      <Text className="mt-2 text-base text-gray-500 text-center">
-        A companion for your backyard bird station.
-      </Text>
-
-      {isConnected ? (
-        <>
-          <Text className="mt-6 text-lg font-semibold text-green-700">
+    <View className="flex-1 bg-green-900 px-6">
+      <View className="flex-1 items-center justify-center">
+        <Image source={require('../assets/icon.png')} className="h-24 w-24 rounded-3xl" />
+        <Text className="mt-6 text-4xl font-bold text-white">BirdEcho</Text>
+        <Text className="mt-2 text-base text-green-200 text-center">
+          Your backyard bird station, on your phone.
+        </Text>
+        {isConnected ? (
+          <Text className="mt-6 text-sm font-semibold uppercase tracking-widest text-gold-400">
             {stationName ?? '—'}
           </Text>
+        ) : null}
+      </View>
+
+      <View className="pb-12">
+        {isConnected ? (
+          <>
+            <Pressable
+              className="items-center rounded-2xl bg-gold-500 py-4 active:opacity-80"
+              onPress={() => router.replace('/(tabs)')}
+            >
+              <Text className="text-base font-bold text-green-950">View recent sightings</Text>
+            </Pressable>
+            <Pressable className="mt-3 items-center py-2 active:opacity-75" onPress={() => disconnect()}>
+              <Text className="text-sm text-green-200">Disconnect</Text>
+            </Pressable>
+          </>
+        ) : (
           <Pressable
-            className="mt-4 rounded-xl bg-green-700 px-6 py-3 active:opacity-75"
-            onPress={() => router.replace('/(tabs)')}
+            className="items-center rounded-2xl bg-gold-500 py-4 active:opacity-80"
+            onPress={() => router.push('/connect')}
           >
-            <Text className="text-base font-semibold text-white">View recent sightings</Text>
+            <Text className="text-base font-bold text-green-950">Connect your station</Text>
           </Pressable>
-          <Pressable
-            className="mt-3 px-4 py-2 active:opacity-75"
-            onPress={() => disconnect()}
-          >
-            <Text className="text-sm text-gray-400">Disconnect</Text>
-          </Pressable>
-        </>
-      ) : (
-        <Pressable
-          className="mt-8 rounded-xl bg-green-700 px-6 py-3 active:opacity-75"
-          onPress={() => router.push('/connect')}
-        >
-          <Text className="text-base font-semibold text-white">Connect your station</Text>
-        </Pressable>
-      )}
+        )}
+      </View>
     </View>
   );
 }

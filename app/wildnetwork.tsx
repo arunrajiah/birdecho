@@ -23,11 +23,11 @@ function AreaSection() {
 
   const latN = Number(lat), lonN = Number(lon);
   const valid = lat.trim() !== '' && lon.trim() !== '' && Math.abs(latN) <= 90 && Math.abs(lonN) <= 180;
-  const input = 'flex-1 rounded-xl border border-gray-200 bg-gray-50 dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white';
+  const input = 'flex-1 rounded-2xl bg-white dark:bg-gray-900 px-4 py-3 text-sm text-gray-900 dark:text-white';
 
   return (
     <View className="mb-8">
-      <Text className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">Station area</Text>
+      <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Station area</Text>
       <Text className="mb-3 text-sm text-gray-600 dark:text-gray-300">
         Used for the Near you list on the Stats tab. One decimal place is plenty: WildNetwork works
         in 5 degree squares. It stays on this phone.
@@ -39,7 +39,7 @@ function AreaSection() {
           value={lon} onChangeText={(t) => { setLon(t); setSaved(false); }} />
       </View>
       <Pressable
-        className={`items-center rounded-xl py-3 active:opacity-75 ${valid ? 'bg-green-700' : 'bg-gray-300'}`}
+        className={`items-center rounded-2xl py-3.5 active:opacity-75 ${valid ? 'bg-green-700' : 'bg-gray-300'}`}
         disabled={!valid}
         onPress={() => void setStationLocation(station.id, latN, lonN).then(() => setSaved(true))}
       >
@@ -69,7 +69,7 @@ export default function WildNetworkScreen() {
 
   if (!station || !wildNetworkSource(station.connectionType)) {
     return (
-      <ScrollView className="flex-1 bg-white dark:bg-gray-950">
+      <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950">
         <View className="px-5 pt-6 pb-10">
           <AreaSection />
           <Text className="text-sm text-gray-500">
@@ -99,7 +99,7 @@ export default function WildNetworkScreen() {
   const command = apiKey ? installCommand(apiKey) : null;
 
   return (
-    <ScrollView className="flex-1 bg-white dark:bg-gray-950">
+    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950">
       <View className="px-5 pt-6 pb-10">
         <Text className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
           Share with WildNetwork
@@ -116,20 +116,20 @@ export default function WildNetworkScreen() {
           <ActivityIndicator />
         ) : command ? (
           <>
-            <Text className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
+            <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Run this on your Pi
             </Text>
             <Text className="mb-3 text-sm text-gray-600 dark:text-gray-300">
               Open a terminal on the Pi running {station.stationName} (for example over SSH) and
               paste this command. It installs the agent and starts sending.
             </Text>
-            <View className="mb-3 rounded-xl border border-gray-200 bg-gray-50 dark:bg-gray-900 p-4">
+            <View className="mb-3 rounded-2xl bg-white dark:bg-gray-900 p-4">
               <Text selectable className="font-mono text-xs text-gray-800 dark:text-gray-200">
                 {command}
               </Text>
             </View>
             <Pressable
-              className="mb-3 items-center rounded-xl bg-green-700 py-3 active:opacity-75"
+              className="mb-3 items-center rounded-2xl bg-green-700 py-3.5 active:opacity-75"
               onPress={() => void Share.share({ message: command })}
             >
               <Text className="text-sm font-semibold text-white">Share or copy command</Text>
@@ -141,21 +141,21 @@ export default function WildNetworkScreen() {
           </>
         ) : (
           <>
-            <Text className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
+            <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Does this station upload to BirdWeather?
             </Text>
-            <View className="mb-4 flex-row rounded-xl border border-gray-200 overflow-hidden">
+            <View className="mb-4 flex-row rounded-2xl bg-gray-200 dark:bg-gray-800 p-1">
               {(['yes', 'no'] as const).map((a) => (
                 <Pressable
                   key={a}
-                  className={`flex-1 items-center py-2.5 active:opacity-75 ${
-                    uploadsToBirdWeather === a ? 'bg-green-700' : 'bg-white dark:bg-gray-900'
+                  className={`flex-1 items-center rounded-xl py-2.5 active:opacity-75 ${
+                    uploadsToBirdWeather === a ? 'bg-white dark:bg-gray-600' : ''
                   }`}
                   onPress={() => setUploadsToBirdWeather(a)}
                 >
                   <Text
                     className={`text-sm font-medium capitalize ${
-                      uploadsToBirdWeather === a ? 'text-white' : 'text-gray-600 dark:text-gray-300'
+                      uploadsToBirdWeather === a ? 'text-gray-900 dark:text-gray-50' : 'text-gray-600 dark:text-gray-300'
                     }`}
                   >
                     {a}
@@ -174,7 +174,7 @@ export default function WildNetworkScreen() {
             {uploadsToBirdWeather === 'no' && (
               <>
                 <Pressable
-                  className="mb-3 items-center rounded-xl bg-green-700 py-3 active:opacity-75"
+                  className="mb-3 items-center rounded-2xl bg-green-700 py-3.5 active:opacity-75"
                   disabled={busy}
                   onPress={() => void handleRegister()}
                 >

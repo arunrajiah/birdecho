@@ -3,10 +3,13 @@ import { useStationStore } from '../stores/stationStore';
 import { fetchCellArrivals, fetchRegionDrift, regionFor } from '../lib/wildnetwork';
 
 const HOUR = 60 * 60 * 1000;
+const DEMO_LOCATION = { lat: 42.36, lon: -71.06 };
 
 /** Approximate location of the active station, or null if it has none yet. */
 export function useStationLocation(): { lat: number; lon: number } | null {
   const station = useStationStore((s) => s.stations.find((st) => st.id === s.activeStationId));
+  // The demo's sample birds are from the US north-east, so show that area's WildNetwork data.
+  if (station?.connectionType === 'demo') return DEMO_LOCATION;
   if (typeof station?.latitude !== 'number' || typeof station?.longitude !== 'number') return null;
   if (station.latitude === 0 && station.longitude === 0) return null;
   return { lat: station.latitude, lon: station.longitude };
