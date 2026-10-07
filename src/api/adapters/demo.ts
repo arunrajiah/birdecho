@@ -1,3 +1,4 @@
+import { Image } from 'react-native';
 import type { StationAdapter } from '../adapter';
 import type { Detection, RecordsPage, Species, Stats } from '../../types/birdweather';
 
@@ -26,6 +27,31 @@ const SPECIES: Species[] = [
   { id: 'tuftit', commonName: 'Tufted Titmouse', scientificName: 'Baeolophus bicolor', count: 14 },
 ];
 
+// Bundled CC0 photos from iNaturalist (credits in assets/demo/CREDITS.txt), so the
+// demo shows real birds while still making no network requests.
+const PHOTOS: Record<string, number> = {
+  amerob: require('../../../assets/demo/amerob.jpg'),
+  norcar: require('../../../assets/demo/norcar.jpg'),
+  blujay: require('../../../assets/demo/blujay.jpg'),
+  houspa: require('../../../assets/demo/houspa.jpg'),
+  amegfi: require('../../../assets/demo/amegfi.jpg'),
+  bkcchi: require('../../../assets/demo/bkcchi.jpg'),
+  moudov: require('../../../assets/demo/moudov.jpg'),
+  sonspa: require('../../../assets/demo/sonspa.jpg'),
+  dowwoo: require('../../../assets/demo/dowwoo.jpg'),
+  houfin: require('../../../assets/demo/houfin.jpg'),
+  whbnut: require('../../../assets/demo/whbnut.jpg'),
+  tuftit: require('../../../assets/demo/tuftit.jpg'),
+};
+
+/** Asset URI for a bundled photo (a dev-server URL in development, a packaged resource in release). */
+function photoUri(id: string): string | undefined {
+  const mod = PHOTOS[id];
+  return mod === undefined ? undefined : Image.resolveAssetSource(mod).uri;
+}
+
+for (const sp of SPECIES) sp.imageUrl = photoUri(sp.id);
+
 const speciesById = (id: string): Species =>
   SPECIES.find((s) => s.id === id) ?? SPECIES[0]!;
 
@@ -42,6 +68,7 @@ function buildDetections(): Detection[] {
       speciesId: sp.id,
       commonName: sp.commonName,
       scientificName: sp.scientificName,
+      imageUrl: sp.imageUrl,
       timestamp: new Date(now - minutesAgo * 60_000).toISOString(),
       confidence: 0.7 + ((i * 37) % 30) / 100,
     });

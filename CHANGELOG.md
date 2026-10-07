@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] — 2026-10-07
+
+### Added
+
+- **Share your station with WildNetwork.** BirdNET-Pi and BirdNET-Go stations can join [WildNetwork](https://wildnetwork.arunrajiah.com), the open map of where birds are moving. Settings > WildNetwork registers the station and gives you a one-line install command for the Pi; the agent on the Pi does the sending. Stations that already upload to BirdWeather are on the map already and are told so.
+- **Near you on WildNetwork.** The Stats tab shows which birds arrived or are leaving in the 5 degree square around your station, and species moving north or south across your continent. Species pages show this season's arrival and peak weeks in your area. BirdNET-Pi and BirdNET-Go stations set an approximate area once; it stays on the phone.
+- **Today card** at the top of the feed: detections today, species count and the latest bird.
+- **Real bird photos in the demo station** (CC0 photos from iNaturalist, bundled so the demo still makes no network requests).
+
+### Changed
+
+- **Refreshed design.** BirdEcho's own forest green, cream and gold palette throughout, card-based lists, larger titles, softer confidence chips, a new welcome screen, and full dark mode on the species and sighting pages.
+- Status bar icons now follow the app theme (dark icons in light mode).
+
+---
+
 ## [0.10.5] — 2026-10-06
 
 ### Changed

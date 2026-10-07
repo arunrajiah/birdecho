@@ -1,0 +1,1 @@
+New look: BirdEcho's own colours, card layout, a Today summary and dark mode everywhere. Share your BirdNET-Pi or BirdNET-Go station with WildNetwork, the open map of where birds are moving, and see which birds are arriving near you. The demo station now has real bird photos.

@@ -8,14 +8,16 @@ Screenshots should be taken on a physical device or a clean simulator/emulator w
 
 ### Screens to capture
 
-- [x] **Feed tab** — at least 6 sighting rows visible; a mix of confidence levels (green, amber) — `feed-dark-galaxys24.jpg`
-- [x] **Sighting detail** — species photo, confidence pill, play button visible — `sighting-detail-light-galaxys24.jpg`
-- [ ] **Species tab** — species list with thumbnails _(needs recapture on v0.5.5 — thumbnails were blank before the image fix)_
-- [ ] **Species detail** — photo, detection count, star button active _(needs recapture on v0.5.5 — hero photo was blank)_
-- [ ] **Stats tab** — bar chart with 14 days of data, top species list below _(needs recapture on v0.5.5 — was showing the load error)_
-- [ ] **Favorites tab** — at least 3 starred species _(needs recapture on v0.5.5 — thumbnails were blank)_
-- [x] **Settings tab** — theme toggle, notifications switch — `settings-dark-galaxys24.jpg`
-- [ ] **Connect screen** — empty state for onboarding docs
+- [x] **Feed tab**: Today card plus sighting rows with mixed confidence: `feed-light-emulator.jpg`, `feed-dark-emulator.jpg`
+- [x] **Sighting detail**: photo, confidence pill: `sighting-light-emulator.jpg`
+- [x] **Species tab**: list with thumbnails: `species-list-light-emulator.jpg`
+- [x] **Species detail**: photo, detection count, In your area: `species-light-emulator.jpg`
+- [x] **Stats tab**: chart and top species: `stats-dark-emulator.jpg`; Near you on WildNetwork: `stats-nearyou-light-emulator.jpg`
+- [x] **Settings tab**: `settings-dark-emulator.jpg`
+- [ ] **Favorites tab**
+- [ ] **Connect screen**
+
+The current set was captured on the Android emulator with the demo station (v0.11.0). Play Store copies live in `fastlane/metadata/android/en-US/images/phoneScreenshots/`.
 
 ### Dark mode variants
 

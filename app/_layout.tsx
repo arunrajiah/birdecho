@@ -103,9 +103,12 @@ export default function RootLayout() {
           headerTitleStyle: { fontWeight: '700' },
           headerShadowVisible: false,
           contentStyle: { backgroundColor: ui.canvas },
+          // react-native-screens defaults every screen to white status bar icons on Android,
+          // which vanish on the light canvas; set it explicitly from the app's colour scheme.
+          statusBarStyle: isDark ? 'light' : 'dark',
         }}
       >
-        <Stack.Screen name="index" options={{ title: 'BirdEcho', headerShown: false }} />
+        <Stack.Screen name="index" options={{ title: 'BirdEcho', headerShown: false, statusBarStyle: 'light' }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="connect" options={{ title: 'Connect station', presentation: 'modal' }} />
         <Stack.Screen name="record/[id]" options={{ title: 'Sighting' }} />

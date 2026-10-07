@@ -1,0 +1,13 @@
+Demo station bird photos, all CC0 (public domain) from iNaturalist.
+amerob.jpg: Turdus migratorius, iNaturalist observation 108121587 photo 181981477, no rights reserved, CC0
+norcar.jpg: Cardinalis cardinalis, iNaturalist observation 256022747 photo 458931669, no rights reserved, CC0
+blujay.jpg: Cyanocitta cristata, iNaturalist observation 156136915 photo 269951256, no rights reserved, CC0
+houspa.jpg: Passer domesticus, iNaturalist observation 255108840 photo 457100849, no rights reserved, CC0
+amegfi.jpg: Spinus tristis, iNaturalist observation 53187208 photo 84579952, no rights reserved, CC0
+bkcchi.jpg: Poecile atricapillus, iNaturalist observation 193337554 photo 339619545, no rights reserved, CC0
+moudov.jpg: Zenaida macroura, iNaturalist observation 16013165 photo 24075595, no rights reserved, CC0
+sonspa.jpg: Melospiza melodia, iNaturalist observation 79016324 photo 129376982, no rights reserved, CC0
+dowwoo.jpg: Dryobates pubescens, iNaturalist observation 20452544 photo 31579590, no rights reserved, CC0
+houfin.jpg: Haemorhous mexicanus, iNaturalist observation 105476125 photo 176982307, no rights reserved, CC0
+whbnut.jpg: Sitta carolinensis, iNaturalist observation 195523844 photo 343999842, no rights reserved, CC0
+tuftit.jpg: Baeolophus bicolor, iNaturalist observation 8910462 photo 11998344, no rights reserved, CC0
