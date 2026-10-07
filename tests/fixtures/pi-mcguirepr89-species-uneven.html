@@ -1,0 +1,164 @@
+
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+    </style>
+  </head>
+
+<script>
+function deleteDetection(filename,copylink=false) {
+  if (confirm("Are you sure you want to delete this detection from the database?") == true) {
+    const xhttp = new XMLHttpRequest();
+    xhttp.onload = function() {
+      if(this.responseText == "OK"){
+        if(copylink == true) {
+          window.top.close();
+        } else {
+          location.reload();
+        }
+      } else {
+        alert("Database busy.")
+      }
+    }
+    xhttp.open("GET", "play.php?deletefile="+filename, true);
+    xhttp.send();
+  }
+}
+
+function toggleLock(filename, type, elem) {
+  const xhttp = new XMLHttpRequest();
+  xhttp.onload = function() {
+    if(this.responseText == "OK"){
+      if(type == "add") {
+        elem.setAttribute("src","images/lock.svg");
+        elem.setAttribute("title", "This file is excluded from being purged.");
+        elem.setAttribute("onclick", elem.getAttribute("onclick").replace("add","del"));
+      } else {
+        elem.setAttribute("src","images/unlock.svg");
+        elem.setAttribute("title", "This file will be deleted when disk space needs to be freed.");
+        elem.setAttribute("onclick", elem.getAttribute("onclick").replace("del","add"));
+      }
+    }
+  }
+  if(type == "add") {
+    xhttp.open("GET", "play.php?excludefile="+filename+"&exclude_add=true", true);
+  } else {
+    xhttp.open("GET", "play.php?excludefile="+filename+"&exclude_del=true", true);  
+  }
+  xhttp.send();
+  elem.setAttribute("src","images/spinner.gif");
+}
+
+function toggleShiftFreq(filename, shiftAction, elem) {
+  const xhttp = new XMLHttpRequest();
+  xhttp.onload = function() {
+    if(this.responseText == "OK"){
+      if(shiftAction == "shift") {
+        elem.setAttribute("src","images/unshift.svg");
+        elem.setAttribute("title", "This file has been shifted down in frequency.");
+        elem.setAttribute("onclick", elem.getAttribute("onclick").replace("shift","unshift"));
+        console.log("shifted freqs of " + filename);
+          video=elem.parentNode.getElementsByTagName("video");
+          if (video.length > 0) {
+            video[0].setAttribute("title", video[0].getAttribute("title").replace("/By_Date/","/By_Date/shifted/"));
+            source = video[0].getElementsByTagName("source")[0];
+            source.setAttribute("src", source.getAttribute("src").replace("/By_Date/","/By_Date/shifted/"));
+            video[0].load();
+          } else {
+            atag=elem.parentNode.getElementsByTagName("a")[0];
+            atag.setAttribute("href", atag.getAttribute("href").replace("/By_Date/","/By_Date/shifted/"));
+          }
+      } else {
+        elem.setAttribute("src","images/shift.svg");
+        elem.setAttribute("title", "This file is not shifted in frequency.");
+        elem.setAttribute("onclick", elem.getAttribute("onclick").replace("unshift","shift"));
+        console.log("unshifted freqs of " + filename);
+          video=elem.parentNode.getElementsByTagName("video");
+          if (video.length > 0) {
+            video[0].setAttribute("title", video[0].getAttribute("title").replace("/By_Date/shifted/","/By_Date/"));
+            source = video[0].getElementsByTagName("source")[0];
+            source.setAttribute("src", source.getAttribute("src").replace("/By_Date/shifted/","/By_Date/"));
+            video[0].load();
+          } else {
+            atag=elem.parentNode.getElementsByTagName("a")[0];
+            atag.setAttribute("href", atag.getAttribute("href").replace("/By_Date/shifted/","/By_Date/"));
+          }
+      }
+    }
+  }
+  if(shiftAction == "shift") {
+    console.log("shifting freqs of " + filename);
+    xhttp.open("GET", "play.php?shiftfile="+filename+"&doshift=true", true);
+  } else {
+    console.log("unshifting freqs of " + filename);
+    xhttp.open("GET", "play.php?shiftfile="+filename, true);  
+  }
+  xhttp.send();
+  elem.setAttribute("src","images/spinner.gif");
+}
+</script>
+
+<div class="play">
+<div style="width: auto;
+   text-align: center">
+   <form action="" method="GET">
+      <input type="hidden" name="view" value="Recordings">
+      <input type="hidden" name="byspecies" value="">
+      <button  class="sortbutton" type="submit" name="sort" value="alphabetical">
+         <img src="images/sort_abc.svg" title="Sort by alphabetical" alt="Sort by alphabetical">
+      </button>
+      <button style='background:#9fe29b !important;' class="sortbutton" type="submit" name="sort" value="occurrences">
+         <img src="images/sort_occ.svg" title="Sort by occurrences" alt="Sort by occurrences">
+      </button>
+   </form>
+</div>
+
+<table>
+  <tr>
+    <form action="" method="GET">
+    <input type="hidden" name="view" value="Recordings">
+<tr>          <td class="spec">
+              <button type="submit" name="species" value="Tufted Titmouse">Tufted Titmouse</button>
+          </td>
+          </tr><tr>          <td class="spec">
+              <button type="submit" name="species" value="White-breasted Nuthatch">White-breasted Nuthatch</button>
+          </td>
+          </tr><tr>          <td class="spec">
+              <button type="submit" name="species" value="Song Sparrow">Song Sparrow</button>
+          </td>
+          </tr><tr>          <td class="spec">
+              <button type="submit" name="species" value="Northern Cardinal">Northern Cardinal</button>
+          </td>
+          </tr><tr>          <td class="spec">
+              <button type="submit" name="species" value="Mourning Dove">Mourning Dove</button>
+          </td>
+          </tr><tr>          <td class="spec">
+              <button type="submit" name="species" value="Downy Woodpecker">Downy Woodpecker</button>
+          </td>
+          </tr><tr>          <td class="spec">
+              <button type="submit" name="species" value="Blue Jay">Blue Jay</button>
+          </td>
+          </tr><tr>          <td class="spec">
+              <button type="submit" name="species" value="Black-capped Chickadee">Black-capped Chickadee</button>
+          </td>
+          </tr><tr>          <td class="spec">
+              <button type="submit" name="species" value="American Robin">American Robin</button>
+          </td>
+          </tr><tr>          <td class="spec">
+              <button type="submit" name="species" value="American Goldfinch">American Goldfinch</button>
+          </td>
+          </tr></form>
+    </tr>
+    </table></div>
+<style>
+td.spec {
+  width: calc(100% / 1);
+}
+tr:first-child td.spec {
+  padding-top: 10px;
+}
+</style>
+
+</html>

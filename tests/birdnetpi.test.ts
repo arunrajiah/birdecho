@@ -103,6 +103,45 @@ for (const fork of FORKS) {
   });
 }
 
+describe('BirdNET-Pi (mcguirepr89) all-time species counts', () => {
+  // Captured from a seeded mcguirepr89 station where each species has a different
+  // all-time total. play.php there has no counts, so they must come from stats.php,
+  // not from today's detections (which made every total look like "today").
+  it('takes all-time counts from stats.php and sorts by them', async () => {
+    const requested = mockFetch([
+      { match: 'play.php?byspecies', body: fixture('pi-mcguirepr89-species-uneven.html') },
+      { match: 'stats.php', body: fixture('pi-mcguirepr89-statspage.html') },
+      { match: 'ajax_detections', body: fixture('pi-mcguirepr89-detections-uneven.html') },
+    ]);
+    const species = await createBirdNetPiAdapter(BASE).fetchTopSpecies(50);
+    assert.deepEqual(
+      species.map((s) => [s.commonName, s.count]),
+      [
+        ['Tufted Titmouse', 9],
+        ['White-breasted Nuthatch', 9],
+        ['Song Sparrow', 8],
+        ['Northern Cardinal', 7],
+        ['Mourning Dove', 6],
+        ['Downy Woodpecker', 5],
+        ['Blue Jay', 4],
+        ['Black-capped Chickadee', 3],
+        ['American Robin', 2],
+        ['American Goldfinch', 1],
+      ],
+    );
+    assert.ok(requested.some((u) => u.includes('/stats.php')));
+  });
+
+  it('does not ask stats.php when play.php already has counts (Nachtzuster)', async () => {
+    const requested = mockFetch([
+      { match: 'play.php?byspecies', body: fixture('pi-nachtzuster-species.html') },
+      { match: 'ajax_detections', body: fixture('pi-nachtzuster-detections.html') },
+    ]);
+    await createBirdNetPiAdapter(BASE).fetchTopSpecies(50);
+    assert.ok(!requested.some((u) => u.includes('/stats.php')));
+  });
+});
+
 describe('BirdNET-Pi parser safety net', () => {
   it('reports rows it cannot read instead of showing an empty feed', async () => {
     const unknown = '<table><tr><td>17:14:58</td><td><span>Blue Jay</span></td></tr></table>';

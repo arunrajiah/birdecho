@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.1] — 2026-10-07
+
+### Fixed
+
+- **Species counts on the original BirdNET-Pi (mcguirepr89).** The Species tab and Top species showed today's detections as if they were all-time totals, because that version's species page lists no counts. BirdEcho now reads the all-time totals from the station's stats page. Found by testing against a local mcguirepr89 station; Nachtzuster's BirdNET-Pi and BirdNET-Go were already correct.
+
+---
+
 ## [0.11.0] — 2026-10-07
 
 ### Added

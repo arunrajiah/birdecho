@@ -230,6 +230,23 @@ export function parseSpeciesButtons(html: string): SpeciesButton[] {
   return out;
 }
 
+/**
+ * All-time detections per species from /stats.php. mcguirepr89's play.php
+ * species buttons carry no counts, but its stats page prints each species
+ * button followed by `<b>Occurrences:</b> N`.
+ */
+export function parseOccurrences(html: string): Map<string, number> {
+  const out = new Map<string, number>();
+  const re =
+    /<button\b[^>]*\bname=["']species["'][^>]*\bvalue=(?:"([^"]*)"|'([^']*)')[^>]*>[\s\S]*?<\/button>\s*(?:<br\s*\/?>\s*)?<b>\s*Occurrences:\s*<\/b>\s*([\d,]+)/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(html)) !== null) {
+    const name = decodeEntities(m[1] ?? m[2] ?? '').trim();
+    if (name && !out.has(name)) out.set(name, parseInt(m[3]!.replace(/,/g, ''), 10));
+  }
+  return out;
+}
+
 // ── Pagination helper ────────────────────────────────────────────────────────
 
 const PAGE_SIZE = 40;
@@ -327,6 +344,16 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
     ]);
     const buttons = listResult.status === 'fulfilled' ? listResult.value : [];
     for (const b of buttons) if (b.approximate) approximate.add(b.commonName);
+
+    // mcguirepr89: the buttons have no counts, so read all-time totals from stats.php.
+    if (buttons.length > 0 && buttons.every((b) => b.count === undefined)) {
+      try {
+        const totals = parseOccurrences(await bpiGetHtml(base, '/stats.php'));
+        for (const b of buttons) b.count = totals.get(b.commonName) ?? totals.get(b.value);
+      } catch {
+        // Older or customised stations without stats.php keep the fallback below.
+      }
+    }
     const today = todayResult.status === 'fulfilled' ? todayResult.value : [];
     if (listResult.status === 'rejected' && todayResult.status === 'rejected') {
       throw todayResult.reason;
