@@ -55,6 +55,19 @@ export interface CellArrival {
   peakWeek: string | null;
   departureWeek: string | null;
   detections: number;
+  /** Share of resamples that still find this season (0 to 1); under 0.5 is weak. */
+  arrivalSupport?: number | null;
+}
+
+/**
+ * WildNetwork's threshold for a believable arrival: below it the "season" is
+ * usually a repeated misdetection (for example a Eurasian Curlew in Boston).
+ */
+export const MIN_ARRIVAL_SUPPORT = 0.5;
+
+/** True unless WildNetwork marks this arrival as weak. Rows without the field are kept. */
+export function isSolidArrival(a: Pick<CellArrival, 'arrivalSupport'>): boolean {
+  return a.arrivalSupport == null || a.arrivalSupport >= MIN_ARRIVAL_SUPPORT;
 }
 
 /** A species whose range centre moved within one continent (WildNetwork /api/v1/insights). */

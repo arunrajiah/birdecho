@@ -1,11 +1,12 @@
 import { View, Text, Pressable, Linking } from 'react-native';
 import { useCellArrivals } from '../hooks/useWildNetwork';
-import { formatWeek, speciesUrl } from '../lib/wildnetwork';
+import { formatWeek, isSolidArrival, speciesUrl } from '../lib/wildnetwork';
 
 /** One species' seasonal timing in the station's 5-degree square, from WildNetwork. */
 export default function SeasonLine({ scientificName }: { scientificName: string }) {
   const { data } = useCellArrivals();
-  const row = data?.find((a) => a.scientificName === scientificName);
+  // Weak seasons (likely misdetections) are left out rather than shown as fact.
+  const row = data?.find((a) => a.scientificName === scientificName && isSolidArrival(a));
   const parts = row
     ? [
         row.arrivalWeek && `arrived week of ${formatWeek(row.arrivalWeek)}`,

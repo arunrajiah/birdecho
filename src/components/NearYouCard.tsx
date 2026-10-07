@@ -1,7 +1,7 @@
 import { View, Text, Pressable, Linking, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { useCellArrivals, useRegionDrift, useStationLocation } from '../hooks/useWildNetwork';
-import { WILDNETWORK_BASE, formatWeek, regionFor, speciesUrl, type CellArrival } from '../lib/wildnetwork';
+import { WILDNETWORK_BASE, formatWeek, isSolidArrival, regionFor, speciesUrl, type CellArrival } from '../lib/wildnetwork';
 
 const RECENT_DAYS = 28;
 
@@ -56,7 +56,7 @@ export default function NearYouCard({ heardHere }: { heardHere: Set<string> }) {
   const name = (a: { vernacularName: string | null; scientificName: string }) => a.vernacularName ?? a.scientificName;
   const rows = arrivals.data ?? [];
   const arrived = rows
-    .filter((a) => isRecent(a.arrivalWeek) && !a.departureWeek)
+    .filter((a) => isRecent(a.arrivalWeek) && !a.departureWeek && isSolidArrival(a))
     .sort((a, b) => (b.arrivalWeek ?? '').localeCompare(a.arrivalWeek ?? '') || b.detections - a.detections)
     .slice(0, 6);
   const leaving = rows
