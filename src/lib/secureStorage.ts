@@ -153,3 +153,17 @@ export async function setConnectionType(type: string): Promise<void> {
 export async function setHostUrl(url: string): Promise<void> {
   await SecureStore.setItemAsync(HOST_URL_KEY, url);
 }
+
+// ─── WildNetwork device keys (one per station, issued by /api/v1/register) ───
+
+function wildNetworkKey(stationId: string): string {
+  return `wildnetwork_key_${stationId}`;
+}
+
+export async function getWildNetworkKey(stationId: string): Promise<string | null> {
+  return SecureStore.getItemAsync(wildNetworkKey(stationId));
+}
+
+export async function setWildNetworkKey(stationId: string, key: string): Promise<void> {
+  await SecureStore.setItemAsync(wildNetworkKey(stationId), key);
+}

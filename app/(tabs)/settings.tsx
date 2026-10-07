@@ -6,6 +6,7 @@ import { useThemeStore } from '../../src/stores/themeStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { requestPermission } from '../../src/lib/notifications';
 import type { SavedStation } from '../../src/types/station';
+import { wildNetworkSource } from '../../src/lib/wildnetwork';
 
 type Mode = 'light' | 'dark' | 'system';
 const MODES: Mode[] = ['light', 'dark', 'system'];
@@ -79,6 +80,7 @@ export default function SettingsScreen() {
   const removeStation = useStationStore((s) => s.removeStation);
   const disconnect = useStationStore((s) => s.disconnect);
   const isConnected = useStationStore((s) => s.isConnected);
+  const activeType = useStationStore((s) => s.connectionType);
 
   const { mode, setMode } = useThemeStore();
   const rareAlertsEnabled = useSettingsStore((s) => s.rareAlertsEnabled);
@@ -186,6 +188,24 @@ export default function SettingsScreen() {
           Mark species as rare from their detail page (⚑). This fires a local notification the
           first time each one is detected per day. No data leaves your device.
         </Text>
+
+        {/* ── WildNetwork ──────────────────────────────────────────────────── */}
+        {isConnected && wildNetworkSource(activeType) && (
+          <>
+            <Text className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
+              WildNetwork
+            </Text>
+            <Pressable
+              className="mb-6 rounded-xl border border-gray-200 bg-gray-50 dark:bg-gray-900 px-4 py-3 active:opacity-75"
+              onPress={() => router.push('/wildnetwork')}
+            >
+              <Text className="text-sm text-gray-700 dark:text-gray-300">Share this station with WildNetwork</Text>
+              <Text className="text-xs text-gray-400 mt-0.5">
+                Add your detections to the open map of where birds are moving
+              </Text>
+            </Pressable>
+          </>
+        )}
 
         {/* ── Stations ─────────────────────────────────────────────────────── */}
         <Text className="mb-2 text-xs font-medium uppercase tracking-wide text-gray-400">
