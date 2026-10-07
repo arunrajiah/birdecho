@@ -8,6 +8,7 @@ import { useFavoritesStore } from '../../src/stores/favoritesStore';
 import { useRareStore } from '../../src/stores/rareStore';
 import RecordCard from '../../src/components/RecordCard';
 import RareBadge from '../../src/components/RareBadge';
+import SeasonLine from '../../src/components/SeasonLine';
 
 export default function SpeciesDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -92,6 +93,8 @@ export default function SpeciesDetailScreen() {
             {rare ? '⚑  Marked as rare' : '⚑  Mark as rare'}
           </Text>
         </Pressable>
+
+        <SeasonLine scientificName={species.scientificName} />
 
         {recentRecords && recentRecords.length > 0 ? (
           <View className="mt-5">

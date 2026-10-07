@@ -78,6 +78,9 @@ interface StationState {
   /** Remove a station.  If it was active, the next station becomes active. */
   removeStation: (id: string) => Promise<void>;
 
+  /** Set a station's approximate location (BirdNET-Pi / Go stations have none from their API). */
+  setStationLocation: (id: string, latitude: number, longitude: number) => Promise<void>;
+
   /**
    * Remove all stations and clear all persisted state.
    * Equivalent to a full logout / factory-reset.
@@ -224,6 +227,12 @@ export const useStationStore = create<StationState>((set, get) => ({
   },
 
   // ── connectBirdNetPi ───────────────────────────────────────────────────────
+
+  setStationLocation: async (id, latitude, longitude) => {
+    const stations = get().stations.map((st) => (st.id === id ? { ...st, latitude, longitude } : st));
+    await storage.setStationList(stations);
+    set({ stations, ...deriveActive(stations, get().activeStationId) });
+  },
 
   connectBirdNetPi: async (hostUrl, stationName) => {
     const id = storage.generateStationId();

@@ -41,3 +41,65 @@ export async function registerWithWildNetwork(name: string, type: ConnectionType
 export function installCommand(apiKey: string): string {
   return `curl -fsSL ${WILDNETWORK_BASE}/agent/install.sh | WDX_KEY=${apiKey} bash`;
 }
+
+// ─── Read side: WildNetwork context for the station's area ───────────────────
+
+/** Seasonal timing for one species in one 5-degree cell (WildNetwork /api/v1/arrivals). */
+export interface CellArrival {
+  scientificName: string;
+  vernacularName: string | null;
+  cellLat: number;
+  cellLon: number;
+  region: string;
+  arrivalWeek: string | null;
+  peakWeek: string | null;
+  departureWeek: string | null;
+  detections: number;
+}
+
+/** A species whose range centre moved within one continent (WildNetwork /api/v1/insights). */
+export interface Drift {
+  scientificName: string;
+  vernacularName: string | null;
+  region: string;
+  driftDeg: number;
+}
+
+async function getJson<T>(path: string): Promise<T> {
+  const res = await fetch(`${WILDNETWORK_BASE}${path}`);
+  if (!res.ok) throw new Error(`WildNetwork HTTP ${res.status}`);
+  return (await res.json()) as T;
+}
+
+/** Every species with seasonal timing in the 5-degree cell containing the point. */
+export async function fetchCellArrivals(lat: number, lon: number): Promise<CellArrival[]> {
+  const j = await getJson<{ arrivals: CellArrival[] }>(`/api/v1/arrivals?lat=${lat}&lon=${lon}`);
+  return j.arrivals;
+}
+
+/** Bird species moving north or south within a region (continent). */
+export async function fetchRegionDrift(region: string): Promise<Drift[]> {
+  const j = await getJson<{ drift: Drift[] }>('/api/v1/insights?group=avian');
+  return j.drift.filter((d) => d.region === region);
+}
+
+/** Same continent split as WildNetwork's REGION (src/lib/methods.ts), applied to the cell corner. */
+export function regionFor(lat: number, lon: number): string {
+  const cLat = Math.floor(lat / 5) * 5;
+  const cLon = Math.floor(lon / 5) * 5;
+  if (cLon < -30) return cLat >= 10 ? 'North America' : 'South America';
+  if (cLon < 60) return cLat >= 35 ? 'Europe' : 'Africa';
+  if (cLon >= 110 && cLat < -10) return 'Oceania';
+  return 'Asia';
+}
+
+export function speciesUrl(scientificName: string): string {
+  return `${WILDNETWORK_BASE}/species/${scientificName.toLowerCase().replace(/\s+/g, '-')}`;
+}
+
+/** "2026-09-21" (a Monday) -> "21 Sep". Weeks are ISO dates from WildNetwork. */
+export function formatWeek(week: string | null): string | null {
+  if (!week) return null;
+  const d = new Date(`${week}T00:00:00Z`);
+  return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', timeZone: 'UTC' });
+}

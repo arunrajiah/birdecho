@@ -7,6 +7,7 @@ import * as Sharing from 'expo-sharing';
 import { useStationStore } from '../../src/stores/stationStore';
 import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import ErrorState from '../../src/components/ErrorState';
+import NearYouCard from '../../src/components/NearYouCard';
 
 function StatCard({ label, value }: { label: string; value: number | string }) {
   return (
@@ -195,6 +196,8 @@ export default function StatsScreen() {
             ))}
           </View>
         ) : null}
+
+        <NearYouCard heardHere={new Set((topSpecies ?? []).map((sp) => sp.scientificName))} />
 
         {/* CSV export */}
         <View className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
