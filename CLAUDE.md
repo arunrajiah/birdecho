@@ -23,7 +23,7 @@ Expo (React Native) + TypeScript, expo-router, NativeWind/Tailwind, TanStack Que
 - Tailwind classes via NativeWind; routes are file-based under `app/`. `gray`/`green` are remapped to the brand palette in tailwind.config.js (mirror in src/theme/colors.ts, `chrome()` for nav colors): screens use `bg-gray-50 dark:bg-gray-950` canvas with `rounded-2xl bg-white dark:bg-gray-900` cards.
 - No em dashes in user-facing copy.
 - Station adapters (`src/api/adapters/`, `src/api/*.ts`): verify API claims against the station's source or a live server, never from memory; add a fixture test for each fix. BirdNET-Pi HTML differs by fork (Nachtzuster vs mcguirepr89).
-- Release: bump `app.json` version + versionCode, CHANGELOG entry, fastlane changelog `<versionCode>.txt`, then push tag `vX.Y.Z` (GitHub Actions builds the APK).
+- Release: bump `app.json` version + versionCode, CHANGELOG entry, fastlane changelog `<versionCode>.txt`, then push tag `vX.Y.Z` (GitHub Actions builds the APK). Play: `npx eas-cli build -p android --profile playstore` (bumps versionCode, commit it) then `npx eas-cli submit -p android --profile playstore --latest` (service account key lives in ../wildecho/secrets, never commit it; it can release but not edit the store listing).
 
 ## Token efficiency
 - Grep/Glob to the target file; read only the relevant section, never whole large files.

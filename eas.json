@@ -42,6 +42,13 @@
         "serviceAccountKeyPath": "./path/to/google-service-account.json",
         "track": "internal"
       }
+    },
+    "playstore": {
+      "android": {
+        "serviceAccountKeyPath": "../wildecho/secrets/play-service-account.json",
+        "track": "production",
+        "releaseStatus": "completed"
+      }
     }
   }
 }
