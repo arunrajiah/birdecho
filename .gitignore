@@ -57,3 +57,7 @@ modules/wear-sync/android/build/
 # assistant notes and tooling, kept locally
 CLAUDE.md
 .claude/
+
+# Local AI assistant / OS / env files
+CLAUDE.local.md
+.mcp.json
