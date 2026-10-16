@@ -40,8 +40,6 @@ BirdEcho is **not** a bird-identification app. It does not listen to audio or id
 | **Feed (dark)** | **Sighting** | **Stats (dark)** |
 | ![Feed tab in dark mode](docs/media/feed-dark-emulator.jpg) | ![Sighting detail](docs/media/sighting-light-emulator.jpg) | ![Stats tab in dark mode](docs/media/stats-dark-emulator.jpg) |
 
-<sub>Captured with the built-in demo station (bird photos are CC0 from iNaturalist). Earlier screenshots were contributed by [@HWittingen](https://github.com/HWittingen), thank you.</sub>
-
 > More screens (Species, Stats, Favorites) coming soon — if you're running BirdEcho against your station, we'd love your help! See [docs/media/README.md](docs/media/README.md) for the capture checklist and how to submit a PR.
 
 ---
