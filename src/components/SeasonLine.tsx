@@ -2,7 +2,7 @@ import { View, Text, Pressable, Linking } from 'react-native';
 import { useCellArrivals } from '../hooks/useWildNetwork';
 import { formatWeek, isSolidArrival, speciesUrl } from '../lib/wildnetwork';
 
-/** One species' seasonal timing in the station's 5-degree square, from WildNetwork. */
+/** One species' seasonal timing in the station's 5-degree square, from Wildlife Network. */
 export default function SeasonLine({ scientificName }: { scientificName: string }) {
   const { data } = useCellArrivals();
   // Weak seasons (likely misdetections) are left out rather than shown as fact.
@@ -24,7 +24,7 @@ export default function SeasonLine({ scientificName }: { scientificName: string 
         </Text>
       ) : null}
       <Pressable className="mt-1" onPress={() => void Linking.openURL(speciesUrl(scientificName))}>
-        <Text className="text-sm font-semibold text-green-700 dark:text-green-300">See its movement on WildNetwork</Text>
+        <Text className="text-sm font-semibold text-green-700 dark:text-green-300">See its movement on Wildlife Network</Text>
       </Pressable>
     </View>
   );

@@ -191,17 +191,17 @@ export default function SettingsScreen() {
           first time each one is detected per day. No data leaves your device.
         </Text>
 
-        {/* ── WildNetwork ──────────────────────────────────────────────────── */}
+        {/* ── Wildlife Network ──────────────────────────────────────────────────── */}
         {isConnected && wildNetworkSource(activeType) && (
           <>
             <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              WildNetwork
+              Wildlife Network
             </Text>
             <Pressable
               className="mb-6 rounded-2xl bg-white dark:bg-gray-900 px-4 py-3.5 active:opacity-75"
               onPress={() => router.push('/wildnetwork')}
             >
-              <Text className="text-[15px] font-medium text-gray-900 dark:text-gray-50">Share this station with WildNetwork</Text>
+              <Text className="text-[15px] font-medium text-gray-900 dark:text-gray-50">Share this station with Wildlife Network</Text>
               <Text className="text-xs text-gray-400 mt-0.5">
                 Add your detections to the open map of where birds are moving
               </Text>

@@ -12,7 +12,7 @@ import {
 
 type BirdWeatherAnswer = 'unknown' | 'yes' | 'no';
 
-/** Approximate station location, used for WildNetwork's "near you" lists (5 degree squares). */
+/** Approximate station location, used for Wildlife Network's "near you" lists (5 degree squares). */
 function AreaSection() {
   const station = useStationStore((s) => s.stations.find((st) => st.id === s.activeStationId) ?? null);
   const setStationLocation = useStationStore((s) => s.setStationLocation);
@@ -29,7 +29,7 @@ function AreaSection() {
     <View className="mb-8">
       <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Station area</Text>
       <Text className="mb-3 text-sm text-gray-600 dark:text-gray-300">
-        Used for the Near you list on the Stats tab. One decimal place is plenty: WildNetwork works
+        Used for the Near you list on the Stats tab. One decimal place is plenty: Wildlife Network works
         in 5 degree squares. It stays on this phone.
       </Text>
       <View className="mb-3 flex-row gap-3">
@@ -73,8 +73,8 @@ export default function WildNetworkScreen() {
         <View className="px-5 pt-6 pb-10">
           <AreaSection />
           <Text className="text-sm text-gray-500">
-            Sharing with WildNetwork works for BirdNET-Pi and BirdNET-Go stations. Stations on
-            BirdWeather are already included on the WildNetwork map.
+            Sharing with Wildlife Network works for BirdNET-Pi and BirdNET-Go stations. Stations on
+            BirdWeather are already included on the Wildlife Network map.
           </Text>
         </View>
       </ScrollView>
@@ -102,10 +102,10 @@ export default function WildNetworkScreen() {
     <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950">
       <View className="px-5 pt-6 pb-10">
         <Text className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
-          Share with WildNetwork
+          Share with Wildlife Network
         </Text>
         <Text className="mb-6 text-sm text-gray-600 dark:text-gray-300">
-          WildNetwork is a free, open map of where birds and animals are and where they are
+          Wildlife Network is a free, open map of where birds and animals are and where they are
           going. Your station can add its detections. A small agent on your Pi sends them; your
           location is rounded to about 1 km before anything leaves the Pi.
         </Text>
@@ -166,7 +166,7 @@ export default function WildNetworkScreen() {
 
             {uploadsToBirdWeather === 'yes' && (
               <Text className="mb-6 text-sm text-gray-600 dark:text-gray-300">
-                You are already on the map. WildNetwork includes BirdWeather stations
+                You are already on the map. Wildlife Network includes BirdWeather stations
                 automatically, so installing the agent as well would count your detections twice.
               </Text>
             )}
@@ -185,7 +185,7 @@ export default function WildNetworkScreen() {
                   )}
                 </Pressable>
                 <Text className="mb-6 px-1 text-xs text-gray-400">
-                  This registers {station.stationName} with WildNetwork and creates a device key
+                  This registers {station.stationName} with Wildlife Network and creates a device key
                   for it. Nothing else is sent from your phone.
                 </Text>
               </>
@@ -199,7 +199,7 @@ export default function WildNetworkScreen() {
           <Text className="text-sm font-medium text-green-700">Full setup guide</Text>
         </Pressable>
         <Pressable className="mt-3" onPress={() => void Linking.openURL(WILDNETWORK_BASE)}>
-          <Text className="text-sm font-medium text-green-700">Open the WildNetwork map</Text>
+          <Text className="text-sm font-medium text-green-700">Open the Wildlife Network map</Text>
         </Pressable>
       </View>
     </ScrollView>

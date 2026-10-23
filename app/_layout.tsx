@@ -113,7 +113,7 @@ export default function RootLayout() {
         <Stack.Screen name="connect" options={{ title: 'Connect station', presentation: 'modal' }} />
         <Stack.Screen name="record/[id]" options={{ title: 'Sighting' }} />
         <Stack.Screen name="species/[id]" options={{ title: 'Species' }} />
-        <Stack.Screen name="wildnetwork" options={{ title: 'WildNetwork' }} />
+        <Stack.Screen name="wildnetwork" options={{ title: 'Wildlife Network' }} />
       </Stack>
     </PersistQueryClientProvider>
   );

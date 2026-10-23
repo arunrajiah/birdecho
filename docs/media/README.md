@@ -12,7 +12,7 @@ Screenshots should be taken on a physical device or a clean simulator/emulator w
 - [x] **Sighting detail**: photo, confidence pill: `sighting-light-emulator.jpg`
 - [x] **Species tab**: list with thumbnails: `species-list-light-emulator.jpg`
 - [x] **Species detail**: photo, detection count, In your area: `species-light-emulator.jpg`
-- [x] **Stats tab**: chart and top species: `stats-dark-emulator.jpg`; Near you on WildNetwork: `stats-nearyou-light-emulator.jpg`
+- [x] **Stats tab**: chart and top species: `stats-dark-emulator.jpg`; Near you on Wildlife Network: `stats-nearyou-light-emulator.jpg`
 - [x] **Settings tab**: `settings-dark-emulator.jpg`
 - [ ] **Favorites tab**
 - [ ] **Connect screen**

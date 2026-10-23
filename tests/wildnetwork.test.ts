@@ -2,8 +2,8 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { isSolidArrival } from '../src/lib/wildnetwork';
 
-// Values as returned by WildNetwork /api/v1/arrivals for the Boston cell (40,-75), 2026-10-07.
-describe('WildNetwork arrivals filter', () => {
+// Values as returned by Wildlife Network /api/v1/arrivals for the Boston cell (40,-75), 2026-10-07.
+describe('Wildlife Network arrivals filter', () => {
   it('drops weak seasons and keeps solid or unscored ones', () => {
     assert.equal(isSolidArrival({ arrivalSupport: 0.28 }), false); // Eurasian Curlew
     assert.equal(isSolidArrival({ arrivalSupport: 0.78 }), true); // Long-eared Owl

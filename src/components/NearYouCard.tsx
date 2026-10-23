@@ -26,7 +26,7 @@ function SpeciesLine({ name, sci, detail, heardHere }: { name: string; sci: stri
 }
 
 /**
- * "Near you on WildNetwork": seasonal arrivals and departures in the station's
+ * "Near you on Wildlife Network": seasonal arrivals and departures in the station's
  * 5-degree square and species moving within its continent.
  * `heardHere` holds scientific names this station has detected.
  */
@@ -38,7 +38,7 @@ export default function NearYouCard({ heardHere }: { heardHere: Set<string> }) {
   if (!loc) {
     return (
       <View className="mt-3 rounded-2xl bg-white dark:bg-gray-900 p-4">
-        <Text className="mb-1 text-base font-semibold text-gray-900 dark:text-gray-50">Near you on WildNetwork</Text>
+        <Text className="mb-1 text-base font-semibold text-gray-900 dark:text-gray-50">Near you on Wildlife Network</Text>
         <Text className="mb-3 text-sm text-gray-400 dark:text-gray-500">
           See which birds are arriving and leaving around your station. Set your station&apos;s
           approximate area first.
@@ -84,14 +84,14 @@ export default function NearYouCard({ heardHere }: { heardHere: Set<string> }) {
 
   return (
     <View className="mt-3 rounded-2xl bg-white dark:bg-gray-900 p-4">
-      <Text className="mb-1 text-base font-semibold text-gray-900 dark:text-gray-50">Near you on WildNetwork</Text>
+      <Text className="mb-1 text-base font-semibold text-gray-900 dark:text-gray-50">Near you on Wildlife Network</Text>
       <Text className="mb-3 text-sm text-gray-400 dark:text-gray-500">
         Across all stations in the 5 degree square around yours, effort corrected.
       </Text>
 
       {arrivals.isLoading ? <ActivityIndicator className="my-3" /> : null}
       {arrivals.isError ? (
-        <Text className="mb-3 text-sm text-gray-400">WildNetwork is not reachable right now.</Text>
+        <Text className="mb-3 text-sm text-gray-400">Wildlife Network is not reachable right now.</Text>
       ) : null}
       {list('Arrived in the last 4 weeks', arrived, (a) => a.arrivalWeek)}
       {list('Leaving', leaving, (a) => a.departureWeek)}
@@ -115,7 +115,7 @@ export default function NearYouCard({ heardHere }: { heardHere: Set<string> }) {
       ) : null}
 
       <Pressable onPress={() => void Linking.openURL(WILDNETWORK_BASE)}>
-        <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Open the WildNetwork map</Text>
+        <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Open the Wildlife Network map</Text>
       </Pressable>
     </View>
   );

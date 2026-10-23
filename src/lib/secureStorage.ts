@@ -154,7 +154,7 @@ export async function setHostUrl(url: string): Promise<void> {
   await SecureStore.setItemAsync(HOST_URL_KEY, url);
 }
 
-// ─── WildNetwork device keys (one per station, issued by /api/v1/register) ───
+// ─── Wildlife Network device keys (one per station, issued by /api/v1/register) ───
 
 function wildNetworkKey(stationId: string): string {
   return `wildnetwork_key_${stationId}`;
