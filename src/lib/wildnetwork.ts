@@ -1,5 +1,5 @@
 /**
- * WildNetwork (https://wildnetwork.arunrajiah.com) contribution helpers.
+ * WildNetwork (https://wlnw.org) contribution helpers.
  *
  * BirdEcho does not relay detections itself: it registers a device key and hands
  * the user the wdx-agent install command with that key filled in. The agent on the
@@ -7,7 +7,7 @@
  */
 import type { ConnectionType } from '../types/station';
 
-export const WILDNETWORK_BASE = 'https://wildnetwork.arunrajiah.com';
+export const WILDNETWORK_BASE = 'https://wlnw.org';
 export const WILDNETWORK_CONTRIBUTE_URL = `${WILDNETWORK_BASE}/contribute`;
 
 /** WildNetwork source systems for the station types the agent supports. */
