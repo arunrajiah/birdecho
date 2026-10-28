@@ -1,0 +1,1 @@
+New "What do you have?" setup: add a Wildlife Network Base (BirdEcho joins its Wi-Fi), a BirdWeather station, BirdNET-Pi, BirdNET-Go or your own DIY device. Species in Near you open in the app. Fixed: Today on BirdNET-Go now counts by your local day, stations get proper names, and clearer empty states.
