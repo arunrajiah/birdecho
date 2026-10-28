@@ -1,5 +1,5 @@
 import { View, Text, Pressable, Switch, Alert, ScrollView } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import Constants from 'expo-constants';
 import { useStationStore } from '../../src/stores/stationStore';
 import { useThemeStore } from '../../src/stores/themeStore';
@@ -7,6 +7,8 @@ import { useSettingsStore } from '../../src/stores/settingsStore';
 import { requestPermission } from '../../src/lib/notifications';
 import type { SavedStation } from '../../src/types/station';
 import { wildNetworkSource } from '../../src/lib/wildnetwork';
+import { getBases, type ManagedBase } from '../../src/lib/secureStorage';
+import { useCallback, useState } from 'react';
 
 type Mode = 'light' | 'dark' | 'system';
 const MODES: Mode[] = ['light', 'dark', 'system'];
@@ -84,6 +86,8 @@ export default function SettingsScreen() {
   const disconnect = useStationStore((s) => s.disconnect);
   const isConnected = useStationStore((s) => s.isConnected);
   const activeType = useStationStore((s) => s.connectionType);
+  const [bases, setBases] = useState<ManagedBase[]>([]);
+  useFocusEffect(useCallback(() => { void getBases().then(setBases); }, []));
 
   const { mode, setMode } = useThemeStore();
   const rareAlertsEnabled = useSettingsStore((s) => s.rareAlertsEnabled);
@@ -209,6 +213,26 @@ export default function SettingsScreen() {
           </>
         )}
 
+        {/* ── Bases ─────────────────────────────────────────────────────────── */}
+        {bases.length > 0 && (
+          <>
+            <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Bases</Text>
+            <View className="mb-6 rounded-2xl bg-white dark:bg-gray-900 overflow-hidden">
+              {bases.map((b, i) => (
+                <Pressable
+                  key={b.hardwareId}
+                  accessibilityRole="button"
+                  className={`px-4 py-3.5 active:opacity-80 ${i > 0 ? 'border-t border-gray-100 dark:border-gray-800' : ''}`}
+                  onPress={() => router.push({ pathname: '/base/[id]', params: { id: b.deviceId || b.hardwareId } })}
+                >
+                  <Text className="text-[15px] font-medium text-gray-900 dark:text-gray-50">{b.name}</Text>
+                  <Text className="text-xs text-gray-400 mt-0.5">Wildlife Network Base · health and status</Text>
+                </Pressable>
+              ))}
+            </View>
+          </>
+        )}
+
         {/* ── Stations ─────────────────────────────────────────────────────── */}
         <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
           Stations
@@ -241,9 +265,9 @@ export default function SettingsScreen() {
         {/* Add station */}
         <Pressable
           className="mb-3 flex-row items-center justify-center rounded-2xl bg-green-700 py-3.5 active:opacity-75"
-          onPress={() => router.push('/connect')}
+          onPress={() => router.push('/onboarding')}
         >
-          <Text className="text-sm font-semibold text-white">+ Add station</Text>
+          <Text className="text-sm font-semibold text-white">+ Add a device</Text>
         </Pressable>
 
         {/* Disconnect all — only show when connected */}

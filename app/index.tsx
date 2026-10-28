@@ -58,7 +58,7 @@ export default function HomeScreen() {
         ) : (
           <Pressable
             className="items-center rounded-2xl bg-gold-500 py-4 active:opacity-80"
-            onPress={() => router.push('/connect')}
+            onPress={() => router.push('/onboarding')}
           >
             <Text className="text-base font-bold text-green-950">Connect your station</Text>
           </Pressable>

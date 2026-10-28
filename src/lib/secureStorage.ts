@@ -167,3 +167,42 @@ export async function getWildNetworkKey(stationId: string): Promise<string | nul
 export async function setWildNetworkKey(stationId: string, key: string): Promise<void> {
   await SecureStore.setItemAsync(wildNetworkKey(stationId), key);
 }
+
+// ─── Wildlife Network Bases set up from this phone ───────────────────────────
+
+/**
+ * A Base this app set up. The setup code and API key stay in secure storage: they are needed for later
+ * changes, data pickup and acknowledgements (wildnetwork/docs/BASE-FIELD-APP.md).
+ */
+export interface ManagedBase {
+  deviceId: string;
+  hardwareId: string;
+  name: string;
+  ssid: string;
+  setupCode: string;
+  apiKey: string;
+  latitude?: number;
+  longitude?: number;
+  addedAt: string;
+}
+
+const BASES_KEY = 'wildnetwork_bases';
+
+export async function getBases(): Promise<ManagedBase[]> {
+  try {
+    const raw = await SecureStore.getItemAsync(BASES_KEY);
+    return raw ? (JSON.parse(raw) as ManagedBase[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function saveBase(base: ManagedBase): Promise<void> {
+  const others = (await getBases()).filter((b) => b.hardwareId !== base.hardwareId);
+  await SecureStore.setItemAsync(BASES_KEY, JSON.stringify([...others, base]));
+}
+
+export async function removeBase(hardwareId: string): Promise<void> {
+  const left = (await getBases()).filter((b) => b.hardwareId !== hardwareId);
+  await SecureStore.setItemAsync(BASES_KEY, JSON.stringify(left));
+}

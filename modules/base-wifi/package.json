@@ -1,0 +1,7 @@
+{
+  "name": "birdecho-base-wifi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Joins a Wildlife Network Base's own Wi-Fi hotspot and routes the app's requests to it while setting it up.",
+  "license": "MIT"
+}

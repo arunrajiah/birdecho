@@ -24,7 +24,7 @@ export default function ErrorState({ error, onRetry, subject = 'data' }: Props) 
         </Text>
         <Pressable
           className="mt-2 rounded-2xl bg-green-700 px-6 py-3 active:opacity-75"
-          onPress={() => router.replace('/connect')}
+          onPress={() => router.replace('/onboarding')}
         >
           <Text className="font-semibold text-white">Reconnect station</Text>
         </Pressable>
