@@ -104,6 +104,33 @@ function mapSpecies(s: BngSpeciesSummary, base: string): Species {
 }
 
 /** Local calendar date as YYYY-MM-DD (BirdNET-Go analytics are keyed by date). */
+/**
+ * Detections at or after `since`, counted from their timestamps (which carry the station's UTC offset).
+ * BirdNET-Go's daily totals use the station's own calendar date, which can differ from the phone's: a station
+ * on UTC still reports "yesterday" at 2 AM in India. Pages newest first and stops at the first older detection.
+ */
+export async function countDetectionsSince(base: string, since: Date, maxPages = 20): Promise<number> {
+  const cutoff = since.getTime();
+  let count = 0;
+  for (let page = 0, offset = 0; page < maxPages; page++) {
+    const data = await bngFetch<BngPaginated>(base, `/detections?limit=100&offset=${offset}&order=desc`);
+    const rows = data.data ?? [];
+    for (const d of rows) {
+      const t = Date.parse(d.timestamp);
+      if (!Number.isFinite(t)) throw new Error('detection without a parsable timestamp');
+      if (t < cutoff) return count;
+      count++;
+    }
+    offset += rows.length;
+    if (rows.length === 0 || offset >= data.total) return count;
+  }
+  return count;
+}
+
+function localMidnight(now = new Date()): Date {
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
 function ymd(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -183,20 +210,22 @@ export function createBirdNetGoAdapter(hostUrl: string): StationAdapter {
 
     async fetchStats(): Promise<Stats> {
       const today = ymd(new Date());
-      const [summaryResult, dailyResult] = await Promise.allSettled([
+      const [summaryResult, dailyResult, localResult] = await Promise.allSettled([
         bngFetch<BngSpeciesSummary[]>(base, `/analytics/species/summary`),
         bngFetch<BngDailyResponse>(
           base,
           `/analytics/time/daily?start_date=${today}&end_date=${today}`,
         ),
+        countDetectionsSince(base, localMidnight()),
       ]);
       // Surface error only if both calls failed — partial data is better than an error screen.
       if (summaryResult.status === 'rejected' && dailyResult.status === 'rejected') {
         throw summaryResult.reason;
       }
       const summary = summaryResult.status === 'fulfilled' ? summaryResult.value : [];
-      // `total` is today's detection count for a single-day range.
-      const recordsToday = dailyResult.status === 'fulfilled' ? dailyResult.value.total : 0;
+      // Today on the phone's calendar; the station's daily `total` is only a fallback (it uses the station's date).
+      const recordsToday =
+        localResult.status === 'fulfilled' ? localResult.value : dailyResult.status === 'fulfilled' ? dailyResult.value.total : 0;
       return {
         totalRecords: summary.reduce((n, s) => n + s.count, 0),
         uniqueSpecies: summary.length,

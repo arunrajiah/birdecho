@@ -29,7 +29,8 @@
       "extends": "production",
       "env": {
         "EXPO_PUBLIC_FDROID": "1"
-      }
+      },
+      "autoIncrement": false
     }
   },
   "submit": {
