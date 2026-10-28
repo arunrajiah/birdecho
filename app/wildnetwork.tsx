@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView, Share, Linking, ActivityIndicator, T
 import { useStationStore } from '../src/stores/stationStore';
 import { getWildNetworkKey, setWildNetworkKey } from '../src/lib/secureStorage';
 import {
+  fetchNear,
   WILDNETWORK_BASE,
   WILDNETWORK_CONTRIBUTE_URL,
   installCommand,
@@ -32,6 +33,17 @@ function AreaSection() {
         Used for the Near you list on the Stats tab. One decimal place is plenty: Wildlife Network works
         in 5 degree squares. It stays on this phone.
       </Text>
+      <Pressable
+        className="mb-3 self-start"
+        accessibilityRole="button"
+        onPress={() =>
+          void fetchNear().then((n) => {
+            if (n) { setLat(String(n.lat)); setLon(String(n.lon)); setSaved(false); }
+          })
+        }
+      >
+        <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Use my approximate area</Text>
+      </Pressable>
       <View className="mb-3 flex-row gap-3">
         <TextInput className={input} placeholder="Latitude, e.g. 51.5" keyboardType="numbers-and-punctuation"
           value={lat} onChangeText={(t) => { setLat(t); setSaved(false); }} />

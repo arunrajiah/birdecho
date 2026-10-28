@@ -1,0 +1,20 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="dev.arunrajiah.birdecho.basewifi" >
+4
+5    <uses-sdk android:minSdkVersion="24" />
+6    <!-- Normal (install-time) permissions: request a local-only Wi-Fi network for the Base's hotspot. -->
+7    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+7-->/Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:3:3-74
+7-->/Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:3:20-71
+8    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+8-->/Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:4:3-74
+8-->/Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:4:20-71
+9    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+9-->/Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:5:3-77
+9-->/Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:5:20-74
+10    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+10-->/Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:6:3-77
+10-->/Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:6:20-74
+11
+12</manifest>

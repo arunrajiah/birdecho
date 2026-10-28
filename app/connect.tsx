@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Pressable, ActivityIndicator, ScrollView } from 'react-native';
-import { router } from 'expo-router';
+import { View, Text, TextInput, Pressable, ActivityIndicator, ScrollView, Linking } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { WILDNETWORK_BASE } from '../src/lib/wildnetwork';
 import { useStationStore } from '../src/stores/stationStore';
 import { fetchStation } from '../src/api/station';
 import { pingBirdNetGo } from '../src/api/adapters/birdnetgo';
@@ -8,8 +9,15 @@ import { pingBirdNetPi } from '../src/api/adapters/birdnetpi';
 
 type Mode = 'birdweather' | 'birdnetgo' | 'birdnetpi';
 
+const MODES: Mode[] = ['birdweather', 'birdnetgo', 'birdnetpi'];
+
 export default function ConnectScreen() {
-  const [mode, setMode] = useState<Mode>('birdweather');
+  // Opened from the "What do you have?" chooser with ?type=..., the type is fixed and the toggle hidden.
+  const { type } = useLocalSearchParams<{ type?: string }>();
+  const fixedMode = MODES.includes(type as Mode) ? (type as Mode) : null;
+  const [mode, setMode] = useState<Mode>(fixedMode ?? 'birdweather');
+  // A name the user recognises; without it a station would show as its raw address.
+  const [name, setName] = useState('');
 
   // BirdWeather fields
   const [token, setTokenValue] = useState('');
@@ -94,8 +102,8 @@ export default function ConnectScreen() {
     setLoading(true);
     setError(null);
     try {
-      const stationName = await pingBirdNetGo(hostUrl.trim());
-      await connectBirdNetGo(hostUrl.trim(), stationName);
+      const nodeName = await pingBirdNetGo(hostUrl.trim());
+      await connectBirdNetGo(hostUrl.trim(), name.trim() || nodeName || 'BirdNET-Go station');
       onConnected();
     } catch (e) {
       setError(
@@ -128,7 +136,7 @@ export default function ConnectScreen() {
     setError(null);
     try {
       await pingBirdNetPi(hostUrl.trim());
-      await connectBirdNetPi(hostUrl.trim());
+      await connectBirdNetPi(hostUrl.trim(), name.trim() || 'BirdNET-Pi station');
       onConnected();
     } catch (e) {
       setError(
@@ -157,11 +165,13 @@ export default function ConnectScreen() {
       contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 40, paddingBottom: 32 }}
     >
       <Text className="mb-6 text-[28px] font-bold text-gray-900 dark:text-gray-50">
-        {isFirstStation ? 'Connect your station' : 'Add a station'}
+        {fixedMode
+          ? `Connect your ${fixedMode === 'birdweather' ? 'BirdWeather station' : fixedMode === 'birdnetgo' ? 'BirdNET-Go' : 'BirdNET-Pi'}`
+          : isFirstStation ? 'Connect your station' : 'Add a station'}
       </Text>
 
-      {/* Mode toggle — three options */}
-      <View className="mb-8 flex-row rounded-2xl bg-gray-200 dark:bg-gray-800 p-1">
+      {/* Mode toggle (three options), hidden when the chooser already picked one */}
+      {fixedMode ? null : <View className="mb-8 flex-row rounded-2xl bg-gray-200 dark:bg-gray-800 p-1">
         {(['birdweather', 'birdnetgo', 'birdnetpi'] as Mode[]).map((m) => {
           const label =
             m === 'birdweather' ? 'BirdWeather' : m === 'birdnetgo' ? 'BirdNET-Go' : 'BirdNET-Pi';
@@ -183,7 +193,7 @@ export default function ConnectScreen() {
             </Pressable>
           );
         })}
-      </View>
+      </View>}
 
       {mode === 'birdweather' ? (
         <>
@@ -209,12 +219,31 @@ export default function ConnectScreen() {
             keyboardType="numeric"
           />
           <Text className="mb-6 text-xs text-gray-400">
-            Find your token and station ID at app.birdweather.com → Account settings.
+            Find your token and station ID at app.birdweather.com, under Account settings.
             Requires an internet connection (unlike BirdNET-Go / BirdNET-Pi which connect over your local network).
           </Text>
+          <View className="mb-6 rounded-2xl bg-white dark:bg-gray-900 p-4">
+            <Text className="text-sm text-gray-700 dark:text-gray-200">
+              BirdWeather stations are already on the Wildlife Network map as anonymous counts. Do not also install
+              wdx-agent on the same station, or its detections are counted twice.
+            </Text>
+            <Pressable className="mt-2" accessibilityRole="link" onPress={() => void Linking.openURL(`${WILDNETWORK_BASE}/stations/join`)}>
+              <Text className="text-sm font-semibold text-green-700 dark:text-green-300">
+                Optional: show your station by name on Wildlife Network
+              </Text>
+            </Pressable>
+          </View>
         </>
       ) : (
         <>
+          <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Station name</Text>
+          <TextInput
+            className="mb-4 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-3.5 text-gray-900 dark:text-gray-50"
+            value={name}
+            onChangeText={setName}
+            placeholder={mode === 'birdnetgo' ? 'e.g. Back garden' : 'e.g. Balcony Pi'}
+            maxLength={60}
+          />
           <Text className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
             {mode === 'birdnetgo' ? 'BirdNET-Go host URL' : 'BirdNET-Pi host URL'}
           </Text>
@@ -251,8 +280,9 @@ export default function ConnectScreen() {
         )}
       </Pressable>
 
-      {/* Demo — lets anyone explore the app with sample data, no station,
-          account, token, or network required. */}
+      {/* Demo: lets anyone explore the app with sample data, no station,
+          account, token, or network required. The chooser has its own "Nothing yet". */}
+      {fixedMode ? null : <>
       <View className="my-6 flex-row items-center">
         <View className="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
         <Text className="mx-3 text-xs text-gray-400">or</Text>
@@ -269,6 +299,7 @@ export default function ConnectScreen() {
       <Text className="mt-2 text-center text-xs text-gray-400">
         Explore BirdEcho with sample data, no station needed.
       </Text>
+      </>}
     </ScrollView>
   );
 }

@@ -3,7 +3,7 @@ import { useCellArrivals } from '../hooks/useWildNetwork';
 import { formatWeek, isSolidArrival, speciesUrl } from '../lib/wildnetwork';
 
 /** One species' seasonal timing in the station's 5-degree square, from Wildlife Network. */
-export default function SeasonLine({ scientificName }: { scientificName: string }) {
+export default function SeasonLine({ scientificName, hideLink = false }: { scientificName: string; hideLink?: boolean }) {
   const { data } = useCellArrivals();
   // Weak seasons (likely misdetections) are left out rather than shown as fact.
   const row = data?.find((a) => a.scientificName === scientificName && isSolidArrival(a));
@@ -15,6 +15,8 @@ export default function SeasonLine({ scientificName }: { scientificName: string 
       ].filter(Boolean)
     : [];
 
+  // On the in-app Wildlife Network page the website link is shown separately; with no timing there is nothing to show.
+  if (hideLink && parts.length === 0) return null;
   return (
     <View className="mt-4 rounded-2xl bg-white dark:bg-gray-900 px-4 py-3.5">
       <Text className="ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">In your area</Text>
@@ -23,9 +25,11 @@ export default function SeasonLine({ scientificName }: { scientificName: string 
           This season around your station it {parts.join(', ')}.
         </Text>
       ) : null}
-      <Pressable className="mt-1" onPress={() => void Linking.openURL(speciesUrl(scientificName))}>
-        <Text className="text-sm font-semibold text-green-700 dark:text-green-300">See its movement on Wildlife Network</Text>
-      </Pressable>
+      {hideLink ? null : (
+        <Pressable className="mt-1" accessibilityRole="link" onPress={() => void Linking.openURL(speciesUrl(scientificName))}>
+          <Text className="text-sm font-semibold text-green-700 dark:text-green-300">See its movement on Wildlife Network</Text>
+        </Pressable>
+      )}
     </View>
   );
 }

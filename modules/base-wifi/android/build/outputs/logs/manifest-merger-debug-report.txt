@@ -1,0 +1,32 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:1:1-7:12
+INJECTED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:1:1-7:12
+	package
+		INJECTED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:1:11-69
+uses-permission#android.permission.CHANGE_WIFI_STATE
+ADDED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:3:3-74
+	android:name
+		ADDED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:3:20-71
+uses-permission#android.permission.ACCESS_WIFI_STATE
+ADDED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:4:3-74
+	android:name
+		ADDED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:4:20-71
+uses-permission#android.permission.CHANGE_NETWORK_STATE
+ADDED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:5:3-77
+	android:name
+		ADDED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:5:20-74
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:6:3-77
+	android:name
+		ADDED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml:6:20-74
+uses-sdk
+INJECTED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml
+INJECTED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/arunrajiah/claude workspace/birdecho/modules/base-wifi/android/src/main/AndroidManifest.xml

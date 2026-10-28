@@ -1,7 +1,8 @@
 import { View, Text, Pressable, Linking, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { useCellArrivals, useRegionDrift, useStationLocation } from '../hooks/useWildNetwork';
-import { WILDNETWORK_BASE, formatWeek, isSolidArrival, regionFor, speciesUrl, type CellArrival } from '../lib/wildnetwork';
+import { Ionicons } from '@expo/vector-icons';
+import { WILDNETWORK_BASE, formatWeek, isSolidArrival, regionFor, type CellArrival } from '../lib/wildnetwork';
 
 const RECENT_DAYS = 28;
 
@@ -13,8 +14,11 @@ function isRecent(week: string | null): boolean {
 function SpeciesLine({ name, sci, detail, heardHere }: { name: string; sci: string; detail: string; heardHere?: boolean }) {
   return (
     <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${name}, ${detail}${heardHere ? ', heard here' : ''}`}
       className="flex-row items-center py-2 border-b border-gray-100 dark:border-gray-800 active:opacity-75"
-      onPress={() => void Linking.openURL(speciesUrl(sci))}
+      // An in-app page: the species is usually not one the station heard, and the browser may open a first-run screen.
+      onPress={() => router.push({ pathname: '/wn-species/[name]', params: { name: sci } })}
     >
       <Text className="flex-1 text-sm font-medium text-gray-900 dark:text-gray-100">
         {name}
@@ -95,8 +99,20 @@ export default function NearYouCard({ heardHere }: { heardHere: Set<string> }) {
       ) : null}
       {list('Arrived in the last 4 weeks', arrived, (a) => a.arrivalWeek)}
       {list('Leaving', leaving, (a) => a.departureWeek)}
-      {arrivals.isSuccess && arrived.length === 0 && leaving.length === 0 ? (
-        <Text className="mb-3 text-sm text-gray-400">No arrivals or departures in your area in the last 4 weeks.</Text>
+      {arrivals.isSuccess && (arrivals.data ?? []).length === 0 ? (
+        // No seasonal data at all for this square: Wildlife Network has no stations here yet, not "no birds".
+        <View className="mb-3">
+          <Text className="text-sm text-gray-600 dark:text-gray-300">
+            Wildlife Network has no stations around here yet, so it cannot tell what is arriving. Adding yours helps.
+          </Text>
+          <Pressable className="mt-1" accessibilityRole="button" onPress={() => router.push('/onboarding')}>
+            <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Add a device</Text>
+          </Pressable>
+        </View>
+      ) : arrivals.isSuccess && arrived.length === 0 && leaving.length === 0 ? (
+        <Text className="mb-3 text-sm text-gray-600 dark:text-gray-300">
+          No species arrived in or left your area in the last 4 weeks. The birds that live here all year are not listed.
+        </Text>
       ) : null}
 
       {moving.length > 0 ? (
@@ -114,8 +130,9 @@ export default function NearYouCard({ heardHere }: { heardHere: Set<string> }) {
         </View>
       ) : null}
 
-      <Pressable onPress={() => void Linking.openURL(WILDNETWORK_BASE)}>
+      <Pressable className="flex-row items-center gap-1.5 self-start" accessibilityRole="link" accessibilityLabel="Open the Wildlife Network map in the browser" onPress={() => void Linking.openURL(WILDNETWORK_BASE)}>
         <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Open the Wildlife Network map</Text>
+        <Ionicons name="open-outline" size={14} color="#347F57" />
       </Pressable>
     </View>
   );

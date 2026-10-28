@@ -111,6 +111,11 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ title: 'BirdEcho', headerShown: false, statusBarStyle: 'light' }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="connect" options={{ title: 'Connect station', presentation: 'modal' }} />
+        <Stack.Screen name="onboarding" options={{ title: 'Add a device' }} />
+        <Stack.Screen name="add-base" options={{ title: 'Wildlife Network Base' }} />
+        <Stack.Screen name="add-diy" options={{ title: 'My own device' }} />
+        <Stack.Screen name="wn-species/[name]" options={{ title: 'Species' }} />
+        <Stack.Screen name="base/[id]" options={{ title: 'Base' }} />
         <Stack.Screen name="record/[id]" options={{ title: 'Sighting' }} />
         <Stack.Screen name="species/[id]" options={{ title: 'Species' }} />
         <Stack.Screen name="wildnetwork" options={{ title: 'Wildlife Network' }} />

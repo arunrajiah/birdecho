@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **"What do you have?"** The first screen (and Settings, "Add a device") asks what you have: a Wildlife Network Base, a BirdWeather station, BirdNET-Pi, BirdNET-Go, your own DIY device, or nothing yet, and takes you down the right setup.
+- **Add a Wildlife Network Base.** BirdEcho joins the Base's own Wi-Fi (Android 10 and later; older phones join in Wi-Fi settings), reads it, lets you name and place it, registers it with Wildlife Network over the phone's internet and saves the settings on the Base. Optional home Wi-Fi and SIM APN. A Base already on your home Wi-Fi can be set up by its address. Settings lists your Bases with their health.
+- **My own (DIY) device.** Register a device you built and get its key, events address and links to the WDX format and wdx-agent.
+- **Species pages for Near you.** Tapping a species in Near you opens a page in the app (photo, what is changing, timing in your area) instead of the browser.
+- **Use my approximate area** fills the station area from your network location.
+
+### Fixed
+
+- **Today on BirdNET-Go** counts by your phone's calendar day; it showed 0 after midnight when the station keeps UTC.
+- **Station names.** BirdNET-Pi and BirdNET-Go stations get a name when you connect them instead of showing their address twice.
+- **Empty Near you** says when Wildlife Network has no stations near you yet (with a link to add one), instead of reading as "no birds".
+- **Build numbers.** Play and GitHub builds of a version now share one versionCode.
+
 ## [0.11.3] — 2026-10-23
 
 ### Changed
