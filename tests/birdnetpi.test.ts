@@ -174,7 +174,24 @@ describe('BirdNET-Pi parser safety net', () => {
     );
   });
 
-  it('replaces rounded "13.6k" counts with the exact total', async () => {
+  it('shows exact counts on the Species tab with one stats.php request', async () => {
+    const requested = mockFetch([
+      { match: 'play.php?byspecies', body: fixture('pi-nachtzuster-species-rounded.html') },
+      { match: 'ajax_detections', body: fixture('pi-nachtzuster-empty.html') },
+      { match: 'stats.php', body: fixture('pi-nachtzuster-statspage.html') },
+      { match: '/api/v1/image/', body: '<html>dashboard</html>' },
+      { match: 'wikipedia.org', body: '{}' },
+    ]);
+    const list = await createBirdNetPiAdapter(BASE).fetchTopSpecies(500);
+    assert.deepEqual(
+      list.map((s) => [s.commonName, s.count]),
+      [['Chimney Swift', 13643], ['American Robin', 1250], ['Red-breasted Nuthatch', 95]],
+    );
+    assert.equal(requested.filter((u) => u.includes('/stats.php')).length, 1);
+    assert.ok(!requested.some((u) => u.includes('comname=')));
+  });
+
+  it('falls back to the per-day total when stats.php is unavailable', async () => {
     const species =
       '<button type="submit" name="species" value="Chaetura pelagica">Chimney Swift (13.6k)</button>';
     const perDay = JSON.stringify([

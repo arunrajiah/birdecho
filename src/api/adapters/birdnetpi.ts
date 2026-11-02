@@ -231,9 +231,8 @@ export function parseSpeciesButtons(html: string): SpeciesButton[] {
 }
 
 /**
- * All-time detections per species from /stats.php. mcguirepr89's play.php
- * species buttons carry no counts, but its stats page prints each species
- * button followed by `<b>Occurrences:</b> N`.
+ * All-time detections per species from /stats.php. Both forks print each
+ * species button followed by `<b>Occurrences:</b> N`.
  */
 export function parseOccurrences(html: string): Map<string, number> {
   const out = new Map<string, number>();
@@ -345,11 +344,18 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
     const buttons = listResult.status === 'fulfilled' ? listResult.value : [];
     for (const b of buttons) if (b.approximate) approximate.add(b.commonName);
 
-    // mcguirepr89: the buttons have no counts, so read all-time totals from stats.php.
-    if (buttons.length > 0 && buttons.every((b) => b.count === undefined)) {
+    // stats.php has every all-time total in one request. mcguirepr89's buttons have no
+    // counts, and Nachtzuster's round to "13.6k" from 1000 up.
+    if (buttons.some((b) => b.approximate) || (buttons.length > 0 && buttons.every((b) => b.count === undefined))) {
       try {
         const totals = parseOccurrences(await bpiGetHtml(base, '/stats.php'));
-        for (const b of buttons) b.count = totals.get(b.commonName) ?? totals.get(b.value);
+        for (const b of buttons) {
+          const total = totals.get(b.commonName) ?? totals.get(b.value);
+          if (total !== undefined) {
+            b.count = total;
+            approximate.delete(b.commonName);
+          }
+        }
       } catch {
         // Older or customised stations without stats.php keep the fallback below.
       }
@@ -537,8 +543,8 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
 
     // ── Species list ──────────────────────────────────────────────────────────
     async fetchTopSpecies(limit: number): Promise<Species[]> {
-      // Short lists (Stats' top 10) get exact counts; the full Species tab
-      // keeps the station's rounded ones rather than a request per species.
+      // Short lists (Stats' top 10) still look up any count stats.php could not
+      // give; the full Species tab keeps those rounded rather than a request per species.
       const top = (await fetchSpeciesList()).slice(0, limit);
       return withImages(limit <= 20 ? await withExactCounts(top) : top);
     },

@@ -1,0 +1,1 @@
+Species tab now shows exact detection counts on BirdNET-Pi stations, instead of rounding from 1000 up.
