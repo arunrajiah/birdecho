@@ -41,8 +41,11 @@ const config: ExpoConfig = {
   ios: {
     ...base.ios,
     // App Store build number mirrors the Android versionCode so one bump in
-    // app.json covers both stores.
-    buildNumber: String(base.android?.versionCode ?? 1),
+    // app.json covers both stores. An iOS-only rebuild of the same versionCode
+    // can set ios.buildNumber to "<versionCode>.N"; it is ignored once versionCode moves on.
+    buildNumber: base.ios?.buildNumber?.startsWith(`${base.android?.versionCode}.`)
+      ? base.ios.buildNumber
+      : String(base.android?.versionCode ?? 1),
   },
   android: {
     ...base.android,
