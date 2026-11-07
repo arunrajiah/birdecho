@@ -25,7 +25,7 @@
       "predictiveBackGestureEnabled": false
     },
     "ios": {
-      "bundleIdentifier": "dev.arunrajiah.birdecho",
+      "bundleIdentifier": "com.arunrajiah.birdecho",
       "supportsTablet": false,
       "infoPlist": {
         "NSAppTransportSecurity": {
