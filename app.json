@@ -38,7 +38,7 @@
         "usesNonExemptEncryption": false
       },
       "icon": "./assets/icon-ios.png",
-      "buildNumber": "53.2"
+      "buildNumber": "53.3"
     },
     "web": {
       "favicon": "./assets/favicon.png"

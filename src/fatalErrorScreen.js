@@ -26,7 +26,9 @@ if (!__DEV__ && g.ErrorUtils) {
   const previous = g.ErrorUtils.getGlobalHandler();
   g.ErrorUtils.setGlobalHandler((error, isFatal) => {
     if (!isFatal) return previous?.(error, isFatal);
-    fatalMessage = `${error?.name ?? 'Error'}: ${error?.message ?? String(error)}\n\n${error?.stack ?? ''}`.slice(0, 4000);
+    // Keep every fatal error in order: the first one is usually the real cause.
+    const entry = `${error?.name ?? 'Error'}: ${error?.message ?? String(error)}\n${(error?.stack ?? '').slice(0, 600)}`;
+    fatalMessage = `${fatalMessage ? `${fatalMessage}\n\n---\n\n` : ''}${entry}`.slice(0, 4000);
     // If the app never registered (error during startup), this screen is what runs.
     try {
       AppRegistry.registerComponent('main', () => FatalErrorScreen);
