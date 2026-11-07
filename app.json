@@ -26,12 +26,16 @@
     },
     "ios": {
       "bundleIdentifier": "dev.arunrajiah.birdecho",
-      "supportsTablet": true,
+      "supportsTablet": false,
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false,
           "NSAllowsLocalNetworking": true
-        }
+        },
+        "NSLocalNetworkUsageDescription": "BirdEcho connects to your bird station on your home network to show its detections."
+      },
+      "config": {
+        "usesNonExemptEncryption": false
       }
     },
     "web": {

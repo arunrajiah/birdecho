@@ -38,6 +38,12 @@ const hasGoogleMapsKey = googleMapsApiKey.length > 0;
 
 const config: ExpoConfig = {
   ...base,
+  ios: {
+    ...base.ios,
+    // App Store build number mirrors the Android versionCode so one bump in
+    // app.json covers both stores.
+    buildNumber: String(base.android?.versionCode ?? 1),
+  },
   android: {
     ...base.android,
     // Only emit the Google Maps key block when a key is actually provided —

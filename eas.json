@@ -31,6 +31,10 @@
         "EXPO_PUBLIC_FDROID": "1"
       },
       "autoIncrement": false
+    },
+    "appstore": {
+      "extends": "production",
+      "autoIncrement": false
     }
   },
   "submit": {
@@ -49,6 +53,11 @@
         "serviceAccountKeyPath": "../wildecho/secrets/play-service-account.json",
         "track": "production",
         "releaseStatus": "completed"
+      }
+    },
+    "appstore": {
+      "ios": {
+        "appleId": "arunrajiah@gmail.com"
       }
     }
   }
