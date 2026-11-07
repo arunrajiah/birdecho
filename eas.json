@@ -64,7 +64,11 @@
     },
     "appstore": {
       "ios": {
-        "appleId": "arunrajiah@gmail.com"
+        "ascAppId": "6831905164",
+        "appleTeamId": "U8MN9X5843",
+        "ascApiKeyPath": "../wildecho/secrets/AuthKey_K66G3HL3DK.p8",
+        "ascApiKeyIssuerId": "4a98bb81-8056-4d05-acf7-fb3a95fddbee",
+        "ascApiKeyId": "K66G3HL3DK"
       }
     }
   }
