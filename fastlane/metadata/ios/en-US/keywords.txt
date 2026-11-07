@@ -1,0 +1,1 @@
+birdnet,birdnet-pi,birdweather,bird station,bird song,birding,bioacoustics,detections,backyard

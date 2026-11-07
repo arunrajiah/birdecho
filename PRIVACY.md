@@ -1,29 +1,32 @@
-# BirdEcho Privacy Policy
+# BirdEcho privacy policy
 
 Last updated: 7 November 2026
 
-BirdEcho shows detections from a bird station you already run (BirdNET-Pi, BirdNET-Go, or BirdWeather). It has no accounts, no ads, and no analytics.
+BirdEcho shows the detections of a bird station you already run (BirdNET-Pi, BirdNET-Go or BirdWeather). It has no
+accounts and no analytics, and the developer receives no data about you or your use of the app.
 
 ## What stays on your phone
-- Station addresses, names and settings you enter.
-- Your BirdWeather API token, kept in the device's secure storage.
-- Favorites and a cache of recent detections.
+- The stations you add (their names, addresses and, for BirdWeather, your station token), your favourites, settings and
+  a cache of the last 24 hours of detections. BirdWeather tokens are kept in the phone's secure storage (iOS Keychain,
+  Android Keystore). Deleting the app deletes all of it.
+- Notifications (favourite species, rare birds) are created on the phone itself; no notification server is involved.
 
-None of this is sent to the developer.
+## What the app contacts, and only when you use it
+- **Your own station** on your home network (BirdNET-Pi, BirdNET-Go), to read its detections and audio.
+- **BirdWeather** (app.birdweather.com), if you connect a BirdWeather station, using the token you enter.
+  BirdWeather's own privacy policy applies.
+- **Wikipedia and Wikimedia Commons**, to show species pictures and descriptions.
+- **Wildlife Network** (wlnw.org), for nearby arrival dates and species pages. To suggest your area, Wildlife Network
+  reads the approximate area of your internet address once; it is not stored. If you choose to register your station
+  with Wildlife Network, the name, position and optional contact you enter are sent to it; see https://wlnw.org/privacy.
+- **Apple Maps** (on iPhone) or Google Maps (on Android) to draw the station map.
 
-## Who the app talks to
-- **Your station.** BirdNET-Pi and BirdNET-Go are reached directly on your network. BirdWeather stations are reached through the BirdWeather API (app.birdweather.com), under BirdWeather's own privacy policy.
-- **Wikipedia / Wikimedia** for species descriptions and photos.
-- **Wildlife Network (wlnw.org)**, only when you open its screens or choose to register a device. Your IP address is used to estimate your area (about 100 km) to show nearby activity, and is not stored with your identity. A device you register sends the name and model you enter.
-
-## Microphone and location
-BirdEcho does not use the microphone or GPS location.
-
-## Notifications
-Rare-species and favorite alerts are local notifications created on the phone. No push service is used.
+## Crash reports
+Builds published by the developer do not send crash reports. The code can send anonymous error reports (Sentry) only
+if a build is made with a Sentry address set; such reports strip station tokens and addresses.
 
 ## Children
-BirdEcho is not directed at children and collects no personal information from anyone.
+BirdEcho is not directed at children and collects no personal data from anyone.
 
 ## Contact
-Questions: open an issue at https://github.com/arunrajiah/birdecho/issues or email arunrajiah@gmail.com.
+Questions or requests: arunrajiah@gmail.com, or open an issue at https://github.com/arunrajiah/birdecho/issues.

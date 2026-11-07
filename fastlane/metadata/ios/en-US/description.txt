@@ -1,0 +1,23 @@
+BirdEcho connects to the bird station you already run (BirdNET-Pi, BirdNET-Go or BirdWeather) and shows what it hears: live detections, songs, species histories and statistics, on your iPhone.
+
+BirdEcho is not a bird-identification app. It does not use your microphone or run a detection model: it shows what your own station has already detected. No station yet? Try the built-in demo station with sample data.
+
+Features:
+- Live detection feed with confidence scores, refreshed every minute
+- Listen to each detection and share it as an image card
+- Species browser with each species' history and recent sightings
+- Rarity badge for birds your station seldom hears, and optional rare-species alerts
+- Favourites, with a notification when a favourite is heard (once a day per species)
+- 14-day chart and headline stats: today, total, unique species
+- Export detections as CSV
+- Offline: the last 24 hours stay readable without a connection
+- Several stations: save as many as you like and switch in Settings
+- Station map for BirdWeather stations
+- Nearby arrival dates and species pages from Wildlife Network
+- Dark mode and station-time timestamps
+
+Connections:
+- BirdNET-Pi and BirdNET-Go: directly over your home network, no cloud account
+- BirdWeather: through the BirdWeather API with your station token (kept in the iOS Keychain)
+
+No accounts, no ads, no tracking. Free and open source: github.com/arunrajiah/birdecho

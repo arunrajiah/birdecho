@@ -1,0 +1,1 @@
+BirdEcho shows detections from a bird station the user runs at home (BirdNET-Pi or BirdNET-Go on the local network, or a BirdWeather station). Reviewers without a station can use the built-in demo station: on the first screen choose "Try a demo station" (sample data, no network or login needed). No account or sign-in exists in the app.
