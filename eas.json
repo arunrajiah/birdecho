@@ -36,6 +36,12 @@
     "appstore": {
       "distribution": "store",
       "autoIncrement": false
+    },
+    "ios-simulator": {
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
     }
   },
   "submit": {
