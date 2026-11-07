@@ -38,6 +38,7 @@
     "react-native-android-widget": "^0.20.3",
     "react-native-css-interop": "0.2.3",
     "react-native-maps": "^1.27.2",
+    "react-native-screens": "~4.16.0",
     "react-native-svg": "15.12.1",
     "react-native-view-shot": "^4.0.3",
     "victory-native": "^36.9.2",
