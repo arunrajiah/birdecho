@@ -9,6 +9,8 @@
  *
  * package.json  →  "main": "./index.js"
  */
+// Must stay first: shows fatal startup errors instead of a silent native crash.
+import './src/fatalErrorScreen';
 import { registerWidgetTaskHandler } from 'react-native-android-widget';
 import { widgetTaskHandler } from './src/widgetTaskHandler';
 
