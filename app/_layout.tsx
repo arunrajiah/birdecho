@@ -102,6 +102,9 @@ export default function RootLayout() {
           headerTintColor: ui.text,
           headerTitleStyle: { fontWeight: '700' },
           headerShadowVisible: false,
+          // iOS labels the back button with the previous screen's title, which for the
+          // tab group is its route name "(tabs)"; show just the chevron instead.
+          headerBackButtonDisplayMode: 'minimal',
           contentStyle: { backgroundColor: ui.canvas },
           // react-native-screens defaults every screen to white status bar icons on Android,
           // which vanish on the light canvas; set it explicitly from the app's colour scheme.
@@ -109,7 +112,7 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="index" options={{ title: 'BirdEcho', headerShown: false, statusBarStyle: 'light' }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ title: 'BirdEcho', headerShown: false }} />
         <Stack.Screen name="connect" options={{ title: 'Connect station', presentation: 'modal' }} />
         <Stack.Screen name="onboarding" options={{ title: 'Add a device' }} />
         <Stack.Screen name="add-base" options={{ title: 'Wildlife Network Base' }} />
