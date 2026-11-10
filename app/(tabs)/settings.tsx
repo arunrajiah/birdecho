@@ -1,5 +1,5 @@
-import { View, Text, Pressable, Switch, Alert, ScrollView } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
+import { View, Text, Pressable, Switch, Alert, ScrollView, Linking } from 'react-native';
+import { router, useFocusEffect, useNavigation } from 'expo-router';
 import Constants from 'expo-constants';
 import { useStationStore } from '../../src/stores/stationStore';
 import { useThemeStore } from '../../src/stores/themeStore';
@@ -9,6 +9,7 @@ import type { SavedStation } from '../../src/types/station';
 import { wildNetworkSource } from '../../src/lib/wildnetwork';
 import { getBases, type ManagedBase } from '../../src/lib/secureStorage';
 import { useCallback, useState } from 'react';
+import { TUTORIAL_VIDEO_URL } from '../../src/lib/links';
 
 type Mode = 'light' | 'dark' | 'system';
 const MODES: Mode[] = ['light', 'dark', 'system'];
@@ -84,6 +85,10 @@ export default function SettingsScreen() {
   const switchStation = useStationStore((s) => s.switchStation);
   const removeStation = useStationStore((s) => s.removeStation);
   const disconnect = useStationStore((s) => s.disconnect);
+  // "/" matches both the welcome screen (app/index) and the Feed tab ((tabs)/index), so
+  // router.replace('/') lands on an empty Feed. Reset the root stack to the welcome screen instead.
+  const rootNavigation = useNavigation('/');
+  const goToWelcome = () => rootNavigation.reset({ index: 0, routes: [{ name: 'index' as never }] });
   const isConnected = useStationStore((s) => s.isConnected);
   const activeType = useStationStore((s) => s.connectionType);
   const [bases, setBases] = useState<ManagedBase[]>([]);
@@ -119,7 +124,7 @@ export default function SettingsScreen() {
             await removeStation(station.id);
             // If the last station was removed, go back to the home screen.
             if (stations.length === 1) {
-              router.replace('/');
+              goToWelcome();
             }
           },
         },
@@ -138,7 +143,7 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: async () => {
             await disconnect();
-            router.replace('/');
+            goToWelcome();
           },
         },
       ],
@@ -279,6 +284,19 @@ export default function SettingsScreen() {
             <Text className="text-sm font-semibold text-red-600 dark:text-red-300">Disconnect all stations</Text>
           </Pressable>
         ) : null}
+
+        {/* Help */}
+        <Pressable
+          accessibilityRole="link"
+          className="mt-6 flex-row items-center rounded-2xl bg-white dark:bg-gray-900 p-4 active:opacity-75"
+          onPress={() => Linking.openURL(TUTORIAL_VIDEO_URL)}
+        >
+          <View className="flex-1">
+            <Text className="text-sm font-semibold text-gray-900 dark:text-gray-100">How to use BirdEcho</Text>
+            <Text className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">Watch the 6 minute step by step video guide</Text>
+          </View>
+          <Text className="text-sm font-semibold text-green-700 dark:text-green-400">Watch ↗</Text>
+        </Pressable>
 
         {/* Version footer */}
         <Text className="mt-8 text-center text-xs text-gray-400 dark:text-gray-600">

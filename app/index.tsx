@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { View, Text, Pressable, ActivityIndicator, Image } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, Image, Linking } from 'react-native';
 import { router } from 'expo-router';
 import { useStationStore } from '../src/stores/stationStore';
+import { TUTORIAL_VIDEO_URL } from '../src/lib/links';
 
 export default function HomeScreen() {
   // Use isConnected (covers both BirdWeather and BirdNET-Go) instead of stationId
@@ -63,6 +64,13 @@ export default function HomeScreen() {
             <Text className="text-base font-bold text-green-950">Connect your station</Text>
           </Pressable>
         )}
+        <Pressable
+          accessibilityRole="link"
+          className="mt-3 items-center py-2 active:opacity-75"
+          onPress={() => Linking.openURL(TUTORIAL_VIDEO_URL)}
+        >
+          <Text className="text-sm text-green-200">New here? Watch the 6 minute video guide</Text>
+        </Pressable>
       </View>
     </View>
   );

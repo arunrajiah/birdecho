@@ -32,6 +32,16 @@ BirdEcho is **not** a bird-identification app. It does not listen to audio or id
 
 ---
 
+## Video guide
+
+New to BirdEcho? This 6 minute step by step video shows everything: trying the app with sample data, the feed, species and favourites, stats, settings, and connecting a BirdNET-Pi, BirdNET-Go or BirdWeather station.
+
+[![How to use BirdEcho (video)](https://img.youtube.com/vi/DkeRI1e-wbE/maxresdefault.jpg)](https://youtu.be/DkeRI1e-wbE)
+
+▶ [Watch on YouTube](https://youtu.be/DkeRI1e-wbE)
+
+---
+
 ## Screenshots
 
 | Feed | Species | Near you on Wildlife Network |
