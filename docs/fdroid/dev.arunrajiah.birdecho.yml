@@ -15,9 +15,9 @@ RepoType: git
 Repo: https://github.com/arunrajiah/birdecho.git
 
 Builds:
-  - versionName: 0.10.2
-    versionCode: 37
-    commit: 3cfaa13466ad0582ec1d225db831ed3fa7bb2604
+  - versionName: 0.11.3
+    versionCode: 50
+    commit: c070122f1684533651c5470a3f96dcb595e5eb9d
     sudo:
       - apt-get update
       - apt-get install -y g++ make python3 xz-utils
@@ -25,11 +25,9 @@ Builds:
       - apt-get update
       - apt-get install -y -t bookworm openjdk-17-jdk-headless
       - update-java-alternatives -s java-1.17.0-openjdk-amd64
-      - curl -Lo node.tar.xz https://nodejs.org/dist/v24.21.0/node-v24.21.0-linux-x64.tar.xz
-      - echo "fd8e59d5a511510f6a298afb548f18c7d2b1be404d8b4a27d94fbe49f56cb2d6  node.tar.xz"
-        | sha256sum -c -
-      - tar xJf node.tar.xz
-      - cp -a node-v24.21.0-linux-x64/. /usr/local/
+      - echo "deb https://deb.debian.org/debian forky main" > /etc/apt/sources.list.d/forky.list
+      - apt-get update
+      - apt-get install -y -t forky nodejs npm
       - npm install -g pnpm@10
     init:
       - pnpm install --frozen-lockfile
@@ -70,8 +68,14 @@ MaintainerNotes: |-
   it with `npx expo prebuild` (same layout as io.evcc.android), so there is no
   subdir and build: runs gradle in the generated android/ project.
 
-  Node 24 LTS and pnpm 10 are required. Node is downloaded in sudo: because
-  Debian's packaged Node is too old. Bump the tarball URL and SHA-256 together.
+  Node 24 and pnpm 10 are required: React Native 0.81 and Metro need Node
+  >= 20.19.4, and trixie ships 20.19.2. Node and npm are installed from Debian
+  forky in sudo: (the same pinning approach as the JDK from bookworm); pnpm comes
+  from npm.
+
+  R8 code shrinking and resource shrinking are on: app.json sets
+  enableMinifyInReleaseBuilds and enableShrinkResourcesInReleaseBuilds through
+  expo-build-properties, which prebuild writes into the generated android/.
 
   React Native 0.81's Gradle plugins require a Java 17 toolchain, installed from
   bookworm in sudo: (same approach as io.evcc.android).
@@ -115,5 +119,5 @@ MaintainerNotes: |-
 AutoUpdateMode: Version
 UpdateCheckMode: Tags ^v[0-9.]+$
 UpdateCheckData: app.json|"versionCode":\s*(\d+)|.|"version":\s*"([\d.]+)"
-CurrentVersion: 0.10.2
-CurrentVersionCode: 37
+CurrentVersion: 0.11.3
+CurrentVersionCode: 50
