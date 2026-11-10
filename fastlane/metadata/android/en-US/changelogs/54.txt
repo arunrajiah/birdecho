@@ -1,0 +1,1 @@
+New 6 minute video guide (welcome screen and Settings), a new splash screen, Disconnect all returns to the welcome screen, and stability fixes.

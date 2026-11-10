@@ -2,7 +2,7 @@
   "expo": {
     "name": "BirdEcho",
     "slug": "birdecho",
-    "version": "0.12.1",
+    "version": "0.12.2",
     "scheme": "birdecho",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "android": {
       "package": "dev.arunrajiah.birdecho",
-      "versionCode": 53,
+      "versionCode": 54,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundImage": "./assets/adaptive-icon-bg.png",
@@ -32,8 +32,7 @@
       "config": {
         "usesNonExemptEncryption": false
       },
-      "icon": "./assets/icon-ios.png",
-      "buildNumber": "53.6"
+      "icon": "./assets/icon-ios.png"
     },
     "web": {
       "favicon": "./assets/favicon.png"

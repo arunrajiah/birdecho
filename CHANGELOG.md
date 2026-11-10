@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.2] - 2026-11-10
+
+### Added
+
+- **Video guide.** A 6 minute step by step video shows how to use BirdEcho. Open it from the welcome screen ("New here? Watch the 6 minute video guide") or from Settings ("How to use BirdEcho").
+- **New splash screen** with the BirdEcho bird on green, instead of a placeholder image.
+
+### Fixed
+
+- **Disconnect all stations** (and removing your last station) now returns to the welcome screen instead of an empty feed.
+- **Back buttons** on the sighting and species pages no longer show "(tabs)".
+- **Pages stopped opening** after going back once on some iPhones; navigation libraries are now on the versions that match the app's platform.
+- **Startup stability.** Native libraries are aligned with the app's Expo SDK, and a startup error now shows a message instead of closing the app.
+
+---
+
 ## [0.12.1] — 2026-11-02
 
 ### Fixed
