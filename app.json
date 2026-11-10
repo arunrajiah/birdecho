@@ -8,11 +8,6 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "android": {
       "package": "dev.arunrajiah.birdecho",
       "versionCode": 53,
@@ -38,7 +33,7 @@
         "usesNonExemptEncryption": false
       },
       "icon": "./assets/icon-ios.png",
-      "buildNumber": "53.5"
+      "buildNumber": "53.6"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -54,6 +49,15 @@
             "enableMinifyInReleaseBuilds": true,
             "enableShrinkResourcesInReleaseBuilds": true
           }
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#149b7a"
         }
       ]
     ],
