@@ -61,3 +61,4 @@ CLAUDE.md
 # Local AI assistant / OS / env files
 CLAUDE.local.md
 .mcp.json
+modules/*/android/build/
