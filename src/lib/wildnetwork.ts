@@ -57,11 +57,24 @@ export async function registerDevice(d: {
   return body as RegisteredDevice;
 }
 
-/** Register a BirdNET-Pi or BirdNET-Go station and return its key for the wdx-agent install command. */
-export async function registerWithWildNetwork(name: string, type: ConnectionType): Promise<string> {
+/** Register a BirdNET-Pi or BirdNET-Go station; its key and device id go into the wdx-agent install command. */
+export async function registerWithWildNetwork(name: string, type: ConnectionType): Promise<{ apiKey: string; deviceId: string }> {
   const source = wildNetworkSource(type);
   if (!source) throw new Error('This station type cannot send to Wildlife Network.');
-  return (await registerDevice({ name: name || 'BirdEcho station', model: source, source })).apiKey;
+  const d = await registerDevice({ name: name || 'BirdEcho station', model: source, source });
+  return { apiKey: d.apiKey, deviceId: d.deviceId };
+}
+
+/**
+ * When the station's agent last reported its health to Wildlife Network (GET /api/v1/devices), or null if never.
+ * Agents installed with WDX_DEVICE_ID report on start and then every 15 minutes.
+ */
+export async function fetchLastReport(deviceId: string, f: typeof fetch = fetch): Promise<Date | null> {
+  const res = await f(`${WILDNETWORK_BASE}/api/v1/devices`);
+  if (!res.ok) throw new Error(`Wildlife Network said ${res.status}.`);
+  const j = (await res.json()) as { devices?: { id: string; lastReport?: string | null }[] };
+  const t = j.devices?.find((d) => d.id === deviceId)?.lastReport;
+  return t ? new Date(t) : null;
 }
 
 /** The phone's approximate area from its IP address (whole degrees, about 100 km), or null. */
@@ -76,11 +89,11 @@ export async function fetchNear(): Promise<{ lat: number; lon: number; city: str
 }
 
 /**
- * Install command for the Pi. Only WDX_KEY is set: the installer detects the
- * source and database path itself (setting WDX_SOURCE would skip path detection).
+ * Install command for the Pi. WDX_KEY and, when known, WDX_DEVICE_ID (turns on health reports) are set; the installer
+ * detects the source and database path itself (setting WDX_SOURCE would skip path detection).
  */
-export function installCommand(apiKey: string): string {
-  return `curl -fsSL ${WILDNETWORK_BASE}/agent/install.sh | WDX_KEY=${apiKey} bash`;
+export function installCommand(apiKey: string, deviceId?: string | null): string {
+  return `curl -fsSL ${WILDNETWORK_BASE}/agent/install.sh | WDX_KEY=${apiKey}${deviceId ? ` WDX_DEVICE_ID=${deviceId}` : ''} bash`;
 }
 
 // ─── Read side: Wildlife Network context for the station's area ───────────────────

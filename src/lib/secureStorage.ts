@@ -168,6 +168,15 @@ export async function setWildNetworkKey(stationId: string, key: string): Promise
   await SecureStore.setItemAsync(wildNetworkKey(stationId), key);
 }
 
+/** The Wildlife Network device id for a station (not secret; lets the app show when the Pi last reported). */
+export async function getWildNetworkDevice(stationId: string): Promise<string | null> {
+  return SecureStore.getItemAsync(`${wildNetworkKey(stationId)}_device`);
+}
+
+export async function setWildNetworkDevice(stationId: string, deviceId: string): Promise<void> {
+  await SecureStore.setItemAsync(`${wildNetworkKey(stationId)}_device`, deviceId);
+}
+
 // ─── Wildlife Network Bases set up from this phone ───────────────────────────
 
 /**
