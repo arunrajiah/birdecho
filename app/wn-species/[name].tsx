@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { remoteImage } from '../../src/lib/remoteImage';
 import { WILDNETWORK_BASE, fetchSpeciesSummary, speciesUrl } from '../../src/lib/wildnetwork';
 import SeasonLine from '../../src/components/SeasonLine';
+import ArrivalAlert from '../../src/components/ArrivalAlert';
 
 /**
  * A Wildlife Network species page inside the app, opened from "Near you" (most of those species are not heard
@@ -49,6 +50,7 @@ export default function WildNetworkSpeciesScreen() {
           </View>
         ) : null}
         <SeasonLine scientificName={name} hideLink />
+        {name ? <ArrivalAlert species={name} name={data?.vernacularName ?? name} /> : null}
         {data?.extract ? <Text className="mt-4 text-sm leading-5 text-gray-600 dark:text-gray-300">{data.extract}</Text> : null}
         <Pressable
           accessibilityRole="link"

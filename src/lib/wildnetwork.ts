@@ -181,3 +181,26 @@ export async function fetchSpeciesSummary(scientificName: string): Promise<Speci
     extract: m?.extract ?? null,
   };
 }
+
+/**
+ * Species arrival alert by email, run by Wildlife Network (POST /api/v1/alerts). The site emails a confirmation link;
+ * nothing else is sent until it is confirmed. Returns the site's message, or throws an Error with its message.
+ */
+export async function subscribeAlert(d: { email: string; species: string; place: string }, f: typeof fetch = fetch): Promise<string> {
+  const email = d.email.trim(), place = d.place.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)) throw new Error('Please enter a valid email address.');
+  if (place.length < 2) throw new Error('Please enter a town or city.');
+  let res: Response;
+  try {
+    res = await f(`${WILDNETWORK_BASE}/api/v1/alerts`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ action: 'subscribe', email, species: d.species, place }),
+    });
+  } catch {
+    throw new Error('Wildlife Network is not reachable right now. Please try again later.');
+  }
+  const body = (await res.json().catch(() => ({}))) as { message?: string; error?: string };
+  if (!res.ok) throw new Error(body.error ?? `Wildlife Network said ${res.status}.`);
+  return body.message ?? 'Almost done: check your inbox and confirm.';
+}
