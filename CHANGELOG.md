@@ -5,11 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.13.0] - 2026-11-17
 
 ### Added
 - Wildlife Network species pages: "Email me when it arrives near me" sets up a Wildlife Network arrival alert (town pre-filled from your rough area, confirmation email first).
 - Share with Wildlife Network: the app now shows whether your Pi is sending ("Sending. Last report 5 minutes ago", or what to check). New install commands carry the device id, which turns on the agent's health reports (wdx-agent 0.4.2).
+
+### Security
+- Updated build-time packages with known security problems (shell-quote, tar, node-forge and others in Expo's tooling). The app itself behaves the same.
 
 ## [0.12.2] - 2026-11-10
 
