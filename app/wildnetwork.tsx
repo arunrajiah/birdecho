@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView, Share, Linking, ActivityIndicator, TextInput } from 'react-native';
 import { useStationStore } from '../src/stores/stationStore';
-import { getWildNetworkKey, setWildNetworkKey } from '../src/lib/secureStorage';
+import { getWildNetworkDevice, getWildNetworkKey, setWildNetworkDevice, setWildNetworkKey } from '../src/lib/secureStorage';
+import StationStatus from '../src/components/StationStatus';
 import {
   fetchNear,
   WILDNETWORK_BASE,
@@ -64,6 +65,7 @@ function AreaSection() {
 export default function WildNetworkScreen() {
   const station = useStationStore((s) => s.stations.find((st) => st.id === s.activeStationId) ?? null);
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
   const [checked, setChecked] = useState(false);
   const [uploadsToBirdWeather, setUploadsToBirdWeather] = useState<BirdWeatherAnswer>('unknown');
   const [busy, setBusy] = useState(false);
@@ -73,8 +75,9 @@ export default function WildNetworkScreen() {
   const stationId = station?.id;
   useEffect(() => {
     if (!stationId) return;
-    void getWildNetworkKey(stationId).then((k) => {
+    void Promise.all([getWildNetworkKey(stationId), getWildNetworkDevice(stationId)]).then(([k, d]) => {
       setApiKey(k);
+      setDeviceId(d);
       setChecked(true);
     });
   }, [stationId]);
@@ -98,9 +101,11 @@ export default function WildNetworkScreen() {
     setBusy(true);
     setError(null);
     try {
-      const key = await registerWithWildNetwork(station.stationName, station.connectionType);
-      await setWildNetworkKey(station.id, key);
-      setApiKey(key);
+      const reg = await registerWithWildNetwork(station.stationName, station.connectionType);
+      await setWildNetworkKey(station.id, reg.apiKey);
+      await setWildNetworkDevice(station.id, reg.deviceId);
+      setApiKey(reg.apiKey);
+      setDeviceId(reg.deviceId);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Registration failed.');
     } finally {
@@ -108,7 +113,7 @@ export default function WildNetworkScreen() {
     }
   }
 
-  const command = apiKey ? installCommand(apiKey) : null;
+  const command = apiKey ? installCommand(apiKey, deviceId) : null;
 
   return (
     <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950">
@@ -150,6 +155,7 @@ export default function WildNetworkScreen() {
               The command contains this station&apos;s device key. Keep it to yourself and run it on
               one Pi only.
             </Text>
+            {deviceId ? <StationStatus deviceId={deviceId} /> : null}
           </>
         ) : (
           <>

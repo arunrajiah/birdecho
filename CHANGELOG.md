@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Wildlife Network species pages: "Email me when it arrives near me" sets up a Wildlife Network arrival alert (town pre-filled from your rough area, confirmation email first).
+- Share with Wildlife Network: the app now shows whether your Pi is sending ("Sending. Last report 5 minutes ago", or what to check). New install commands carry the device id, which turns on the agent's health reports (wdx-agent 0.4.2).
 
 ## [0.12.2] - 2026-11-10
 

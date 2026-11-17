@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { isSolidArrival, subscribeAlert } from '../src/lib/wildnetwork';
+import { fetchLastReport, installCommand, isSolidArrival, subscribeAlert } from '../src/lib/wildnetwork';
 
 // Values as returned by Wildlife Network /api/v1/arrivals for the Boston cell (40,-75), 2026-10-07.
 describe('Wildlife Network arrivals filter', () => {
@@ -29,5 +29,18 @@ describe('Wildlife Network species alerts', () => {
   it('passes the site error on', async () => {
     const f = (async () => new Response(JSON.stringify({ error: 'Unknown species.' }), { status: 400 })) as unknown as typeof fetch;
     await assert.rejects(subscribeAlert({ email: 'a@b.org', species: 'X y', place: 'Leeds' }, f), /Unknown species/);
+  });
+});
+
+describe('Wildlife Network station status', () => {
+  it('puts the device id in the install command when known', () => {
+    assert.equal(installCommand('wn_k'), 'curl -fsSL https://wlnw.org/agent/install.sh | WDX_KEY=wn_k bash');
+    assert.equal(installCommand('wn_k', 'dev_1'), 'curl -fsSL https://wlnw.org/agent/install.sh | WDX_KEY=wn_k WDX_DEVICE_ID=dev_1 bash');
+  });
+  it('reads the last report of this device only', async () => {
+    const f = (async () => new Response(JSON.stringify({ devices: [{ id: 'a', lastReport: '2026-11-16T10:00:00Z' }, { id: 'b', lastReport: null }] }))) as unknown as typeof fetch;
+    assert.equal((await fetchLastReport('a', f))?.toISOString(), '2026-11-16T10:00:00.000Z');
+    assert.equal(await fetchLastReport('b', f), null);
+    assert.equal(await fetchLastReport('zzz', f), null);
   });
 });
