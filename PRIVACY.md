@@ -14,7 +14,7 @@ None of this is sent to the developer.
 ## Who the app talks to
 - **Your station.** BirdNET-Pi and BirdNET-Go are reached directly on your network. BirdWeather stations are reached through the BirdWeather API (app.birdweather.com), under BirdWeather's own privacy policy.
 - **Wikipedia / Wikimedia** for species descriptions and photos.
-- **Wildlife Network (wlnw.org)**, only when you open its screens or choose to register a device. Your IP address is used to estimate your area (about 100 km) to show nearby activity, and is not stored with your identity. A device you register sends the name and model you enter.
+- **Wildlife Network (wlnw.org)**, only when you open its screens or choose to register a device. Your IP address is used to estimate your area (about 100 km) to show nearby activity, and is not stored with your identity. A device you register sends the name and model you enter. If you ask to be emailed when a species arrives, your email address, the species and the town you type go to Wildlife Network, which stores the email encrypted, sends a confirmation first and deletes it when you unsubscribe ([wlnw.org privacy](https://wlnw.org/privacy#alerts)).
 
 ## Microphone and location
 BirdEcho does not use the microphone or GPS location.
