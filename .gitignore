@@ -54,10 +54,8 @@ credentials/
 *.jks
 modules/wear-sync/android/build/
 
-# assistant notes and tooling, kept locally
-CLAUDE.md
-.claude/
-
-# Local AI assistant / OS / env files
-CLAUDE.local.md
+# Local OS / env files
 .mcp.json
+
+# Native module build outputs
+modules/*/android/build/
