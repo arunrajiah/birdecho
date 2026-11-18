@@ -77,6 +77,10 @@ New to BirdEcho? This 6 minute step by step video shows everything: trying the a
 - **Station map** — all your BirdWeather stations on an interactive map; tap a marker to switch stations or open in Apple/Google Maps
 - **Direct BirdNET-Go support** — connect over your home network; no BirdWeather account needed
 - **Direct BirdNET-Pi support** — connect to a local BirdNET-Pi instance (both mcguirepr89 and Nachtzuster forks supported)
+- **Wildlife Network Base** (from v0.14): set up a Base from the phone. On home Wi-Fi BirdEcho finds it by itself; otherwise join its own Wi-Fi (Android does this for you, iPhone gets step by step instructions). Its bird feed is added automatically, and the Base page shows its health (microphone, temperature, signal, uploads waiting) and a "Test station" badge
+- **Collect detections** (next release): a Base with no Wi-Fi or SIM keeps its detections; the phone collects them over the Base's Wi-Fi and uploads them to Wildlife Network once it has internet. Works for Bases this phone set up
+- **Share with Wildlife Network**: a one-line install command for BirdNET-Pi and BirdNET-Go, and (from v0.13) whether your Pi is sending and when it last reported
+- **Species alerts** (from v0.13): get an email when a species arrives near you, from any Wildlife Network species page
 
 ### Notifications & Widget
 - **Favourites** — star any species and get a local notification the first time it's detected each day
@@ -171,6 +175,13 @@ No token or account needed. BirdNET-Go's `/api/v2` endpoints are public by defau
 3. Open BirdEcho → **Connect your station** → choose **BirdWeather** → paste both values → tap **Connect**.
 
 Your token is stored in the device's secure enclave (iOS Keychain / Android Keystore). It is sent only to the BirdWeather API, never logged or cached in plain text.
+
+### Wildlife Network Base
+
+1. Flash the Base's SD card and power it on: see the [Base setup guide](https://wlnw.org/help/site/base).
+2. Open BirdEcho → **Add a Base**. If the Base is already on your home Wi-Fi it appears in the list; otherwise join its Wi-Fi `Wildlife Network-XXXX` with the password on the label.
+3. Give it a name and its location, and choose how it reaches the internet. Tick **Test station** while you try it at home.
+4. No internet where it stands? Visit it with the phone and choose **Collect detections** on the Base page; the phone uploads them later.
 
 ---
 
