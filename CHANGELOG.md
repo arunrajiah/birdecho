@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- Removing your last station no longer sends you back to the welcome screen when a Wildlife Network Base is saved under Settings, Bases. BirdEcho now asks first and says what will happen; it only starts over when no station and no Base is left.
+- Setting up a Base with BirdNET-Go now adds its bird feed too, so its detections show in the Feed without adding it again by hand. The station is linked to the Base, and one that already uses that address is linked instead of added twice.
+- Stations that belong to a Base no longer offer "Share this station with Wildlife Network": the Base already shares its detections, so registering it again would count them twice. A BirdNET-Go station added by hand is recognised as a Base too.
+
 ## [0.13.0] - 2026-11-17
 
 ### Added

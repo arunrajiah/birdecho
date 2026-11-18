@@ -11,6 +11,8 @@ import {
   registerWithWildNetwork,
   wildNetworkSource,
 } from '../src/lib/wildnetwork';
+import { getBaseInfo } from '../src/lib/baseApi';
+import { baseApiUrlFor, isBaseStation } from '../src/lib/baseStation';
 
 type BirdWeatherAnswer = 'unknown' | 'yes' | 'no';
 
@@ -71,16 +73,52 @@ export default function WildNetworkScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Reuse a key issued earlier for this station so revisiting does not register again.
+  const linkStationToBase = useStationStore((s) => s.linkStationToBase);
+  const isBase = isBaseStation(station);
+
+  // Reuse a key issued earlier for this station so revisiting does not register again. A BirdNET-Go station
+  // added by hand may be a Base's own: ask the same host's setup API, and link it so it is not registered twice.
   const stationId = station?.id;
+  const probeUrl = station?.connectionType === 'birdnetgo' && !isBase && station.hostUrl ? baseApiUrlFor(station.hostUrl) : null;
   useEffect(() => {
     if (!stationId) return;
-    void Promise.all([getWildNetworkKey(stationId), getWildNetworkDevice(stationId)]).then(([k, d]) => {
+    let live = true;
+    void (async () => {
+      if (probeUrl) {
+        const info = await getBaseInfo(probeUrl, 3000).catch(() => null);
+        if (info?.model === 'wildnetwork-base' && info.hardwareId) {
+          await linkStationToBase(stationId, info.hardwareId);
+          return;
+        }
+      }
+      const [k, d] = await Promise.all([getWildNetworkKey(stationId), getWildNetworkDevice(stationId)]);
+      if (!live) return;
       setApiKey(k);
       setDeviceId(d);
       setChecked(true);
-    });
-  }, [stationId]);
+    })();
+    return () => {
+      live = false;
+    };
+  }, [stationId, probeUrl, linkStationToBase]);
+
+  if (station && isBase) {
+    return (
+      <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950">
+        <View className="px-5 pt-6 pb-10">
+          <Text className="mb-2 text-xl font-bold text-gray-900 dark:text-white">This Base already shares its detections</Text>
+          <Text className="mb-6 text-sm text-gray-600 dark:text-gray-300">
+            {station.stationName} runs on a Wildlife Network Base, which sends its detections to Wildlife Network
+            itself. Registering it again here would count every detection twice, so there is nothing to set up.
+          </Text>
+          <AreaSection />
+          <Pressable onPress={() => void Linking.openURL(WILDNETWORK_BASE)}>
+            <Text className="text-sm font-medium text-green-700">Open the Wildlife Network map</Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    );
+  }
 
   if (!station || !wildNetworkSource(station.connectionType)) {
     return (
@@ -97,7 +135,7 @@ export default function WildNetworkScreen() {
   }
 
   async function handleRegister() {
-    if (!station) return;
+    if (!station || isBaseStation(station)) return;
     setBusy(true);
     setError(null);
     try {

@@ -63,8 +63,11 @@ interface StationState {
     longitude?: number,
   ) => Promise<void>;
 
-  /** Add (or update) a BirdNET-Go station and make it active. */
-  connectBirdNetGo: (hostUrl: string, stationName?: string) => Promise<void>;
+  /** Add (or update) a BirdNET-Go station and make it active. `baseId` links it to a Wildlife Network Base. */
+  connectBirdNetGo: (hostUrl: string, stationName?: string, baseId?: string) => Promise<void>;
+
+  /** Mark an existing station as a Base's own BirdNET-Go (hardware id of the Base). */
+  linkStationToBase: (stationId: string, baseId: string) => Promise<void>;
 
   /** Add (or update) a BirdNET-Pi station and make it active. */
   connectBirdNetPi: (hostUrl: string, stationName?: string) => Promise<void>;
@@ -75,7 +78,10 @@ interface StationState {
   /** Switch the active station. */
   switchStation: (id: string) => Promise<void>;
 
-  /** Remove a station.  If it was active, the next station becomes active. */
+  /**
+   * Remove a station.  If it was active, the next station becomes active.  Removing the last one clears the
+   * station state only: Bases saved under Settings stay (see planRemoval in lib/baseStation.ts).
+   */
   removeStation: (id: string) => Promise<void>;
 
   /** Set a station's approximate location (BirdNET-Pi / Go stations have none from their API). */
@@ -203,13 +209,14 @@ export const useStationStore = create<StationState>((set, get) => ({
 
   // ── connectBirdNetGo ───────────────────────────────────────────────────────
 
-  connectBirdNetGo: async (hostUrl, stationName) => {
+  connectBirdNetGo: async (hostUrl, stationName, baseId) => {
     const id = storage.generateStationId();
     const station: SavedStation = {
       id,
       connectionType: 'birdnetgo',
       stationName: stationName ?? hostUrl,
       hostUrl,
+      ...(baseId ? { baseId } : {}),
     };
 
     const stations = [...get().stations, station];
@@ -224,6 +231,12 @@ export const useStationStore = create<StationState>((set, get) => ({
       activeStationId: id,
       ...deriveActive(stations, id),
     });
+  },
+
+  linkStationToBase: async (stationId, baseId) => {
+    const stations = get().stations.map((st) => (st.id === stationId ? { ...st, baseId } : st));
+    await storage.setStationList(stations);
+    set({ stations, ...deriveActive(stations, get().activeStationId) });
   },
 
   // ── connectBirdNetPi ───────────────────────────────────────────────────────
@@ -309,7 +322,7 @@ export const useStationStore = create<StationState>((set, get) => ({
     await storage.deleteTokenForStation(id);
 
     if (remaining.length === 0) {
-      // Last station removed — full disconnect.
+      // Last station removed: clear the station state. Bases (secure storage, Settings > Bases) are kept.
       await Promise.all([
         storage.setStationList([]),
         storage.clearActiveStationId(),

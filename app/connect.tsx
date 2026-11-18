@@ -5,6 +5,8 @@ import { WILDNETWORK_BASE } from '../src/lib/wildnetwork';
 import { useStationStore } from '../src/stores/stationStore';
 import { fetchStation } from '../src/api/station';
 import { pingBirdNetGo } from '../src/api/adapters/birdnetgo';
+import { getBaseInfo } from '../src/lib/baseApi';
+import { baseApiUrlFor } from '../src/lib/baseStation';
 import { pingBirdNetPi } from '../src/api/adapters/birdnetpi';
 
 type Mode = 'birdweather' | 'birdnetgo' | 'birdnetpi';
@@ -103,7 +105,11 @@ export default function ConnectScreen() {
     setError(null);
     try {
       const nodeName = await pingBirdNetGo(hostUrl.trim());
-      await connectBirdNetGo(hostUrl.trim(), name.trim() || nodeName || 'BirdNET-Go station');
+      // BirdNET-Go on a Wildlife Network Base: link it, so the app never offers to share it a second time.
+      const api = baseApiUrlFor(hostUrl.trim());
+      const info = api ? await getBaseInfo(api, 3000).catch(() => null) : null;
+      const baseId = info?.model === 'wildnetwork-base' ? info.hardwareId : undefined;
+      await connectBirdNetGo(hostUrl.trim(), name.trim() || info?.name || nodeName || 'BirdNET-Go station', baseId);
       onConnected();
     } catch (e) {
       setError(
