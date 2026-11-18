@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { isBaseInfo, nameUrls, serviceUrls, suffixFrom, verifyBases } from '../src/lib/baseFind';
+import { HOTSPOT_POLL, isBaseInfo, nameUrls, pollUntil, serviceUrls, suffixFrom, verifyBases } from '../src/lib/baseFind';
 import { fixture } from './helpers';
 
 const info = JSON.parse(fixture('base-info-registered.json')) as Record<string, unknown>;
@@ -61,5 +61,43 @@ describe('Verifying candidates', () => {
       ['http://192.168.1.30', 'second'],
     ]);
     assert.equal(asked.length, 5, 'each address is asked once');
+  });
+});
+
+describe('Waiting for the Base on its hotspot', () => {
+  // A fake clock: sleep moves time on at once, so the test runs instantly.
+  function clock() {
+    let t = 0;
+    return { now: () => t, sleep: async (ms: number) => { t += ms; } };
+  }
+
+  it('goes on as soon as the Base answers', async () => {
+    const c = clock();
+    let tries = 0;
+    const v = await pollUntil(async () => (++tries === 4 ? 'info' : null), { intervalMs: 3000, timeoutMs: 60_000, ...c });
+    assert.equal(v, 'info');
+    assert.equal(tries, 4);
+    assert.equal(c.now(), 9000);
+  });
+
+  it('treats a failed request as no answer yet and gives up after the timeout', async () => {
+    const c = clock();
+    let tries = 0;
+    const v = await pollUntil(async () => { tries++; throw new Error('not on the hotspot'); }, { intervalMs: 3000, timeoutMs: 10_000, ...c });
+    assert.equal(v, null);
+    assert.equal(tries, 4); // at 0, 3, 6 and 9 s
+  });
+
+  it('stops when cancelled (screen left)', async () => {
+    const c = clock();
+    let tries = 0;
+    const v = await pollUntil(async () => { tries++; return null; }, { intervalMs: 3000, timeoutMs: 60_000, cancelled: () => tries >= 2, ...c });
+    assert.equal(v, null);
+    assert.equal(tries, 2);
+  });
+
+  it('waits a sensible time: a few seconds between tries, each shorter than the gap, minutes in all', () => {
+    assert.ok(HOTSPOT_POLL.requestMs < HOTSPOT_POLL.intervalMs);
+    assert.ok(HOTSPOT_POLL.timeoutMs >= 2 * 60_000);
   });
 });

@@ -80,3 +80,26 @@ export async function verifyBases(
   return [...byHw.values()];
 }
 
+
+/** Waiting for the Base on its hotspot: ask every 3 s (each try up to 2.5 s) for up to 5 minutes. */
+export const HOTSPOT_POLL = { intervalMs: 3000, requestMs: 2500, timeoutMs: 5 * 60_000 };
+
+/**
+ * Wait for something to succeed: call `attempt` every `intervalMs` until it returns a value or `timeoutMs`
+ * has passed (then null). Used to notice when the phone has joined the Base's hotspot.
+ */
+export async function pollUntil<T>(
+  attempt: () => Promise<T | null>,
+  opts: { intervalMs: number; timeoutMs: number; cancelled?: () => boolean; now?: () => number; sleep?: (ms: number) => Promise<void> },
+): Promise<T | null> {
+  const now = opts.now ?? Date.now;
+  const sleep = opts.sleep ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)));
+  const end = now() + opts.timeoutMs;
+  while (!opts.cancelled?.()) {
+    const v = await attempt().catch(() => null);
+    if (v != null) return v;
+    if (now() + opts.intervalMs > end) return null;
+    await sleep(opts.intervalMs);
+  }
+  return null;
+}

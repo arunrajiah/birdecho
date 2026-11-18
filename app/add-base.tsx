@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator, Switch } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator, Switch, AppState, Platform } from 'react-native';
 import { router } from 'expo-router';
 import {
   BASE_HOTSPOT_URL,
@@ -20,7 +20,7 @@ import {
 import { fetchNear, registerDevice } from '../src/lib/wildnetwork';
 import { getBases, saveBase } from '../src/lib/secureStorage';
 import { findBases } from '../src/lib/baseDiscovery';
-import type { FoundBase } from '../src/lib/baseFind';
+import { HOTSPOT_POLL, isBaseInfo, pollUntil, type FoundBase } from '../src/lib/baseFind';
 import { planBaseStation } from '../src/lib/baseStation';
 import { useStationStore } from '../src/stores/stationStore';
 
@@ -71,6 +71,40 @@ export default function AddBaseScreen() {
 
   // Never leave the app bound to the Base's network after this screen closes.
   useEffect(() => () => leaveHotspot(), []);
+
+  // Joining by hand (iPhone, older Android): keep asking the hotspot address and go on once the Base answers.
+  // Restarted when the app comes back from Settings, since timers pause while it is in the background.
+  const [waitRun, setWaitRun] = useState(0);
+  const [waitTimedOut, setWaitTimedOut] = useState(false);
+  useEffect(() => {
+    if (step !== 'manual-join') return;
+    let cancelled = false;
+    setWaitTimedOut(false);
+    void pollUntil(
+      async () => {
+        const i = await getBaseInfo(BASE_HOTSPOT_URL, HOTSPOT_POLL.requestMs);
+        return isBaseInfo(i) ? i : null;
+      },
+      { intervalMs: HOTSPOT_POLL.intervalMs, timeoutMs: HOTSPOT_POLL.timeoutMs, cancelled: () => cancelled },
+    ).then((i) => {
+      if (cancelled) return;
+      if (!i) return setWaitTimedOut(true);
+      setError(null);
+      setStep('working');
+      setProgress('Talking to the Base');
+      readInfo(BASE_HOTSPOT_URL).catch((e) => {
+        setStep('manual-join');
+        setError(e instanceof Error ? e.message : 'Could not reach the Base.');
+      });
+    });
+    const sub = AppState.addEventListener('change', (st) => {
+      if (st === 'active') setWaitRun((n) => n + 1);
+    });
+    return () => {
+      cancelled = true;
+      sub.remove();
+    };
+  }, [step, waitRun]);
 
   // On home Wi-Fi: look for Bases (mDNS `_wlnw-base._tcp`, then known .local names), each checked with /api/info.
   const [found, setFound] = useState<FoundBase[] | null>(null);
@@ -288,25 +322,37 @@ export default function AddBaseScreen() {
       {step === 'manual-join' && ssid && setupCode && (
         <>
           <Text className="mt-1 mb-4 text-sm text-gray-600 dark:text-gray-300">
-            Open your phone&apos;s Wi-Fi settings and join this network, then come back here.
+            {Platform.OS === 'ios'
+              ? 'iPhone does not let apps join a Wi-Fi network by themselves, so join the Base\'s Wi-Fi in Settings:'
+              : 'Join the Base\'s Wi-Fi in your phone\'s settings:'}
           </Text>
           <View className="mb-4 rounded-2xl bg-white dark:bg-gray-900 p-4">
-            <Text selectable className="text-[15px] font-semibold text-gray-900 dark:text-gray-50">{ssid}</Text>
-            <Text selectable className="mt-1 font-mono text-sm text-gray-700 dark:text-gray-200">Password: {hotspotPassword(setupCode)}</Text>
+            <Text className="text-sm text-gray-800 dark:text-gray-100">
+              1. Open {Platform.OS === 'ios' ? 'Settings, then Wi-Fi' : 'Settings, then Wi-Fi (or Network and internet)'}.
+            </Text>
+            <Text className="mt-2 text-sm text-gray-800 dark:text-gray-100">2. Tap this network:</Text>
+            <Text selectable className="mt-1 ml-4 text-[15px] font-semibold text-gray-900 dark:text-gray-50">{ssid}</Text>
+            <Text className="mt-2 text-sm text-gray-800 dark:text-gray-100">3. Enter this password (wn- and the setup code from the label):</Text>
+            <Text selectable className="mt-1 ml-4 font-mono text-[15px] text-gray-900 dark:text-gray-50">{hotspotPassword(setupCode)}</Text>
+            <Text className="mt-2 text-sm text-gray-800 dark:text-gray-100">
+              4. If the phone says the network has no internet, choose to stay connected (on iPhone, just leave it joined).
+            </Text>
+            <Text className="mt-2 text-sm text-gray-800 dark:text-gray-100">5. Come back to BirdEcho.</Text>
           </View>
-          <Text className={hint}>If the phone says the network has no internet, choose to stay connected.</Text>
+          {waitTimedOut ? (
+            <Text className="mb-3 text-sm text-amber-700 dark:text-amber-300">
+              The Base has not answered yet. Check that the phone is joined to {ssid} and that you are close to the Base, then tap the button below.
+            </Text>
+          ) : (
+            <View className="mb-3 flex-row items-center">
+              <ActivityIndicator color="#347F57" />
+              <Text className="ml-3 flex-1 text-sm text-gray-600 dark:text-gray-300">
+                Waiting for the Base. BirdEcho goes on by itself as soon as it answers.
+              </Text>
+            </View>
+          )}
           {error ? <Text className="mb-3 text-sm text-red-600">{error}</Text> : null}
-          <Button
-            title="I am on the Base's Wi-Fi"
-            onPress={() => {
-              setStep('working');
-              setProgress('Talking to the Base');
-              readInfo(BASE_HOTSPOT_URL).catch((e) => {
-                setStep('manual-join');
-                setError(e instanceof Error ? e.message : 'Could not reach the Base.');
-              });
-            }}
-          />
+          <Button title="I am on the Base's Wi-Fi" onPress={() => setWaitRun((n) => n + 1)} />
           <Button secondary title="Back" onPress={() => setStep('code')} />
         </>
       )}
