@@ -192,6 +192,8 @@ export interface ManagedBase {
   apiKey: string;
   latitude?: number;
   longitude?: number;
+  /** The Base's setup API on the home network (http://<ip> or http://<hostname>.local), when known. */
+  address?: string;
   addedAt: string;
 }
 

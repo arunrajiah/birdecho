@@ -15,6 +15,7 @@
     "build:all": "eas build --platform all --profile production"
   },
   "dependencies": {
+    "@inthepocket/react-native-service-discovery": "0.3.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@sentry/react-native": "^7.2.0",
     "@shopify/flash-list": "^2.0.2",

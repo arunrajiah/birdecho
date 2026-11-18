@@ -85,6 +85,9 @@ importers:
 
   .:
     dependencies:
+      '@inthepocket/react-native-service-discovery':
+        specifier: 0.3.0
+        version: 0.3.0(react-native@0.81.5(@babel/core@7.29.13)(@react-native/metro-config@0.85.1(@babel/core@7.29.13))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       '@react-native-async-storage/async-storage':
         specifier: ^2.2.0
         version: 2.2.0(react-native@0.81.5(@babel/core@7.29.13)(@react-native/metro-config@0.85.1(@babel/core@7.29.13))(@types/react@19.1.17)(react@19.1.0))
@@ -985,6 +988,12 @@ packages:
 
   '@ide/backoff@1.0.0':
     resolution: {integrity: sha512-F0YfUDjvT+Mtt/R4xdl2X0EYCHMMiJqNLdxHD++jDT5ydEFIyqbCHh51Qx2E211dgZprPKhV7sHmnXKpLuvc5g==}
+
+  '@inthepocket/react-native-service-discovery@0.3.0':
+    resolution: {integrity: sha512-3un9plBNLB/50anzKfjkzkITIwWFbbu72lY/i0AZhZNNIEo9PyuC8pCbbrdOPgdJNO1BTxYDoPHW/O9TxYm2/g==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
 
   '@isaacs/fs-minipass@4.0.1':
     resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
@@ -5349,9 +5358,9 @@ snapshots:
 
   '@babel/helper-wrap-function@7.28.6':
     dependencies:
-      '@babel/template': 7.28.6
+      '@babel/template': 7.29.7
       '@babel/traverse': 7.29.0
-      '@babel/types': 7.29.0
+      '@babel/types': 7.29.14
     transitivePeerDependencies:
       - supports-color
 
@@ -6293,6 +6302,11 @@ snapshots:
 
   '@ide/backoff@1.0.0': {}
 
+  '@inthepocket/react-native-service-discovery@0.3.0(react-native@0.81.5(@babel/core@7.29.13)(@react-native/metro-config@0.85.1(@babel/core@7.29.13))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.29.13)(@react-native/metro-config@0.85.1(@babel/core@7.29.13))(@types/react@19.1.17)(react@19.1.0)
+
   '@isaacs/fs-minipass@4.0.1':
     dependencies:
       minipass: 7.1.3
@@ -6616,7 +6630,7 @@ snapshots:
 
   '@react-native/babel-plugin-codegen@0.85.1(@babel/core@7.29.13)':
     dependencies:
-      '@babel/traverse': 7.29.0
+      '@babel/traverse': 7.29.14
       '@react-native/codegen': 0.85.1(@babel/core@7.29.13)
     transitivePeerDependencies:
       - '@babel/core'
@@ -6725,7 +6739,7 @@ snapshots:
   '@react-native/codegen@0.85.1(@babel/core@7.29.13)':
     dependencies:
       '@babel/core': 7.29.13
-      '@babel/parser': 7.29.2
+      '@babel/parser': 7.29.14
       hermes-parser: 0.33.3
       invariant: 2.2.4
       nullthrows: 1.1.1
@@ -9407,7 +9421,7 @@ snapshots:
   metro-source-map@0.83.3:
     dependencies:
       '@babel/traverse': 7.29.0
-      '@babel/traverse--for-generate-function-map': '@babel/traverse@7.29.0'
+      '@babel/traverse--for-generate-function-map': '@babel/traverse@7.29.14'
       '@babel/types': 7.29.0
       flow-enums-runtime: 0.0.6
       invariant: 2.2.4
@@ -9421,8 +9435,8 @@ snapshots:
 
   metro-source-map@0.84.3:
     dependencies:
-      '@babel/traverse': 7.29.0
-      '@babel/types': 7.29.0
+      '@babel/traverse': 7.29.14
+      '@babel/types': 7.29.14
       flow-enums-runtime: 0.0.6
       invariant: 2.2.4
       metro-symbolicate: 0.84.3
@@ -9471,9 +9485,9 @@ snapshots:
   metro-transform-plugins@0.84.3:
     dependencies:
       '@babel/core': 7.29.13
-      '@babel/generator': 7.29.1
-      '@babel/template': 7.28.6
-      '@babel/traverse': 7.29.0
+      '@babel/generator': 7.29.14
+      '@babel/template': 7.29.7
+      '@babel/traverse': 7.29.14
       flow-enums-runtime: 0.0.6
       nullthrows: 1.1.1
     transitivePeerDependencies:
@@ -9503,9 +9517,9 @@ snapshots:
   metro-transform-worker@0.84.3:
     dependencies:
       '@babel/core': 7.29.13
-      '@babel/generator': 7.29.1
-      '@babel/parser': 7.29.2
-      '@babel/types': 7.29.0
+      '@babel/generator': 7.29.14
+      '@babel/parser': 7.29.14
+      '@babel/types': 7.29.14
       flow-enums-runtime: 0.0.6
       metro: 0.84.3
       metro-babel-transformer: 0.84.3
@@ -9570,13 +9584,13 @@ snapshots:
 
   metro@0.84.3:
     dependencies:
-      '@babel/code-frame': 7.29.0
+      '@babel/code-frame': 7.29.7
       '@babel/core': 7.29.13
-      '@babel/generator': 7.29.1
-      '@babel/parser': 7.29.2
-      '@babel/template': 7.28.6
-      '@babel/traverse': 7.29.0
-      '@babel/types': 7.29.0
+      '@babel/generator': 7.29.14
+      '@babel/parser': 7.29.14
+      '@babel/template': 7.29.7
+      '@babel/traverse': 7.29.14
+      '@babel/types': 7.29.14
       accepts: 2.0.0
       chalk: 4.1.2
       ci-info: 2.0.0
