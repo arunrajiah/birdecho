@@ -1,0 +1,1 @@
+Wildlife Network Base: BirdEcho finds your Base on home Wi-Fi, adds its bird feed automatically, and shows its health and test mode. Removing your last station keeps your Bases. Clearer steps for joining the Base's Wi-Fi.
