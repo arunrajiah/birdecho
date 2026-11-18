@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.15.0] - 2026-11-19
 
 ### Added
 - Collect detections from a Wildlife Network Base that has no Wi-Fi or SIM: on the Base page, the phone joins the Base's Wi-Fi (on iPhone, follow the steps to join it in Settings), keeps each batch safely on the phone before the Base lets it go, and uploads them to Wildlife Network as soon as it has internet again. Shows how many detections are waiting to upload and when the last pickup was. Works for Bases set up from this phone (it needs the Base's key).
