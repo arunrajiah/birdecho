@@ -10,6 +10,7 @@ import { wildNetworkSource } from '../../src/lib/wildnetwork';
 import { getBases, type ManagedBase } from '../../src/lib/secureStorage';
 import { useCallback, useState } from 'react';
 import { TUTORIAL_VIDEO_URL } from '../../src/lib/links';
+import { isBaseStation, planRemoval } from '../../src/lib/baseStation';
 
 type Mode = 'light' | 'dark' | 'system';
 const MODES: Mode[] = ['light', 'dark', 'system'];
@@ -36,9 +37,11 @@ function StationRow({
   const subLabel =
     station.connectionType === 'birdweather'
       ? `${typeLabel} · ID ${station.bwStationId ?? '?'}`
-      : station.hostUrl
-        ? `${typeLabel} · ${station.hostUrl}`
-        : `${typeLabel} · sample data`;
+      : isBaseStation(station)
+        ? `Wildlife Network Base · ${station.hostUrl ?? typeLabel}`
+        : station.hostUrl
+          ? `${typeLabel} · ${station.hostUrl}`
+          : `${typeLabel} · sample data`;
 
   return (
     <Pressable
@@ -91,6 +94,7 @@ export default function SettingsScreen() {
   const goToWelcome = () => rootNavigation.reset({ index: 0, routes: [{ name: 'index' as never }] });
   const isConnected = useStationStore((s) => s.isConnected);
   const activeType = useStationStore((s) => s.connectionType);
+  const activeIsBase = useStationStore((s) => isBaseStation(s.stations.find((st) => st.id === s.activeStationId)));
   const [bases, setBases] = useState<ManagedBase[]>([]);
   useFocusEffect(useCallback(() => { void getBases().then(setBases); }, []));
 
@@ -111,31 +115,32 @@ export default function SettingsScreen() {
     }
   }
 
-  function confirmRemove(station: SavedStation) {
-    Alert.alert(
-      'Remove station',
-      `Remove "${station.stationName}" from BirdEcho?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: async () => {
-            await removeStation(station.id);
-            // If the last station was removed, go back to the home screen.
-            if (stations.length === 1) {
-              goToWelcome();
-            }
-          },
+  async function confirmRemove(station: SavedStation) {
+    // Read the Bases now (not the list from the last focus): one may have been added or forgotten since.
+    const saved = await getBases();
+    const plan = planRemoval(stations, station.id, saved.length);
+    Alert.alert(plan.title, plan.message, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: plan.confirm,
+        style: 'destructive',
+        onPress: async () => {
+          await removeStation(station.id);
+          // Only with no station and no Base left does the app go back to the welcome screen.
+          if (plan.outcome === 'last-reset') goToWelcome();
         },
-      ],
-    );
+      },
+    ]);
   }
 
-  function confirmDisconnectAll() {
+  async function confirmDisconnectAll() {
+    const saved = await getBases();
+    const keep = saved.length > 0;
     Alert.alert(
       'Disconnect all stations',
-      'This removes all saved stations and returns to the welcome screen.',
+      keep
+        ? 'This removes all saved stations. Your Bases stay saved under Bases, and BirdEcho stays open.'
+        : 'This removes all saved stations and returns to the welcome screen.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -143,7 +148,7 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: async () => {
             await disconnect();
-            goToWelcome();
+            if (!keep) goToWelcome();
           },
         },
       ],
@@ -201,7 +206,20 @@ export default function SettingsScreen() {
         </Text>
 
         {/* ── Wildlife Network ──────────────────────────────────────────────────── */}
-        {isConnected && wildNetworkSource(activeType) && (
+        {isConnected && wildNetworkSource(activeType) && activeIsBase && (
+          <>
+            <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+              Wildlife Network
+            </Text>
+            <View className="mb-6 rounded-2xl bg-white dark:bg-gray-900 px-4 py-3.5">
+              <Text className="text-[15px] font-medium text-gray-900 dark:text-gray-50">This Base already shares its detections</Text>
+              <Text className="text-xs text-gray-400 mt-0.5">
+                It sends them to Wildlife Network itself, so there is nothing to set up here. See its health under Bases.
+              </Text>
+            </View>
+          </>
+        )}
+        {isConnected && wildNetworkSource(activeType) && !activeIsBase && (
           <>
             <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Wildlife Network
@@ -256,7 +274,7 @@ export default function SettingsScreen() {
                       void switchStation(station.id);
                     }
                   }}
-                  onRemove={() => confirmRemove(station)}
+                  onRemove={() => void confirmRemove(station)}
                 />
               </View>
             ))}
@@ -279,7 +297,7 @@ export default function SettingsScreen() {
         {isConnected ? (
           <Pressable
             className="items-center rounded-2xl bg-white dark:bg-gray-900 py-3.5 active:opacity-75"
-            onPress={confirmDisconnectAll}
+            onPress={() => void confirmDisconnectAll()}
           >
             <Text className="text-sm font-semibold text-red-600 dark:text-red-300">Disconnect all stations</Text>
           </Pressable>

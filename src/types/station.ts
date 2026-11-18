@@ -26,4 +26,9 @@ export interface SavedStation {
   latitude?: number;
   /** GPS longitude — populated for BirdWeather stations from the station API. */
   longitude?: number;
+  /**
+   * Hardware id of the Wildlife Network Base this station runs on (its BirdNET-Go). Set when the app added the
+   * station for a Base or found a Base at the station's address. The Base shares its own detections.
+   */
+  baseId?: string;
 }

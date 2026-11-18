@@ -19,6 +19,8 @@ import {
 } from '../src/lib/base';
 import { fetchNear, registerDevice } from '../src/lib/wildnetwork';
 import { saveBase } from '../src/lib/secureStorage';
+import { planBaseStation } from '../src/lib/baseStation';
+import { useStationStore } from '../src/stores/stationStore';
 
 type Step = 'code' | 'manual-join' | 'details' | 'working' | 'done';
 
@@ -62,6 +64,7 @@ export default function AddBaseScreen() {
   const [apn, setApn] = useState('');
   const [progress, setProgress] = useState('');
   const [warnings, setWarnings] = useState<string[]>([]);
+  const [feedAdded, setFeedAdded] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Never leave the app bound to the Base's network after this screen closes.
@@ -175,6 +178,15 @@ export default function AddBaseScreen() {
         addedAt: new Date().toISOString(),
       });
       leaveHotspot();
+      // The Base's BirdNET-Go becomes a station, so its detections show in the Feed (linked, never shared twice).
+      const store = useStationStore.getState();
+      const plan = planBaseStation(store.stations, { hardwareId: info.hardwareId, name: name.trim() }, info, baseUrl);
+      if (plan.kind === 'add') {
+        await store.connectBirdNetGo(plan.hostUrl, plan.stationName, info.hardwareId);
+        setFeedAdded(plan.hostUrl);
+      } else if (plan.kind === 'link') {
+        await store.linkStationToBase(plan.stationId, info.hardwareId);
+      }
       setStep('done');
     } catch (e) {
       routeToBase(true);
@@ -289,6 +301,11 @@ export default function AddBaseScreen() {
                 <Text key={w} className="mt-1 text-sm text-amber-800 dark:text-amber-300">{w}</Text>
               ))}
             </View>
+          ) : null}
+          {feedAdded ? (
+            <Text className="mt-2 text-sm text-gray-600 dark:text-gray-300">
+              Its detections now show in the Feed (BirdNET-Go at {feedAdded}). The Base already shares them with Wildlife Network.
+            </Text>
           ) : null}
           <Text className="mt-2 text-sm text-gray-600 dark:text-gray-300">
             You can see its health in Settings, under Bases.

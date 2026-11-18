@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { Platform, View, Text, ActivityIndicator } from 'react-native';
+import { Platform, View, Text, ActivityIndicator, Pressable } from 'react-native';
+import { router } from 'expo-router';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { FlashList } from '@shopify/flash-list';
 import { requestWidgetUpdate } from 'react-native-android-widget';
@@ -141,6 +142,24 @@ export default function FeedScreen() {
   const onRefresh = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['records', adapter?.cacheKey] });
   }, [queryClient, adapter?.cacheKey]);
+
+  if (!isConnected) {
+    // No station saved (for example only a Base is left): nothing to show, offer to add a device.
+    return (
+      <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-950 px-8">
+        <Text className="text-center text-base text-gray-500 dark:text-gray-400">
+          No station to show. Add a device to see its detections here.
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          className="mt-4 rounded-2xl bg-green-700 px-6 py-3 active:opacity-75"
+          onPress={() => router.push('/onboarding')}
+        >
+          <Text className="text-sm font-semibold text-white">Add a device</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   if (isLoading) {
     return (

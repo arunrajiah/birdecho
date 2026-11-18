@@ -77,8 +77,8 @@ async function call<T>(base: string, path: string, init: RequestInit = {}, timeo
   }
 }
 
-export function getBaseInfo(base: string): Promise<BaseInfo> {
-  return call<BaseInfo>(base, '/api/info');
+export function getBaseInfo(base: string, timeoutMs?: number): Promise<BaseInfo> {
+  return call<BaseInfo>(base, '/api/info', {}, timeoutMs);
 }
 
 /** `warnings` lists settings the Base could not apply (for example Wi-Fi or APN); `notes` are informational. */
