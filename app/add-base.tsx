@@ -21,7 +21,7 @@ import { fetchNear, registerDevice } from '../src/lib/wildnetwork';
 import { getBases, saveBase } from '../src/lib/secureStorage';
 import { findBases } from '../src/lib/baseDiscovery';
 import { HOTSPOT_POLL, isBaseInfo, pollUntil, type FoundBase } from '../src/lib/baseFind';
-import { planBaseStation } from '../src/lib/baseStation';
+import { baseLocalUrl, planBaseStation } from '../src/lib/baseStation';
 import { useStationStore } from '../src/stores/stationStore';
 
 type Step = 'code' | 'manual-join' | 'details' | 'working' | 'done';
@@ -230,6 +230,7 @@ export default function AddBaseScreen() {
         apiKey: reg.apiKey,
         latitude: roundCoord(latN),
         longitude: roundCoord(lonN),
+        ...(baseLocalUrl(baseUrl, info) ? { address: baseLocalUrl(baseUrl, info)! } : {}),
         addedAt: new Date().toISOString(),
       });
       leaveHotspot();

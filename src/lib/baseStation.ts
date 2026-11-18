@@ -56,6 +56,12 @@ export function baseFeedUrl(baseUrl: string, info: Pick<BaseInfo, 'hostname'>): 
   return `http://${name}.local:${BASE_BIRDNET_GO_PORT}`;
 }
 
+/** The Base's setup API (port 80) on the home network, for health checks later; null when unknown. */
+export function baseLocalUrl(baseUrl: string, info: Pick<BaseInfo, 'hostname'>): string | null {
+  const feed = baseFeedUrl(baseUrl, info);
+  return feed ? baseApiUrlFor(feed) : null;
+}
+
 export type BaseStationPlan =
   | { kind: 'none' }
   | { kind: 'link'; stationId: string }
