@@ -376,7 +376,7 @@ export default function AddBaseScreen() {
           <Text className={label}>Home Wi-Fi (optional)</Text>
           <TextInput className={input} value={wifiSsid} onChangeText={setWifiSsid} placeholder="Network name" autoCapitalize="none" autoCorrect={false} />
           <TextInput className={input} value={wifiPsk} onChangeText={setWifiPsk} placeholder="Password" autoCapitalize="none" autoCorrect={false} secureTextEntry />
-          <Text className={hint}>With Wi-Fi or a SIM the Base sends its detections itself. Without either, this phone can carry them out later.</Text>
+          <Text className={hint}>With Wi-Fi or a SIM the Base sends its detections itself. Without either, this phone can carry them out later with Collect detections on the Base page.</Text>
           <Text className={label}>SIM APN (only if a SIM card is fitted)</Text>
           <TextInput className={input} value={apn} onChangeText={setApn} placeholder="e.g. internet" autoCapitalize="none" autoCorrect={false} />
           {error ? <Text className="mb-3 text-sm text-red-600">{error}</Text> : null}

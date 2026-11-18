@@ -5,6 +5,7 @@ import { getBases, removeBase, type ManagedBase } from '../../src/lib/secureStor
 import { BASE_HOTSPOT_URL, getBaseInfo, getBaseStatus, joinHotspot, leaveHotspot, routeToBase } from '../../src/lib/base';
 import { WILDNETWORK_BASE } from '../../src/lib/wildnetwork';
 import { useStationStore } from '../../src/stores/stationStore';
+import CollectDetections from '../../src/components/CollectDetections';
 import { baseApiUrlFor } from '../../src/lib/baseStation';
 import {
   ago,
@@ -199,6 +200,8 @@ export default function BaseScreen() {
           ? 'On the same Wi-Fi as the Base this fills in by itself. Away from it, stand near the Base: the phone joins its Wi-Fi only for this check.'
           : 'Stand near the Base. The phone joins its Wi-Fi only for this check.'}
       </Text>
+
+      <CollectDetections base={base} onBaseChange={setBase} />
 
       <Pressable
         accessibilityRole="button"

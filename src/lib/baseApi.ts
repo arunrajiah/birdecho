@@ -55,7 +55,14 @@ export interface BaseConfig {
   wifi?: { ssid: string; psk: string };
 }
 
-export class BaseError extends Error {}
+export class BaseError extends Error {
+  /** HTTP status from the Base, or 0 when it could not be reached. */
+  readonly status: number;
+  constructor(message: string, status = 0) {
+    super(message);
+    this.status = status;
+  }
+}
 
 async function call<T>(base: string, path: string, init: RequestInit = {}, timeoutMs = 10_000): Promise<T> {
   const ctrl = new AbortController();
@@ -64,9 +71,9 @@ async function call<T>(base: string, path: string, init: RequestInit = {}, timeo
     const res = await fetch(`${base.replace(/\/$/, '')}${path}`, { ...init, signal: ctrl.signal });
     const body = (await res.json().catch(() => ({}))) as T & { error?: string };
     if (!res.ok) {
-      if (res.status === 403) throw new BaseError('The setup code is not right. Check the label on the Base.');
-      if (res.status === 429) throw new BaseError('Too many wrong setup codes. Wait 10 minutes, then try again.');
-      throw new BaseError(body.error ?? `The Base answered with an error (${res.status}).`);
+      if (res.status === 403) throw new BaseError('The setup code is not right. Check the label on the Base.', 403);
+      if (res.status === 429) throw new BaseError('Too many wrong setup codes. Wait 10 minutes, then try again.', 429);
+      throw new BaseError(body.error ?? `The Base answered with an error (${res.status}).`, res.status);
     }
     return body;
   } catch (e) {
@@ -108,4 +115,20 @@ export function getBaseStatus(base: string): Promise<BaseStatus> {
 /** Round to 2 decimals (about 1 km), the Base's default and what Wildlife Network shows. */
 export function roundCoord(v: number): number {
   return Math.round(v * 100) / 100;
+}
+
+// ─── Data pickup (README "Data pickup", wnbase.py detections/ack) ────────────
+
+/** Up to `limit` (max 500) WDX events not yet uploaded, and the cursor to acknowledge them with. */
+export function getDetections(base: string, limit = 500): Promise<{ cursor: unknown; events: { eventId: string; [k: string]: unknown }[] }> {
+  return call(base, `/api/detections?limit=${Math.max(1, Math.min(500, Math.trunc(limit)))}`, {}, 20_000);
+}
+
+/** Move the Base's queue past the last batch. Only the cursor of the last /api/detections answer is accepted (else 409). */
+export function ackDetections(base: string, code: string, cursor: unknown): Promise<{ ok: boolean; advanced: boolean }> {
+  return call(base, '/api/ack', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-setup-code': code },
+    body: JSON.stringify({ cursor }),
+  });
 }

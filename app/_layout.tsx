@@ -16,6 +16,8 @@ import { initSentry, captureException } from '../src/lib/sentry';
 import { QUERY_CACHE_STORAGE_KEY } from '../src/lib/queryCache';
 import { chrome } from '../src/theme/colors';
 import { StatusBar } from 'expo-status-bar';
+import { AppState } from 'react-native';
+import { flushOutbox } from '../src/lib/outbox';
 
 initSentry();
 
@@ -53,6 +55,16 @@ export default function RootLayout() {
   const activeStation = useStationStore(
     (st) => st.stations.find((x) => x.id === st.activeStationId) ?? null,
   );
+
+  // Detections collected from a Base without internet go to Wildlife Network once the phone is online:
+  // tried at start and whenever the app comes back to the foreground.
+  useEffect(() => {
+    void flushOutbox();
+    const sub = AppState.addEventListener('change', (st) => {
+      if (st === 'active') void flushOutbox();
+    });
+    return () => sub.remove();
+  }, []);
 
   useEffect(() => {
     if (hydrated.current) return;

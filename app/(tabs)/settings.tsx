@@ -11,6 +11,7 @@ import { getBases, type ManagedBase } from '../../src/lib/secureStorage';
 import { useCallback, useState } from 'react';
 import { TUTORIAL_VIDEO_URL } from '../../src/lib/links';
 import { isBaseStation, planRemoval } from '../../src/lib/baseStation';
+import { waitingCounts } from '../../src/lib/outbox';
 
 type Mode = 'light' | 'dark' | 'system';
 const MODES: Mode[] = ['light', 'dark', 'system'];
@@ -96,7 +97,11 @@ export default function SettingsScreen() {
   const activeType = useStationStore((s) => s.connectionType);
   const activeIsBase = useStationStore((s) => isBaseStation(s.stations.find((st) => st.id === s.activeStationId)));
   const [bases, setBases] = useState<ManagedBase[]>([]);
-  useFocusEffect(useCallback(() => { void getBases().then(setBases); }, []));
+  const [waiting, setWaiting] = useState<Record<string, number>>({});
+  useFocusEffect(useCallback(() => {
+    void getBases().then(setBases);
+    void waitingCounts().then(setWaiting).catch(() => undefined);
+  }, []));
 
   const { mode, setMode } = useThemeStore();
   const rareAlertsEnabled = useSettingsStore((s) => s.rareAlertsEnabled);
@@ -249,7 +254,9 @@ export default function SettingsScreen() {
                   onPress={() => router.push({ pathname: '/base/[id]', params: { id: b.deviceId || b.hardwareId } })}
                 >
                   <Text className="text-[15px] font-medium text-gray-900 dark:text-gray-50">{b.name}</Text>
-                  <Text className="text-xs text-gray-400 mt-0.5">Wildlife Network Base · health and status</Text>
+                  <Text className="text-xs text-gray-400 mt-0.5">
+                    {waiting[b.hardwareId] ? `Wildlife Network Base · ${waiting[b.hardwareId]} detections waiting to upload` : 'Wildlife Network Base · health and status'}
+                  </Text>
                 </Pressable>
               ))}
             </View>
