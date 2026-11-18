@@ -27,7 +27,10 @@
           "NSAllowsArbitraryLoads": false,
           "NSAllowsLocalNetworking": true
         },
-        "NSLocalNetworkUsageDescription": "BirdEcho connects to your bird station on your home network to show its detections."
+        "NSLocalNetworkUsageDescription": "BirdEcho connects to your bird station and finds your Wildlife Network Base on your home network to show their detections and health.",
+        "NSBonjourServices": [
+          "_wlnw-base._tcp"
+        ]
       },
       "config": {
         "usesNonExemptEncryption": false

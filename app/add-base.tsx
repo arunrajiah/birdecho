@@ -18,7 +18,9 @@ import {
   type BaseInfo,
 } from '../src/lib/base';
 import { fetchNear, registerDevice } from '../src/lib/wildnetwork';
-import { saveBase } from '../src/lib/secureStorage';
+import { getBases, saveBase } from '../src/lib/secureStorage';
+import { findBases } from '../src/lib/baseDiscovery';
+import type { FoundBase } from '../src/lib/baseFind';
 import { planBaseStation } from '../src/lib/baseStation';
 import { useStationStore } from '../src/stores/stationStore';
 
@@ -69,6 +71,25 @@ export default function AddBaseScreen() {
 
   // Never leave the app bound to the Base's network after this screen closes.
   useEffect(() => () => leaveHotspot(), []);
+
+  // On home Wi-Fi: look for Bases (mDNS `_wlnw-base._tcp`, then known .local names), each checked with /api/info.
+  const [found, setFound] = useState<FoundBase[] | null>(null);
+  const [searchRun, setSearchRun] = useState(0);
+  useEffect(() => {
+    if (!onHomeWifi || step !== 'code') return;
+    let live = true;
+    setFound(null);
+    void (async () => {
+      const known = (await getBases()).map((b) => b.ssid);
+      const list = await findBases([...known, baseId]).catch(() => []);
+      if (live) setFound(list);
+    })();
+    return () => {
+      live = false;
+    };
+    // baseId is read once per search; typing it does not restart the search ("Search again" does).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onHomeWifi, step, searchRun]);
 
   const ssid = ssidFor(baseId);
   const setupCode = normalizeSetupCode(code);
@@ -210,6 +231,40 @@ export default function AddBaseScreen() {
           </View>
           {onHomeWifi ? (
             <>
+              <Text className={label}>Bases on this Wi-Fi</Text>
+              {found === null ? (
+                <View className="mb-3 flex-row items-center rounded-2xl bg-white dark:bg-gray-900 px-4 py-3.5">
+                  <ActivityIndicator color="#347F57" />
+                  <Text className="ml-3 text-sm text-gray-600 dark:text-gray-300">Looking for Bases on this network</Text>
+                </View>
+              ) : found.length === 0 ? (
+                <Text className={hint}>No Base found on this network. Enter its address below, or search again.</Text>
+              ) : (
+                <View className="mb-3 rounded-2xl bg-white dark:bg-gray-900 overflow-hidden">
+                  {found.map((b, i) => {
+                    const chosen = address.trim().replace(/\/$/, '') === b.url;
+                    return (
+                      <Pressable
+                        key={b.info.hardwareId}
+                        accessibilityRole="button"
+                        accessibilityState={{ selected: chosen }}
+                        className={`px-4 py-3.5 active:opacity-80 ${i > 0 ? 'border-t border-gray-100 dark:border-gray-800' : ''} ${chosen ? 'bg-green-50 dark:bg-green-950' : ''}`}
+                        onPress={() => setAddress(b.url)}
+                      >
+                        <Text className="text-[15px] font-medium text-gray-900 dark:text-gray-50">{b.info.name || b.info.hostname}</Text>
+                        <Text className="text-xs text-gray-400 mt-0.5">
+                          {b.url}{b.info.configured ? ' · already set up' : ' · new'}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              )}
+              {found !== null ? (
+                <Pressable accessibilityRole="button" className="mb-4 self-start" onPress={() => setSearchRun((n) => n + 1)}>
+                  <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Search again</Text>
+                </Pressable>
+              ) : null}
               <Text className={label}>Base address</Text>
               <TextInput className={input} value={address} onChangeText={setAddress} placeholder="http://192.168.1.50" autoCapitalize="none" autoCorrect={false} keyboardType="url" />
             </>

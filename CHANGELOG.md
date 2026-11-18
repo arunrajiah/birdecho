@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add a Base on home Wi-Fi: BirdEcho now looks for Bases on the network (Bonjour service `_wlnw-base._tcp` and the Base's .local name), checks each one and lists them, so there is no address to type. Typing the address still works. iPhone asks once for local network access.
+
 ### Fixed
 - Removing your last station no longer sends you back to the welcome screen when a Wildlife Network Base is saved under Settings, Bases. BirdEcho now asks first and says what will happen; it only starts over when no station and no Base is left.
 - Setting up a Base with BirdNET-Go now adds its bird feed too, so its detections show in the Feed without adding it again by hand. The station is linked to the Base, and one that already uses that address is linked instead of added twice.
