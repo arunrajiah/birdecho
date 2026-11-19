@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Base page: a note when the Base has not reported to Wildlife Network for over an hour, saying it may have lost Wi-Fi and to check it over the Base's Wi-Fi.
+
 ## [0.15.0] - 2026-11-19
 
 ### Added
