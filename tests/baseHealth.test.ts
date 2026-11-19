@@ -9,6 +9,7 @@ import {
   healthFromReport,
   isTestBase,
   micWarning,
+  staleReport,
 } from '../src/lib/baseHealth';
 import { baseLocalUrl } from '../src/lib/baseStation';
 import { fixture } from './helpers';
@@ -115,5 +116,24 @@ describe('Health wording', () => {
   it('has no em dashes in what it shows', () => {
     const text = [micWarning({ micActive: false, micProblem: 'x' }), formatUptime(93_600), formatSignal('4g', 61)].join(' ');
     assert.equal(/—/.test(text), false);
+  });
+});
+
+describe('Silent Base note', () => {
+  const now = Date.parse('2026-11-19T12:00:00Z');
+  it('shows after more than an hour without a report, with how long', () => {
+    assert.equal(staleReport('2026-11-19T11:30:00Z', now), null);
+    assert.equal(staleReport('2026-11-19T11:00:00Z', now), null, 'exactly an hour is not yet stale');
+    assert.equal(staleReport('2026-11-19T10:45:00Z', now), '75 minutes');
+    assert.equal(staleReport('2026-11-19T09:00:00Z', now), '3 hours');
+    assert.equal(staleReport('2026-11-16T12:00:00Z', now), '3 days');
+  });
+  it('stays quiet when the Base never reported or the time is unreadable', () => {
+    assert.equal(staleReport(null, now), null);
+    assert.equal(staleReport('not a date', now), null);
+  });
+  it('keeps ago() wording', () => {
+    assert.equal(ago('2026-11-19T09:00:00Z', now), '3 hours ago');
+    assert.equal(ago('2026-11-19T11:59:30Z', now), 'just now');
   });
 });

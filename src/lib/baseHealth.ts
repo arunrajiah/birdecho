@@ -130,10 +130,28 @@ export function ago(iso: string | null | undefined, now = Date.now()): string {
   const t = new Date(iso).getTime();
   if (!Number.isFinite(t)) return 'never';
   const m = Math.round((now - t) / 60000);
-  if (m < 2) return 'just now';
-  if (m < 120) return `${m} minutes ago`;
+  return m < 2 ? 'just now' : `${duration(m)} ago`;
+}
+
+/** Minutes as "45 minutes", "3 hours" or "2 days" (the units ago() uses). */
+function duration(m: number): string {
+  if (m < 120) return `${m} minutes`;
   const h = Math.round(m / 60);
-  return h < 48 ? `${h} hours ago` : `${Math.round(h / 24)} days ago`;
+  return h < 48 ? `${h} hours` : `${Math.round(h / 24)} days`;
+}
+
+/** A Base that has not reported for longer than this gets a note on its page. */
+export const STALE_REPORT_MS = 60 * 60_000;
+
+/**
+ * How long a Base has been silent ("3 hours"), when its last report to Wildlife Network is older than
+ * STALE_REPORT_MS; null when it is recent or when it has never reported (the page already says so).
+ */
+export function staleReport(iso: string | null | undefined, now = Date.now()): string | null {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t) || now - t <= STALE_REPORT_MS) return null;
+  return duration(Math.round((now - t) / 60000));
 }
 
 /**

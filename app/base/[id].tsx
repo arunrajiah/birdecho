@@ -16,6 +16,7 @@ import {
   healthFromReport,
   isTestBase,
   micWarning,
+  staleReport,
   type BaseHealth,
 } from '../../src/lib/baseHealth';
 
@@ -176,6 +177,13 @@ export default function BaseScreen() {
             {ago(cloud.health.at)}
             {cloud.full && cloud.history > 1 ? ` · ${cloud.history} reports kept` : ''}
           </Text>
+          {staleReport(cloud.health.at) ? (
+            <View className="mb-2 rounded-2xl bg-amber-50 dark:bg-amber-950 p-4" accessibilityRole="alert">
+              <Text className="text-sm text-amber-800 dark:text-amber-300">
+                This Base hasn&apos;t reported for {staleReport(cloud.health.at)}. It may have lost Wi-Fi. Stand near it and use Check over the Base&apos;s Wi-Fi.
+              </Text>
+            </View>
+          ) : null}
           <Health h={cloud.health} />
           {!cloud.full ? (
             <Text className="mt-2 ml-1 text-xs text-gray-500 dark:text-gray-400">
