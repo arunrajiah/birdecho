@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { getBases, removeBase, type ManagedBase } from '../../src/lib/secureStorage';
 import { BASE_HOTSPOT_URL, getBaseInfo, getBaseStatus, joinHotspot, leaveHotspot, routeToBase } from '../../src/lib/base';
 import { WILDNETWORK_BASE } from '../../src/lib/wildnetwork';
@@ -92,9 +92,12 @@ export default function BaseScreen() {
   const stationHost = useStationStore((s) => s.stations.find((st) => base && st.baseId === base.hardwareId)?.hostUrl);
 
   useEffect(() => () => leaveHotspot(), []);
-  useEffect(() => {
-    void getBases().then((all) => setBase(all.find((b) => b.deviceId === id || b.hardwareId === id) ?? null));
-  }, [id]);
+  // Reloaded on focus, so a location changed on the next screen shows here.
+  useFocusEffect(
+    useCallback(() => {
+      void getBases().then((all) => setBase(all.find((b) => b.deviceId === id || b.hardwareId === id) ?? null));
+    }, [id]),
+  );
 
   // Wildlife Network: the detailed health endpoint needs this Base's device key, which the phone only holds when
   // it registered the Base itself. Otherwise the public list, which has the last report time and a few fields.
@@ -119,19 +122,32 @@ export default function BaseScreen() {
   }, [base, id]);
 
   // Straight from the Base when it is on the same network as the phone.
+  // Also the address it answers at right now (home network, or its own Wi-Fi when the phone is joined to it),
+  // which settings changes such as the location need.
   const lanUrl = base?.address ?? (stationHost ? baseApiUrlFor(stationHost) : null);
+  const hardwareId = base?.hardwareId;
+  const [reachUrl, setReachUrl] = useState<string | null | undefined>(undefined);
+  const [probeRun, setProbeRun] = useState(0);
   useEffect(() => {
-    if (!base || !lanUrl) return;
+    if (!hardwareId) return;
     let live = true;
-    void getBaseInfo(lanUrl, 3000)
-      .then((info) => {
-        if (live && info.hardwareId === base.hardwareId) setLocal({ health: healthFromLocal(info), test: isTestBase(info) });
-      })
-      .catch(() => undefined);
+    setReachUrl(undefined);
+    void (async () => {
+      for (const url of lanUrl ? [lanUrl, BASE_HOTSPOT_URL] : [BASE_HOTSPOT_URL]) {
+        const info = await getBaseInfo(url, 3000).catch(() => null);
+        if (!live) return;
+        if (info?.hardwareId === hardwareId) {
+          setLocal({ health: healthFromLocal(info), test: isTestBase(info) });
+          setReachUrl(url);
+          return;
+        }
+      }
+      setReachUrl(null);
+    })();
     return () => {
       live = false;
     };
-  }, [base, lanUrl]);
+  }, [hardwareId, lanUrl, probeRun]);
 
   const checkLocally = useCallback(async () => {
     if (!base) return;
@@ -208,6 +224,28 @@ export default function BaseScreen() {
           ? 'On the same Wi-Fi as the Base this fills in by itself. Away from it, stand near the Base: the phone joins its Wi-Fi only for this check.'
           : 'Stand near the Base. The phone joins its Wi-Fi only for this check.'}
       </Text>
+
+      <Text className={heading}>Location</Text>
+      {reachUrl === undefined ? (
+        <ActivityIndicator className="my-2 self-start" color="#347F57" />
+      ) : reachUrl ? (
+        <Pressable
+          accessibilityRole="button"
+          className="items-center rounded-2xl border border-green-700 dark:border-green-400 py-3.5 active:opacity-75"
+          onPress={() => router.push({ pathname: '/base-location', params: { id: base.hardwareId, url: reachUrl } })}
+        >
+          <Text className="text-base font-semibold text-green-700 dark:text-green-300">Change location</Text>
+        </Pressable>
+      ) : (
+        <>
+          <Text className="ml-1 text-sm text-gray-600 dark:text-gray-300">
+            To change the Base&apos;s location after moving it, connect this phone to the Base&apos;s Wi-Fi or to the same Wi-Fi as the Base.
+          </Text>
+          <Pressable accessibilityRole="button" className="mt-2 ml-1 self-start" onPress={() => setProbeRun((n) => n + 1)}>
+            <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Check again</Text>
+          </Pressable>
+        </>
+      )}
 
       <CollectDetections base={base} onBaseChange={setBase} />
 
