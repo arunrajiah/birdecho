@@ -215,6 +215,24 @@ export async function saveBase(base: ManagedBase): Promise<void> {
   await SecureStore.setItemAsync(BASES_KEY, JSON.stringify([...others, base]));
 }
 
+const DEPLOYMENTS_KEY = 'wildnetwork_base_deployments';
+
+/** Deployment ids Bases reported about themselves, by hardware id (also for Bases set up on another phone). */
+export async function getBaseDeployments(): Promise<Record<string, string>> {
+  try {
+    const raw = await SecureStore.getItemAsync(DEPLOYMENTS_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+
+export async function rememberBaseDeployment(hardwareId: string, deploymentId: string): Promise<void> {
+  const all = await getBaseDeployments();
+  if (all[hardwareId] === deploymentId) return;
+  await SecureStore.setItemAsync(DEPLOYMENTS_KEY, JSON.stringify({ ...all, [hardwareId]: deploymentId }));
+}
+
 export async function removeBase(hardwareId: string): Promise<void> {
   const left = (await getBases()).filter((b) => b.hardwareId !== hardwareId);
   await SecureStore.setItemAsync(BASES_KEY, JSON.stringify(left));

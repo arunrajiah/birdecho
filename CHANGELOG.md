@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Base page: a note when the Base has not reported to Wildlife Network for over an hour, saying it may have lost Wi-Fi and to check it over the Base's Wi-Fi.
 - Feed for a Base (or a BirdNET-Go station linked to one) when the phone cannot reach it on this network: its detections come from Wildlife Network instead, marked "From Wildlife Network". Recordings play only on the same Wi-Fi as the station, so those entries have no recording. When the station answers again the lists merge, each detection shown once with the station's own copy kept. A test Base's detections show only on the phone that set it up.
+- The Base tells the app where its detections are on Wildlife Network (Base software 0.2.0 or later): BirdEcho asks while the Base is reachable and remembers it, so the Feed from Wildlife Network also works for a Base set up on another phone.
 
 ## [0.15.0] - 2026-11-19
 

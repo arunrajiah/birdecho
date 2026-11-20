@@ -41,6 +41,8 @@ export interface BaseInfo {
   latitude: number | null;
   longitude: number | null;
   registration?: string;
+  /** "<system>:<stationId>" its detections are filed under on Wildlife Network (Base 0.2.0 and later). */
+  deploymentId?: string | null;
 }
 
 export interface BaseConfig {
