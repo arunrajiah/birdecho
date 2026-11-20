@@ -13,6 +13,8 @@ import { useFavoritesStore } from '../../src/stores/favoritesStore';
 import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useRareStore } from '../../src/stores/rareStore';
 import { useApiAdapter } from '../../src/hooks/useApiAdapter';
+import { useRemoteFeed } from '../../src/hooks/useRemoteFeed';
+import { mergeFeed } from '../../src/lib/remoteFeed';
 import { scheduleLocalNotification } from '../../src/lib/notifications';
 import { saveWidgetData, WIDGET_NAME } from '../../src/widgetTaskHandler';
 import { BirdStationWidget } from '../../src/widgets/BirdStationWidget';
@@ -24,6 +26,8 @@ export default function FeedScreen() {
   const isConnected = useStationStore((s) => s.isConnected);
   const stationName = useStationStore((s) => s.stationName);
   const stationTimezone = useStationStore((s) => s.stationTimezone) ?? undefined;
+  // A Base's own BirdNET-Go, or a BirdNET-Go station linked to a Base: its detections are also on Wildlife Network.
+  const baseId = useStationStore((s) => s.stations.find((st) => st.id === s.activeStationId)?.baseId);
   const queryClient = useQueryClient();
   const favSpeciesIds = useFavoritesStore((s) => s.speciesIds);
   const rareAlertsEnabled = useSettingsStore((s) => s.rareAlertsEnabled);
@@ -55,9 +59,23 @@ export default function FeedScreen() {
     refetchOnWindowFocus: true,
   });
 
-  const records = useMemo<Detection[]>(
+  const localRecords = useMemo<Detection[]>(
     () => data?.pages.flatMap((p) => p.records) ?? [],
     [data],
+  );
+
+  // Out of reach on this network: show the Base's Feed from Wildlife Network, merged with what was seen locally.
+  const unreachable = isError && !!baseId;
+  const remote = useRemoteFeed(baseId, unreachable, localRecords);
+  const records = useMemo<Detection[]>(
+    () =>
+      mergeFeed(
+        localRecords,
+        remote.records,
+        // While more local pages can load, remote items older than the loaded ones would only fill a gap.
+        !unreachable && hasNextPage ? localRecords[localRecords.length - 1]?.timestamp : null,
+      ),
+    [localRecords, remote.records, unreachable, hasNextPage],
   );
 
   // ─── Favourites local notifications ─────────────────────────────────────
@@ -169,7 +187,7 @@ export default function FeedScreen() {
     );
   }
 
-  if (isError) {
+  if (isError && !(unreachable && (records.length > 0 || remote.state !== 'unknown'))) {
     return (
       <ErrorState
         error={error instanceof Error ? error : null}
@@ -182,6 +200,22 @@ export default function FeedScreen() {
   return (
     <View className="flex-1 bg-gray-50 dark:bg-gray-950">
       <UpdateBanner />
+      {unreachable ? (
+        <View className="mx-4 mt-3 rounded-2xl bg-white dark:bg-gray-900 p-3">
+          <Text className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+            {stationName ?? 'Your station'} is not reachable on this network
+          </Text>
+          <Text className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            {remote.state === 'loading'
+              ? 'Loading its detections from Wildlife Network.'
+              : remote.state === 'error'
+                ? 'Wildlife Network could not be reached either. Showing the detections already on this phone.'
+                : remote.state === 'unknown'
+                  ? 'Its detections could not be found on Wildlife Network yet. Showing the detections already on this phone.'
+                  : 'Showing its detections from Wildlife Network. Recordings play only on the same Wi-Fi as the station.'}
+          </Text>
+        </View>
+      ) : null}
       <FlashList
         data={records}
         keyExtractor={(item) => item.id}
@@ -196,7 +230,11 @@ export default function FeedScreen() {
         ListEmptyComponent={() => (
           <View className="flex-1 items-center justify-center py-24">
             <Text className="text-center text-base text-gray-400 dark:text-gray-500">
-              No recent sightings from your station yet.
+              {unreachable && remote.state === 'ready'
+                ? remote.hasKey
+                  ? 'No detections from this station on Wildlife Network in the last 7 days.'
+                  : 'No detections from this station on Wildlife Network in the last 7 days. A test Base shares its detections only with the phone that set it up.'
+                : 'No recent sightings from your station yet.'}
             </Text>
           </View>
         )}
