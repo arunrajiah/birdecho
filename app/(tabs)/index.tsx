@@ -14,6 +14,8 @@ import { useSettingsStore } from '../../src/stores/settingsStore';
 import { useRareStore } from '../../src/stores/rareStore';
 import { useApiAdapter } from '../../src/hooks/useApiAdapter';
 import { useRemoteFeed } from '../../src/hooks/useRemoteFeed';
+import { usePhoneNetwork } from '../../src/hooks/usePhoneNetwork';
+import { feedSources, stationReach } from '../../src/lib/reachability';
 import { mergeFeed } from '../../src/lib/remoteFeed';
 import { scheduleLocalNotification } from '../../src/lib/notifications';
 import { saveWidgetData, WIDGET_NAME } from '../../src/widgetTaskHandler';
@@ -35,6 +37,9 @@ export default function FeedScreen() {
   const rareSpeciesIds = useRareStore((s) => s.speciesIds);
   const lastNotifiedRef = useRef<Record<string, number>>({});
   const adapter = useApiAdapter();
+  // Decided without waiting for a request: no Wi-Fi, or Wi-Fi on another network than the station's address.
+  const phoneNet = usePhoneNetwork();
+  const reach = useMemo(() => stationReach(baseHostUrl, phoneNet), [baseHostUrl, phoneNet]);
 
   useEffect(() => {
     lastNotifiedRef.current = {};
@@ -50,6 +55,7 @@ export default function FeedScreen() {
     error,
     refetch,
     isRefetching,
+    isFetchedAfterMount,
   } = useInfiniteQuery({
     queryKey: ['records', adapter?.cacheKey],
     queryFn: ({ pageParam }) => adapter!.fetchRecentRecords(pageParam as string | undefined),
@@ -58,16 +64,34 @@ export default function FeedScreen() {
     enabled: !!adapter && isConnected,
     refetchInterval: 60_000,
     refetchOnWindowFocus: true,
+    // A station linked to a Base has the Wildlife Network fallback: one try (with the adapter's short timeout)
+    // decides, the next poll tries again. Retries with backoff kept the spinner up for minutes on mobile data.
+    retry: baseId ? false : 3,
   });
+
+  // Back on the station's network: try it at once instead of waiting for the next poll.
+  useEffect(() => {
+    if (!reach.outOfReach && isError) void refetch();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reach.outOfReach]);
 
   const localRecords = useMemo<Detection[]>(
     () => data?.pages.flatMap((p) => p.records) ?? [],
     [data],
   );
 
-  // Out of reach on this network: show the Base's Feed from Wildlife Network, merged with what was seen locally.
-  const unreachable = isError && !!baseId;
-  const remote = useRemoteFeed(baseId, unreachable, localRecords, baseHostUrl);
+  // A Base's Feed from Wildlife Network is asked for while the station is tried (shown as soon as it arrives) and
+  // while the station is out of reach, merged with what was seen locally.
+  const sources = feedSources({
+    baseId,
+    outOfReach: reach.outOfReach,
+    answered: isFetchedAfterMount && !isError,
+    failed: isError,
+  });
+  const { unreachable } = sources;
+  const remote = useRemoteFeed(baseId, sources, localRecords, baseHostUrl);
+  // Wildlife Network answered before the station: show it instead of the spinner.
+  const remoteShown = sources.remote && remote.state === 'ready' && (remote.records.length > 0 || unreachable);
   const records = useMemo<Detection[]>(
     () =>
       mergeFeed(
@@ -180,7 +204,7 @@ export default function FeedScreen() {
     );
   }
 
-  if (isLoading) {
+  if (isLoading && !remoteShown) {
     return (
       <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-950">
         <ActivityIndicator size="large" color="#1D5339" />
@@ -204,7 +228,9 @@ export default function FeedScreen() {
       {unreachable ? (
         <View className="mx-4 mt-3 rounded-2xl bg-white dark:bg-gray-900 p-3">
           <Text className="text-sm font-semibold text-gray-900 dark:text-gray-50">
-            {stationName ?? 'Your station'} is not reachable on this network
+            {remote.state === 'ready'
+              ? 'Station out of reach, showing detections from Wildlife Network'
+              : `${stationName ?? 'Your station'} is not reachable on this network`}
           </Text>
           <Text className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             {remote.state === 'loading'
@@ -213,7 +239,13 @@ export default function FeedScreen() {
                 ? 'Wildlife Network could not be reached either. Showing the detections already on this phone.'
                 : remote.state === 'unknown'
                   ? 'Its detections could not be found on Wildlife Network yet. Showing the detections already on this phone.'
-                  : 'Showing its detections from Wildlife Network. Recordings play only on the same Wi-Fi as the station.'}
+                  : 'Recordings play only on the same Wi-Fi as the station.'}
+          </Text>
+        </View>
+      ) : isLoading && remoteShown ? (
+        <View className="mx-4 mt-3 rounded-2xl bg-white dark:bg-gray-900 p-3">
+          <Text className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+            Connecting to {stationName ?? 'your station'}, showing detections from Wildlife Network meanwhile
           </Text>
         </View>
       ) : null}
