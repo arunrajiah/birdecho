@@ -28,6 +28,7 @@ export default function FeedScreen() {
   const stationTimezone = useStationStore((s) => s.stationTimezone) ?? undefined;
   // A Base's own BirdNET-Go, or a BirdNET-Go station linked to a Base: its detections are also on Wildlife Network.
   const baseId = useStationStore((s) => s.stations.find((st) => st.id === s.activeStationId)?.baseId);
+  const baseHostUrl = useStationStore((s) => s.stations.find((st) => st.id === s.activeStationId)?.hostUrl);
   const queryClient = useQueryClient();
   const favSpeciesIds = useFavoritesStore((s) => s.speciesIds);
   const rareAlertsEnabled = useSettingsStore((s) => s.rareAlertsEnabled);
@@ -66,7 +67,7 @@ export default function FeedScreen() {
 
   // Out of reach on this network: show the Base's Feed from Wildlife Network, merged with what was seen locally.
   const unreachable = isError && !!baseId;
-  const remote = useRemoteFeed(baseId, unreachable, localRecords);
+  const remote = useRemoteFeed(baseId, unreachable, localRecords, baseHostUrl);
   const records = useMemo<Detection[]>(
     () =>
       mergeFeed(

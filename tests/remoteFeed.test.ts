@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  deploymentFromInfo,
   deploymentOfEvent,
   fetchStationFeed,
   mergeFeed,
@@ -156,5 +157,17 @@ describe('finding the deployment', () => {
     urls.length = 0;
     assert.equal(await resolveDeployment({ deviceId: 'wnd_x', apiKey: 'k', latitude: 42.36, longitude: -71.06 }, [], g), 'wildnetwork-base:29ab78f229b9');
     assert.match(urls[1]!, /bbox=-71\.08,42\.34,-71\.04,42\.38&source=wildnetwork-base/);
+  });
+});
+
+describe('deploymentFromInfo', () => {
+  it('takes the deployment the Base reports about itself', () => {
+    assert.equal(deploymentFromInfo({ hardwareId: 'hw1', deploymentId: 'wildnetwork-base:29ab78f229b9' }, 'hw1'), 'wildnetwork-base:29ab78f229b9');
+  });
+  it('ignores another Base, older Bases without the field, and odd values', () => {
+    assert.equal(deploymentFromInfo({ hardwareId: 'hw2', deploymentId: 'wildnetwork-base:x' }, 'hw1'), null);
+    assert.equal(deploymentFromInfo({ hardwareId: 'hw1' }, 'hw1'), null);
+    assert.equal(deploymentFromInfo({ hardwareId: 'hw1', deploymentId: 'no colon' }, 'hw1'), null);
+    assert.equal(deploymentFromInfo(null, 'hw1'), null);
   });
 });

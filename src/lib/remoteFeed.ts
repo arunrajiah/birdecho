@@ -185,6 +185,16 @@ export async function deploymentNear(
   }
 }
 
+/**
+ * The deployment a Base reports about itself in /api/info, when it is the Base we asked about and the value looks
+ * like "<system>:<id>". Pure.
+ */
+export function deploymentFromInfo(info: { hardwareId?: string; deploymentId?: string | null } | null, baseId: string): string | null {
+  if (!info || info.hardwareId !== baseId) return null;
+  const d = typeof info.deploymentId === 'string' ? info.deploymentId.trim() : '';
+  return /^[\w.-]+:[\w.-]+$/.test(d) ? d : null;
+}
+
 /** What the phone knows about the Base behind a station (a ManagedBase when this phone set it up). */
 export interface BaseRef {
   deviceId?: string;
@@ -195,7 +205,8 @@ export interface BaseRef {
 }
 
 /**
- * The Base's deployment on Wildlife Network: the one saved earlier, else from its test detections (needs its key),
+ * The Base's deployment on Wildlife Network: the one saved earlier (from the Base's own /api/info while it was
+ * reachable, or found before), else from its test detections (needs its key),
  * else from public detections at its position. Null when none of these works (for example a Base set up on
  * another phone, or one that has sent nothing yet).
  */
