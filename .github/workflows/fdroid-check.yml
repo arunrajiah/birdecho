@@ -82,6 +82,7 @@ jobs:
           shopt -s failglob
           rm -rf wear modules/wear-sync/android
           rm -rf node_modules/.pnpm/react-native-maps@*/node_modules/react-native-maps/android
+          rm -rf node_modules/.pnpm/expo-location@*/node_modules/expo-location/android
           rm -rf node_modules/.pnpm/@sentry+react-native@*/node_modules/@sentry/react-native/android
           rm -rf node_modules/.pnpm/@sentry+cli-*/node_modules/@sentry/cli-*/bin
           rm -rf node_modules/.pnpm/expo-*/node_modules/expo-*/local-maven-repo
@@ -102,6 +103,7 @@ jobs:
           AA="$ANDROID_HOME/cmdline-tools/latest/bin/apkanalyzer"
           echo "--- permissions"; "$AA" manifest permissions "$APK" | tee perms.txt
           ! grep -q REQUEST_INSTALL_PACKAGES perms.txt
+          ! grep -q LOCATION perms.txt
           echo "--- proprietary packages (must be empty)"
           "$AA" dex packages --defined-only "$APK" | grep -E "com\.google\.(firebase|android\.gms)|com\.android\.installreferrer|io\.sentry|com\.rnmaps" | tee bad.txt || true
           [ ! -s bad.txt ]

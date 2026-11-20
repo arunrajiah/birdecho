@@ -40,6 +40,7 @@ Builds:
       - wear
       - modules/wear-sync/android
       - node_modules/.pnpm/react-native-maps@*/node_modules/react-native-maps/android
+      - node_modules/.pnpm/expo-location@*/node_modules/expo-location/android
       - node_modules/.pnpm/@sentry+react-native@*/node_modules/@sentry/react-native/android
       - node_modules/.pnpm/@sentry+cli-*/node_modules/@sentry/cli-*/bin
       - node_modules/.pnpm/expo-*/node_modules/expo-*/local-maven-repo
@@ -78,8 +79,10 @@ MaintainerNotes: |-
 
   scripts/fdroid-prepare.mjs (in the app repo) rewrites package.json's Expo
   autolinking config so that:
-  * react-native-maps (depends on Google Play Services) and @sentry/react-native
-    (ships prebuilt stub jars) are not linked. The JS side only loads the map
+  * react-native-maps (depends on Google Play Services), expo-location (its Android
+    side is built on play-services-location) and @sentry/react-native (ships
+    prebuilt stub jars) are not linked. Without expo-location the app falls back to
+    the approximate area for a Base's location and asks for no location permission. The JS side only loads the map
     module when a Google Maps key was baked in at prebuild (never the case here)
     and Sentry is a no-op without a DSN, so neither native module is needed.
   * every expo-* module is compiled from source instead of the prebuilt AARs that

@@ -181,7 +181,7 @@ Your token is stored in the device's secure enclave (iOS Keychain / Android Keys
 
 1. Flash the Base's SD card and power it on: see the [Base setup guide](https://wlnw.org/help/site/base).
 2. Open BirdEcho → **Add a Base**. If the Base is already on your home Wi-Fi it appears in the list; otherwise join its Wi-Fi `Wildlife Network-XXXX` with the password on the label.
-3. Give it a name and its location, and choose how it reaches the internet. Tick **Test station** while you try it at home.
+3. Give it a name and its location (**Use this phone's location** while standing next to it, or type it), and choose how it reaches the internet. Tick **Test station** while you try it at home.
 4. No internet where it stands? Visit it with the phone and choose **Collect detections** on the Base page; the phone uploads them later.
 
 ---

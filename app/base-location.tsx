@@ -3,7 +3,7 @@ import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator, Alert 
 import { router, useLocalSearchParams } from 'expo-router';
 import { configureBase, getBaseInfo, type BaseInfo } from '../src/lib/base';
 import { getBases, saveBase, type ManagedBase } from '../src/lib/secureStorage';
-import { fetchNear } from '../src/lib/wildnetwork';
+import { getPhoneLocation } from '../src/lib/phoneLocation';
 import { LOCATION_CHANGE_NOTE, buildLocationRequest, formatLocation, locationErrorMessage, pickSetupCode } from '../src/lib/baseLocation';
 
 const input =
@@ -26,6 +26,7 @@ export default function BaseLocationScreen() {
   const [askCode, setAskCode] = useState(false);
   const [busy, setBusy] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [locNote, setLocNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ warnings: string[]; notes: string[] } | null>(null);
 
@@ -48,14 +49,15 @@ export default function BaseLocationScreen() {
       .catch((e) => setError(locationErrorMessage(e).message));
   }, [base, url]);
 
-  async function fillFromArea() {
+  async function fillFromPhone() {
     setLocating(true);
-    const n = await fetchNear();
+    const r = await getPhoneLocation(true);
     setLocating(false);
-    if (!n) return setError('Could not find this phone’s area. Enter the latitude and longitude instead.');
+    if (!r.ok) return setError(r.error);
     setError(null);
-    setLat(String(n.lat));
-    setLon(String(n.lon));
+    setLat(r.lat);
+    setLon(r.lon);
+    setLocNote(r.note);
   }
 
   function save() {
@@ -135,15 +137,16 @@ export default function BaseLocationScreen() {
       </View>
 
       <Text className={label}>New location</Text>
-      <Pressable accessibilityRole="button" className="mb-3 items-center rounded-2xl border border-green-700 dark:border-green-400 py-3 active:opacity-75" disabled={locating} onPress={() => void fillFromArea()}>
-        {locating ? <ActivityIndicator color="#347F57" /> : <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Start from this phone&apos;s area</Text>}
+      <Pressable accessibilityRole="button" className="mb-3 items-center rounded-2xl border border-green-700 dark:border-green-400 py-3 active:opacity-75" disabled={locating} onPress={() => void fillFromPhone()}>
+        {locating ? <ActivityIndicator color="#347F57" /> : <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Use this phone&apos;s location</Text>}
       </Pressable>
       <View className="flex-row gap-3">
         <TextInput className={`flex-1 ${input}`} value={lat} onChangeText={setLat} placeholder="Latitude, e.g. 13.08" keyboardType="numbers-and-punctuation" accessibilityLabel="Latitude" />
         <TextInput className={`flex-1 ${input}`} value={lon} onChangeText={setLon} placeholder="Longitude, e.g. 80.27" keyboardType="numbers-and-punctuation" accessibilityLabel="Longitude" />
       </View>
       <Text className={hint}>
-        The phone&apos;s area is approximate (whole degrees); adjust it to where the Base stands now. Only a position rounded to about 1 km is ever shared.
+        {locNote ??
+          'Stand next to the Base and use this phone’s location, or type where it stands now. Only a position rounded to about 1 km is sent to the Base and shared.'}
       </Text>
 
       {askCode ? (
