@@ -6,8 +6,10 @@
  * this script rewrites package.json's Expo autolinking config to:
  *   - exclude react-native-maps (pulls in Google Play Services) and
  *     @sentry/react-native (ships prebuilt stub jars) and the local wear-sync
- *     module (Wearable Data Layer, also Play Services); the JS side handles all
- *     three being absent, and
+ *     module (Wearable Data Layer, also Play Services), and expo-location (its
+ *     Android side is built on play-services-location); the JS side handles all
+ *     four being absent (src/lib/phoneLocation.ts falls back to the approximate
+ *     area), and
  *   - compile every expo-* module from source instead of using the prebuilt
  *     AARs that Expo SDK 54 ships in node_modules/expo-*\/local-maven-repo.
  *
@@ -22,7 +24,7 @@ pkg.expo = {
   ...(pkg.expo ?? {}),
   autolinking: {
     ...(pkg.expo?.autolinking ?? {}),
-    exclude: ['react-native-maps', '@sentry/react-native', 'birdecho-wear-sync'],
+    exclude: ['react-native-maps', '@sentry/react-native', 'birdecho-wear-sync', 'expo-location'],
     android: { ...(pkg.expo?.autolinking?.android ?? {}), buildFromSource: ['.*'] },
   },
 };

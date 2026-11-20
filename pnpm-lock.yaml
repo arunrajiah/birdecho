@@ -124,6 +124,9 @@ importers:
       expo-intent-launcher:
         specifier: ^13.0.8
         version: 13.0.8(expo@54.0.38)
+      expo-location:
+        specifier: ~19.0.8
+        version: 19.0.8(expo@54.0.38)
       expo-notifications:
         specifier: ~0.32.16
         version: 0.32.16(patch_hash=6b798dd81fa6509abfc06080a4a98d46f1dee0a09b8acd4f7e33c21398904504)(expo@54.0.38)(react-native@0.81.5(@babel/core@7.29.13)(@react-native/metro-config@0.85.1(@babel/core@7.29.13))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
@@ -2733,6 +2736,11 @@ packages:
     peerDependencies:
       react: '*'
       react-native: '*'
+
+  expo-location@19.0.8:
+    resolution: {integrity: sha512-H/FI75VuJ1coodJbbMu82pf+Zjess8X8Xkiv9Bv58ZgPKS/2ztjC1YO1/XMcGz7+s9DrbLuMIw22dFuP4HqneA==}
+    peerDependencies:
+      expo: '*'
 
   expo-modules-autolinking@3.0.28:
     resolution: {integrity: sha512-DQhRuyD7b8mX833Ei5vqjF/HoZIGzKihPdfwpihq7cEOLFkhG/erz53HjebwV3XNFLMA3wBuX/vnyev8ISojCQ==}
@@ -8385,6 +8393,10 @@ snapshots:
     transitivePeerDependencies:
       - expo
       - supports-color
+
+  expo-location@19.0.8(expo@54.0.38):
+    dependencies:
+      expo: 54.0.38(@babel/core@7.29.13)(@expo/metro-runtime@6.1.2)(expo-router@6.0.24)(react-native@0.81.5(@babel/core@7.29.13)(@react-native/metro-config@0.85.1(@babel/core@7.29.13))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
 
   expo-modules-autolinking@3.0.28:
     dependencies:

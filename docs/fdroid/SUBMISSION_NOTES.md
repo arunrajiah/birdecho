@@ -11,6 +11,7 @@ on the merge request).
 | Concern | Resolution |
 |---|---|
 | `react-native-maps` pulls Google Play Services | Excluded from autolinking by `scripts/fdroid-prepare.mjs`; the Map tab shows a station list instead. The native map is only loaded when `Constants.expoConfig.extra.hasGoogleMapsKey` is true, which never holds for F-Droid builds (the Play Store profile also sets `EXPO_PUBLIC_FDROID=1`, so `fdroidBuild` alone is not a usable gate). Native map code lives in `src/components/StationMap.tsx` and is `require()`d lazily. |
+| `expo-location` is built on `play-services-location` (FusedLocationProviderClient, no option to drop it) | Excluded from autolinking by `scripts/fdroid-prepare.mjs` and its `android/` folder `rm:`d. `app.config.ts` skips the expo-location plugin when it is excluded, so the F-Droid APK asks for no location permission. `src/lib/phoneLocation.ts` loads the module only when its native side is linked; without it, a Base's location starts from the approximate area (Wildlife Network, IP based) or is typed in. |
 | `@sentry/react-native` ships prebuilt stub jars | Excluded from autolinking. The JS import is harmless without the native module and `Sentry.init` never runs without a DSN. |
 | `expo-notifications` depends on Firebase Cloud Messaging | Removed by `patches/expo-notifications@0.32.16.patch` (applies to every build; BirdEcho only uses local notifications). |
 | `expo-application` depends on the Play Install Referrer client | Removed by `patches/expo-application@7.0.8.patch`. It is now only a transitive dep of expo-notifications. |

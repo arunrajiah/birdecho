@@ -1,4 +1,7 @@
 import type { ExpoConfig } from 'expo/config';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { withAndroidManifest, type ConfigPlugin } from 'expo/config-plugins';
 import appJson from './app.json';
 
 /**
@@ -10,6 +13,7 @@ import appJson from './app.json';
  *   1. the react-native-android-widget config plugin (needs an object argument)
  *   2. the Google Maps API key (sourced from the environment at prebuild time)
  *   3. the REQUEST_INSTALL_PACKAGES permission (for the in-app GitHub updater)
+ *   4. expo-location (GPS for a Base's location), left out of the F-Droid build
  *
  * Edit version, versionCode, and everything else in app.json — it flows through
  * here automatically.
@@ -36,6 +40,59 @@ const isFdroidBuild = process.env.EXPO_PUBLIC_FDROID === '1';
 const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY ?? '';
 const hasGoogleMapsKey = googleMapsApiKey.length > 0;
 
+/**
+ * Location is read once, while the app is open, to set where a Base stands (src/lib/phoneLocation.ts). Never in
+ * the background. Only a position rounded to 2 decimals (about 1 km) is sent to the Base and shared.
+ *
+ * expo-location on Android needs Google Play services (play-services-location), which F-Droid does not accept,
+ * so scripts/fdroid-prepare.mjs drops it from autolinking and this plugin is skipped there: the F-Droid build asks
+ * for no location permission and falls back to the approximate area from Wildlife Network. The gate is that
+ * autolinking exclude, not EXPO_PUBLIC_FDROID, because the Play Store profile also sets EXPO_PUBLIC_FDROID=1.
+ */
+const autolinkExclude: string[] =
+  (JSON.parse(readFileSync(join(__dirname, 'package.json'), 'utf8')) as { expo?: { autolinking?: { exclude?: string[] } } }).expo
+    ?.autolinking?.exclude ?? [];
+const hasLocationModule = !autolinkExclude.includes('expo-location');
+
+const LOCATION_REASON =
+  'BirdEcho uses your location to set where your Wildlife Network Base or bird station stands. Only a position rounded to about 1 km is sent to the Base and shared.';
+
+/**
+ * expo-location's library manifest declares a location foreground service for background tracking, which BirdEcho
+ * never uses. Removing it keeps the merged manifest to the two foreground location permissions.
+ */
+const withoutLocationService: ConfigPlugin = (cfg) =>
+  withAndroidManifest(cfg, (c) => {
+    const manifest = c.modResults.manifest;
+    manifest.$['xmlns:tools'] = 'http://schemas.android.com/tools';
+    const app = manifest.application?.[0];
+    if (app) {
+      const name = 'expo.modules.location.services.LocationTaskService';
+      app.service = [
+        ...(app.service ?? []).filter((x) => x.$['android:name'] !== name),
+        { $: { 'android:name': name, 'tools:node': 'remove' } } as unknown as NonNullable<typeof app.service>[number],
+      ];
+    }
+    return c;
+  });
+
+const locationPlugins: NonNullable<ExpoConfig['plugins']> = !hasLocationModule
+  ? []
+  : [
+      [
+        'expo-location',
+        {
+          locationWhenInUsePermission: LOCATION_REASON,
+          // false removes the key: BirdEcho never asks for background ("Always") location.
+          locationAlwaysPermission: false,
+          locationAlwaysAndWhenInUsePermission: false,
+          isIosBackgroundLocationEnabled: false,
+          isAndroidBackgroundLocationEnabled: false,
+          isAndroidForegroundServiceEnabled: false,
+        },
+      ],
+    ];
+
 const config: ExpoConfig = {
   ...base,
   ios: {
@@ -56,6 +113,12 @@ const config: ExpoConfig = {
       : {}),
     // REQUEST_INSTALL_PACKAGES lets the in-app updater hand a downloaded APK to
     // Android's installer. Omitted entirely for F-Droid/IzzyOnDroid builds.
+    // Location is never wanted in the background, even if a library asks for it.
+    blockedPermissions: [
+      ...(base.android?.blockedPermissions ?? []),
+      'android.permission.ACCESS_BACKGROUND_LOCATION',
+      'android.permission.FOREGROUND_SERVICE_LOCATION',
+    ],
     permissions: [
       ...(base.android?.permissions ?? []),
       ...(isFdroidBuild ? [] : ['android.permission.REQUEST_INSTALL_PACKAGES']),
@@ -63,6 +126,7 @@ const config: ExpoConfig = {
   },
   plugins: [
     ...(base.plugins ?? []),
+    ...locationPlugins,
     [
       'react-native-android-widget',
       {
@@ -99,4 +163,4 @@ const config: ExpoConfig = {
   owner: 'arunrajiah',
 };
 
-export default config;
+export default hasLocationModule ? withoutLocationService(config) : config;

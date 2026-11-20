@@ -1,6 +1,6 @@
 # BirdEcho Privacy Policy
 
-Last updated: 7 November 2026
+Last updated: 20 November 2026
 
 BirdEcho shows detections from a bird station you already run (BirdNET-Pi, BirdNET-Go, or BirdWeather). It has no accounts, no ads, and no analytics.
 
@@ -17,7 +17,9 @@ None of this is sent to the developer.
 - **Wildlife Network (wlnw.org)**, only when you open its screens or choose to register a device. Your IP address is used to estimate your area (about 100 km) to show nearby activity, and is not stored with your identity. A device you register sends the name and model you enter. If you ask to be emailed when a species arrives, your email address, the species and the town you type go to Wildlife Network, which stores the email encrypted, sends a confirmation first and deletes it when you unsubscribe ([wlnw.org privacy](https://wlnw.org/privacy#alerts)). When you use Collect detections for a Wildlife Network Base without internet, the Base's detections are kept in the app's own storage on your phone until they have been sent to Wildlife Network with that Base's key, then deleted from the phone.
 
 ## Microphone and location
-BirdEcho does not use the microphone or GPS location.
+BirdEcho does not use the microphone.
+
+Location is used only when you tap **Use this phone's location** while adding a Wildlife Network Base or changing where a Base stands (and, once you have allowed it, to fill in the Add a Base form when it opens). The app reads the position once, while it is open, never in the background. It is rounded to 2 decimals (about 1 km) straight away; only that rounded position is kept with the Base's settings on the phone and sent to the Base, which uses it as the place of its detections on Wildlife Network. If you do not allow location, the app starts from your approximate area (see above) or you type the coordinates. The F-Droid version does not use location at all.
 
 ## Notifications
 Rare-species and favorite alerts are local notifications created on the phone. No push service is used.

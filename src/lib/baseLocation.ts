@@ -69,3 +69,60 @@ export function locationErrorMessage(e: unknown): { message: string; askForCode:
 export function formatLocation(lat: number | null | undefined, lon: number | null | undefined): string {
   return lat == null || lon == null ? 'not set' : `${lat}, ${lon}`;
 }
+
+// ─── This phone's location (GPS, with the approximate area as a fallback) ─────────────
+
+/** What a one-shot GPS lookup gave: a fix, or why there is none ('unsupported' = build without GPS, e.g. F-Droid). */
+export type PhoneFix =
+  | { kind: 'gps'; latitude: number; longitude: number; accuracy?: number | null }
+  | { kind: 'failed'; reason: 'denied' | 'off' | 'timeout' | 'unavailable' | 'unsupported' };
+
+/** The phone's approximate area from Wildlife Network (IP based, whole degrees), or null when it was not found. */
+export type PhoneArea = { lat: number; lon: number } | null;
+
+export type PhoneLocation =
+  | { ok: true; lat: string; lon: string; source: 'gps' | 'area'; note: string }
+  | { ok: false; error: string };
+
+const WHY_NO_GPS: Record<Extract<PhoneFix, { kind: 'failed' }>['reason'], string> = {
+  denied: 'BirdEcho is not allowed to use this phone’s location (you can allow it in Settings)',
+  off: 'Location is turned off on this phone',
+  timeout: 'The phone could not get a GPS position in time',
+  unavailable: 'The phone could not get a GPS position',
+  unsupported: 'This version of BirdEcho does not read GPS',
+};
+
+const SHARED = 'Only a position rounded to about 1 km is sent to the Base and shared.';
+
+function inRange(lat: number, lon: number): boolean {
+  return Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180;
+}
+
+/**
+ * What to put in the latitude and longitude fields: the GPS fix rounded to 2 decimals (about 1 km, what the Base is
+ * sent), else the approximate area with the reason GPS was not used, else an error asking to type them.
+ */
+export function phoneLocationResult(fix: PhoneFix, area: PhoneArea): PhoneLocation {
+  if (fix.kind === 'gps' && inRange(fix.latitude, fix.longitude)) {
+    const acc = fix.accuracy != null && Number.isFinite(fix.accuracy) && fix.accuracy > 0 ? fix.accuracy : null;
+    const within = acc == null ? '' : acc < 1000 ? ` (within about ${Math.max(10, Math.round(acc / 10) * 10)} m)` : ` (within about ${Math.round(acc / 1000)} km)`;
+    return {
+      ok: true,
+      lat: String(roundCoord(fix.latitude)),
+      lon: String(roundCoord(fix.longitude)),
+      source: 'gps',
+      note: `From this phone’s location${within}. Adjust it if the Base stands somewhere else. ${SHARED}`,
+    };
+  }
+  const why = fix.kind === 'failed' ? WHY_NO_GPS[fix.reason] : 'The phone gave a position that is not valid';
+  if (area && inRange(area.lat, area.lon)) {
+    return {
+      ok: true,
+      lat: String(area.lat),
+      lon: String(area.lon),
+      source: 'area',
+      note: `${why}, so this is the phone’s approximate area (about 100 km). Adjust it to where the Base stands. ${SHARED}`,
+    };
+  }
+  return { ok: false, error: `${why}. Enter the latitude and longitude instead.` };
+}

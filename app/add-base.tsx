@@ -17,7 +17,8 @@ import {
   ssidFor,
   type BaseInfo,
 } from '../src/lib/base';
-import { fetchNear, registerDevice } from '../src/lib/wildnetwork';
+import { registerDevice } from '../src/lib/wildnetwork';
+import { getPhoneLocation } from '../src/lib/phoneLocation';
 import { getBases, saveBase } from '../src/lib/secureStorage';
 import { findBases } from '../src/lib/baseDiscovery';
 import { HOTSPOT_POLL, isBaseInfo, pollUntil, type FoundBase } from '../src/lib/baseFind';
@@ -61,6 +62,8 @@ export default function AddBaseScreen() {
   const [name, setName] = useState('');
   const [lat, setLat] = useState('');
   const [lon, setLon] = useState('');
+  const [locating, setLocating] = useState(false);
+  const [locNote, setLocNote] = useState<string | null>(null);
   const [wifiSsid, setWifiSsid] = useState('');
   const [wifiPsk, setWifiPsk] = useState('');
   const [apn, setApn] = useState('');
@@ -136,13 +139,15 @@ export default function AddBaseScreen() {
     if (i.latitude != null && i.longitude != null) {
       setLat(String(i.latitude));
       setLon(String(i.longitude));
+      setLocNote('This is where the Base was set before. Use this phone’s location if it stands somewhere else now.');
     } else {
-      // Start from the phone's approximate area (whole degrees); the user refines it to about 1 km.
-      void fetchNear().then((n) => {
-        if (n) {
-          setLat((v) => v || String(n.lat));
-          setLon((v) => v || String(n.lon));
-        }
+      // Start quietly: GPS only when location was already allowed (no dialog here), else the phone's approximate
+      // area (whole degrees). "Use this phone's location" asks for permission.
+      void getPhoneLocation(false).then((r) => {
+        if (!r.ok) return;
+        setLat((v) => v || r.lat);
+        setLon((v) => v || r.lon);
+        setLocNote(r.note);
       });
     }
     setStep('details');
@@ -181,6 +186,17 @@ export default function AddBaseScreen() {
       setStep('code');
       setError(e instanceof Error ? e.message : 'Something went wrong.');
     }
+  }
+
+  async function fillFromPhone() {
+    setLocating(true);
+    const r = await getPhoneLocation(true);
+    setLocating(false);
+    if (!r.ok) return setError(r.error);
+    setError(null);
+    setLat(r.lat);
+    setLon(r.lon);
+    setLocNote(r.note);
   }
 
   async function finish() {
@@ -366,12 +382,16 @@ export default function AddBaseScreen() {
           <Text className={label}>Name</Text>
           <TextInput className={input} value={name} onChangeText={setName} placeholder="e.g. Garden Base" maxLength={60} />
           <Text className={label}>Where it stands</Text>
+          <Pressable accessibilityRole="button" className="mb-3 items-center rounded-2xl border border-green-700 dark:border-green-400 py-3 active:opacity-75" disabled={locating} onPress={() => void fillFromPhone()}>
+            {locating ? <ActivityIndicator color="#347F57" /> : <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Use this phone&apos;s location</Text>}
+          </Pressable>
           <View className="flex-row gap-3">
             <TextInput className={`flex-1 ${input}`} value={lat} onChangeText={setLat} placeholder="Latitude, e.g. 13.08" keyboardType="numbers-and-punctuation" accessibilityLabel="Latitude" />
             <TextInput className={`flex-1 ${input}`} value={lon} onChangeText={setLon} placeholder="Longitude, e.g. 80.27" keyboardType="numbers-and-punctuation" accessibilityLabel="Longitude" />
           </View>
           <Text className={hint}>
-            Started from your approximate area; adjust it to the Base&apos;s place. Only a position rounded to about 1 km is ever shared.
+            {locNote ??
+              'Stand next to the Base and use this phone’s location, or type where it stands. Only a position rounded to about 1 km is sent to the Base and shared.'}
           </Text>
           <Text className={label}>Home Wi-Fi (optional)</Text>
           <TextInput className={input} value={wifiSsid} onChangeText={setWifiSsid} placeholder="Network name" autoCapitalize="none" autoCorrect={false} />

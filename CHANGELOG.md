@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Use this phone's location when adding a Base or changing where a Base stands: one GPS reading while the app is open (never in the background), rounded to about 1 km before it is sent to the Base. If location is not allowed, is off or takes too long, the form starts from the phone's approximate area as before, with the reason shown; typing the coordinates still works. Add a Base fills it in by itself only when location was already allowed. The F-Droid version has no GPS (expo-location needs Google Play services there) and keeps the approximate area; it asks for no location permission.
 - Base page: Change location, for a Base that was moved. Shown while the phone can reach the Base (on the Base's Wi-Fi or the same Wi-Fi as the Base); otherwise a short note says how to connect. Shows the Base's current location, starts from the phone's approximate area or takes latitude and longitude typed in, and uses the setup code this phone saved (or asks for it from the label). The Base updates both its uploads and BirdNET-Go's species filter. Detections from before keep their old place; new ones use the new location.
 
 ## [0.16.0] - 2026-11-20
