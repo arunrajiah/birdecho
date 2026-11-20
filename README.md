@@ -79,6 +79,7 @@ New to BirdEcho? This 6 minute step by step video shows everything: trying the a
 - **Direct BirdNET-Pi support** — connect to a local BirdNET-Pi instance (both mcguirepr89 and Nachtzuster forks supported)
 - **Wildlife Network Base** (from v0.14): set up a Base from the phone. On home Wi-Fi BirdEcho finds it by itself; otherwise join its own Wi-Fi (Android does this for you, iPhone gets step by step instructions). Its bird feed is added automatically, and the Base page shows its health (microphone, temperature, signal, uploads waiting) and a "Test station" badge
 - **Collect detections** (from v0.15): a Base with no Wi-Fi or SIM keeps its detections; the phone collects them over the Base's Wi-Fi and uploads them to Wildlife Network once it has internet. Works for Bases this phone set up
+- **Feed from Wildlife Network** (from v0.16): when the phone can't reach a Base on the local network, its Feed comes from Wildlife Network, merged without duplicates once the Base is back. Recordings play only on the same Wi-Fi as the Base
 - **Share with Wildlife Network**: a one-line install command for BirdNET-Pi and BirdNET-Go, and (from v0.13) whether your Pi is sending and when it last reported
 - **Species alerts** (from v0.13): get an email when a species arrives near you, from any Wildlife Network species page
 
