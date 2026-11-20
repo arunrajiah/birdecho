@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Base page: Change location, for a Base that was moved. Shown while the phone can reach the Base (on the Base's Wi-Fi or the same Wi-Fi as the Base); otherwise a short note says how to connect. Shows the Base's current location, starts from the phone's approximate area or takes latitude and longitude typed in, and uses the setup code this phone saved (or asks for it from the label). The Base updates both its uploads and BirdNET-Go's species filter. Detections from before keep their old place; new ones use the new location.
+
 ## [0.16.0] - 2026-11-20
 
 ### Added
