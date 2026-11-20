@@ -9,6 +9,14 @@ on:
         description: Submit the build to App Store Connect
         type: boolean
         default: true
+      ref:
+        description: Tag or commit to build (for example v0.16.0); empty = main
+        type: string
+        default: ''
+      build_number:
+        description: iOS build number override, "<versionCode>.N" (for example 58.1) when a build number was already used
+        type: string
+        default: ''
 
 permissions: {}
 
@@ -20,7 +28,7 @@ jobs:
   ios:
     name: Build and submit iOS
     if: github.ref == 'refs/heads/main'
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 90
     permissions:
       contents: read
@@ -28,6 +36,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Set the iOS build number
+        if: inputs.build_number != ''
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number }}
+        run: |
+          [[ "$BUILD_NUMBER" =~ ^[0-9]+\.[0-9]+$ ]] || { echo "build_number must look like 58.1"; exit 1; }
+          node -e 'const f="app.json",j=JSON.parse(require("fs").readFileSync(f));j.expo.ios={...j.expo.ios,buildNumber:process.env.BUILD_NUMBER};require("fs").writeFileSync(f,JSON.stringify(j,null,2)+"\n")'
+          node -e 'console.log("version",require("./app.json").expo.version,"build",require("./app.json").expo.ios.buildNumber)'
+
+      - name: Select the newest Xcode (App Store needs Xcode 26 or later)
+        run: |
+          XC="$(ls -d /Applications/Xcode_*.app | sed -E 's/.*Xcode_([0-9.]+)\.app/\1 &/' | sort -V | tail -1 | cut -d' ' -f2)"
+          sudo xcode-select -s "$XC/Contents/Developer"
+          xcodebuild -version
+          MAJOR="$(xcodebuild -version | sed -n 's/^Xcode \([0-9]*\).*/\1/p')"
+          [ "$MAJOR" -ge 26 ] || { echo "Xcode $MAJOR is too old for App Store uploads (needs 26 or later)"; exit 1; }
 
       - name: Setup Node
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6.4.0
