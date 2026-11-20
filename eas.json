@@ -70,6 +70,13 @@
         "ascApiKeyIssuerId": "4a98bb81-8056-4d05-acf7-fb3a95fddbee",
         "ascApiKeyId": "K66G3HL3DK"
       }
+    },
+    "playinternal": {
+      "android": {
+        "serviceAccountKeyPath": "../wildecho/secrets/play-service-account.json",
+        "track": "internal",
+        "releaseStatus": "completed"
+      }
     }
   }
 }
