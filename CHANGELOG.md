@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.17.0] - 2026-11-21
 
 ### Added
 - Use this phone's location when adding a Base or changing where a Base stands: one GPS reading while the app is open (never in the background), rounded to about 1 km before it is sent to the Base. If location is not allowed, is off or takes too long, the form starts from the phone's approximate area as before, with the reason shown; typing the coordinates still works. Add a Base fills it in by itself only when location was already allowed. The F-Droid version has no GPS (expo-location needs Google Play services there) and keeps the approximate area; it asks for no location permission.

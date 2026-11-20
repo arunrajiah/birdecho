@@ -1,0 +1,1 @@
+Use your phone's GPS to set where a Wildlife Network Base stands, and change the location of a Base you moved. The Feed for a Base now switches to detections from Wildlife Network within seconds when you're on mobile data, instead of a long spinner.
