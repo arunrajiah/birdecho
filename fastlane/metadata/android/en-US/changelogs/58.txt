@@ -1,0 +1,1 @@
+Wildlife Network Base: when the phone can't reach your Base, the Feed shows its detections from Wildlife Network (recordings play on the same Wi-Fi as the Base), and merges them when the Base is back. Works for Bases set up on another phone too. The Base page notes when a Base hasn't reported for over an hour.
