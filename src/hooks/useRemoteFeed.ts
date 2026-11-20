@@ -4,17 +4,20 @@ import { getBaseDeployments, getBases, rememberBaseDeployment, saveBase, type Ma
 import { deploymentFromInfo, fetchStationFeed, remoteWindowStart, resolveDeployment, type BaseRef } from '../lib/remoteFeed';
 import { getBaseInfo } from '../lib/baseApi';
 import { baseApiUrlFor } from '../lib/baseStation';
+import type { FeedSources } from '../lib/reachability';
 import type { Detection } from '../types/birdweather';
 
 export type RemoteFeedState = 'off' | 'loading' | 'ready' | 'unknown' | 'error';
 
 /**
- * The active Base station's detections from Wildlife Network, fetched while the station is out of reach on the
- * local network (`unreachable`). The answer stays cached, so items keep merging (without duplicates) after the
- * station answers again. `state` is 'unknown' when the Base's deployment could not be found.
- * While the station is reachable, the Base's own /api/info tells its deployment, which is remembered for later.
+ * The active Base station's detections from Wildlife Network, fetched while the station is being tried and while it
+ * is out of reach on the local network (`sources`, see feedSources), so they show as soon as they arrive. The answer
+ * stays cached, so items keep merging (without duplicates) after the station answers. `state` is 'unknown' when the
+ * Base's deployment could not be found. Once the station answers, the Base's own /api/info tells its deployment,
+ * which is remembered for later.
  */
-export function useRemoteFeed(baseId: string | undefined, unreachable: boolean, local: Detection[], hostUrl?: string) {
+export function useRemoteFeed(baseId: string | undefined, sources: FeedSources, local: Detection[], hostUrl?: string) {
+  const { remote: wanted, unreachable } = sources;
   const [base, setBase] = useState<ManagedBase | null | undefined>(undefined);
 
   useEffect(() => {
@@ -29,7 +32,7 @@ export function useRemoteFeed(baseId: string | undefined, unreachable: boolean, 
     };
   }, [baseId]);
 
-  // Reachable: ask the Base itself (Base 0.2.0 and later report deploymentId), at most once a day.
+  // The station answered: ask the Base itself (Base 0.2.0 and later report deploymentId), at most once a day.
   const reported = useQuery({
     queryKey: ['base-deployment', baseId, hostUrl],
     queryFn: async () => {
@@ -38,7 +41,7 @@ export function useRemoteFeed(baseId: string | undefined, unreachable: boolean, 
       if (d) await rememberBaseDeployment(baseId!, d);
       return d;
     },
-    enabled: !!baseId && !!hostUrl && !unreachable,
+    enabled: !!baseId && !!hostUrl && !wanted,
     staleTime: 24 * 3600_000,
     retry: false,
   });
@@ -57,7 +60,7 @@ export function useRemoteFeed(baseId: string | undefined, unreachable: boolean, 
       }
       return d;
     },
-    enabled: !!baseId && unreachable && base !== undefined,
+    enabled: !!baseId && wanted && base !== undefined,
     staleTime: 30 * 60_000,
   });
 
@@ -66,13 +69,13 @@ export function useRemoteFeed(baseId: string | undefined, unreachable: boolean, 
   const feed = useQuery({
     queryKey: ['wn-feed', deploymentId, hasKey],
     queryFn: () => fetchStationFeed(deploymentId!, { from: remoteWindowStart(local), apiKey: base?.apiKey }),
-    enabled: !!deploymentId && unreachable,
+    enabled: !!deploymentId && wanted,
     refetchInterval: unreachable ? 5 * 60_000 : false,
     staleTime: 60_000,
   });
 
   let state: RemoteFeedState = 'off';
-  if (unreachable) {
+  if (wanted) {
     if (base === undefined || deployment.isLoading || feed.isLoading) state = 'loading';
     else if (!deploymentId) state = 'unknown';
     else if (feed.isError && !feed.data) state = 'error';

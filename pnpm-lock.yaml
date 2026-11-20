@@ -127,6 +127,9 @@ importers:
       expo-location:
         specifier: ~19.0.8
         version: 19.0.8(expo@54.0.38)
+      expo-network:
+        specifier: ~8.0.8
+        version: 8.0.8(expo@54.0.38)(react@19.1.0)
       expo-notifications:
         specifier: ~0.32.16
         version: 0.32.16(patch_hash=6b798dd81fa6509abfc06080a4a98d46f1dee0a09b8acd4f7e33c21398904504)(expo@54.0.38)(react-native@0.81.5(@babel/core@7.29.13)(@react-native/metro-config@0.85.1(@babel/core@7.29.13))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
@@ -2751,6 +2754,12 @@ packages:
     peerDependencies:
       react: '*'
       react-native: '*'
+
+  expo-network@8.0.8:
+    resolution: {integrity: sha512-dgrL8UHAmWofqeY4UEjWskCl/RoQAM0DG6PZR8xz2WZt+6aQEboQgFRXowCfhbKZ71d16sNuKXtwBEsp2DtdNw==}
+    peerDependencies:
+      expo: '*'
+      react: '*'
 
   expo-notifications@0.32.16:
     resolution: {integrity: sha512-QQD/UA6v7LgvwIJ+tS7tSvqJZkdp0nCSj9MxsDk/jU1GttYdK49/5L2LvE/4U0H7sNBz1NZAyhDZozg8xgBLXw==}
@@ -8411,6 +8420,11 @@ snapshots:
       invariant: 2.2.4
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.29.13)(@react-native/metro-config@0.85.1(@babel/core@7.29.13))(@types/react@19.1.17)(react@19.1.0)
+
+  expo-network@8.0.8(expo@54.0.38)(react@19.1.0):
+    dependencies:
+      expo: 54.0.38(@babel/core@7.29.13)(@expo/metro-runtime@6.1.2)(expo-router@6.0.24)(react-native@0.81.5(@babel/core@7.29.13)(@react-native/metro-config@0.85.1(@babel/core@7.29.13))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
+      react: 19.1.0
 
   expo-notifications@0.32.16(patch_hash=6b798dd81fa6509abfc06080a4a98d46f1dee0a09b8acd4f7e33c21398904504)(expo@54.0.38)(react-native@0.81.5(@babel/core@7.29.13)(@react-native/metro-config@0.85.1(@babel/core@7.29.13))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)(typescript@5.9.3):
     dependencies:

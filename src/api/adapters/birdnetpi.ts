@@ -17,8 +17,12 @@
 
 import { ApiError } from '../../lib/apiClient';
 import { USER_AGENT } from '../../lib/remoteImage';
+import { fetchWithTimeout } from '../../lib/reachability';
 import type { StationAdapter } from '../adapter';
 import type { Detection, RecordsPage, Species, Stats } from '../../types/birdweather';
+
+// BirdNET-Pi renders PHP pages, slower than BirdNET-Go's API on a small Pi, so it gets a longer (still bounded) timeout.
+const BPI_TIMEOUT_MS = 10_000;
 
 // ── Low-level fetch helpers ─────────────────────────────────────────────────
 
@@ -26,7 +30,7 @@ async function bpiGetHtml(base: string, path: string): Promise<string> {
   const url = `${base}${path}`;
   let response: Response;
   try {
-    response = await fetch(url);
+    response = await fetchWithTimeout(url, {}, BPI_TIMEOUT_MS);
   } catch {
     throw new Error('Could not reach BirdNET-Pi station — check the host URL and your network.');
   }
@@ -40,7 +44,7 @@ async function bpiGetJson<T>(base: string, path: string): Promise<T> {
   const url = `${base}${path}`;
   let response: Response;
   try {
-    response = await fetch(url);
+    response = await fetchWithTimeout(url, {}, BPI_TIMEOUT_MS);
   } catch {
     throw new Error('Could not reach BirdNET-Pi station — check the host URL and your network.');
   }
@@ -626,7 +630,7 @@ export async function pingBirdNetPi(hostUrl: string): Promise<string | undefined
   const base = hostUrl.replace(/\/$/, '');
   let response: Response;
   try {
-    response = await fetch(`${base}/todays_detections.php?today_stats=true`);
+    response = await fetchWithTimeout(`${base}/todays_detections.php?today_stats=true`, {}, BPI_TIMEOUT_MS);
   } catch {
     throw new Error(
       'Could not reach the BirdNET-Pi station — check the host URL and that your phone is on the same network.',

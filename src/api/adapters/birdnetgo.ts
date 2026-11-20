@@ -8,6 +8,7 @@
  */
 
 import { ApiError } from '../../lib/apiClient';
+import { fetchWithTimeout } from '../../lib/reachability';
 import type { StationAdapter } from '../adapter';
 import type { Detection, RecordsPage, Species, Stats } from '../../types/birdweather';
 
@@ -54,7 +55,8 @@ async function bngFetch<T>(base: string, path: string): Promise<T> {
   const url = `${base}/api/v2${path}`;
   let response: Response;
   try {
-    response = await fetch(url);
+    // Short timeout: a station out of reach (for example a private address over mobile data) never answers.
+    response = await fetchWithTimeout(url);
   } catch {
     throw new Error('Could not reach BirdNET-Go station — check the host URL and your network.');
   }
@@ -272,7 +274,7 @@ export async function pingBirdNetGo(hostUrl: string): Promise<string | undefined
   const base = hostUrl.replace(/\/$/, '');
   let response: Response;
   try {
-    response = await fetch(`${base}/api/v2/ping`);
+    response = await fetchWithTimeout(`${base}/api/v2/ping`);
   } catch {
     throw new Error(
       'Could not reach the BirdNET-Go station — check the host URL and that your phone is on the same network.',
