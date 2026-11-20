@@ -194,6 +194,8 @@ export interface ManagedBase {
   longitude?: number;
   /** The Base's setup API on the home network (http://<ip> or http://<hostname>.local), when known. */
   address?: string;
+  /** "<system>:<deploymentId>" its detections are filed under on Wildlife Network, once found (remoteFeed.ts). */
+  deploymentId?: string;
   addedAt: string;
 }
 

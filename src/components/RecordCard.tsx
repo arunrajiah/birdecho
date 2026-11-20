@@ -32,6 +32,9 @@ export default function RecordCard({ record, timezone }: Props) {
   return (
     <Pressable
       className="mx-4 my-1 flex-row items-center gap-3 rounded-2xl bg-white dark:bg-gray-900 p-3 active:opacity-80"
+      // A detection read from Wildlife Network has no recording here: it plays only on the station's Wi-Fi.
+      disabled={record.remote}
+      accessibilityHint={record.remote ? 'From Wildlife Network. The recording plays only on the same Wi-Fi as the station.' : undefined}
       onPress={() => router.push({ pathname: '/record/[id]', params: { id: record.id } })}
     >
       <Image
@@ -44,9 +47,15 @@ export default function RecordCard({ record, timezone }: Props) {
         <Text className="text-[15px] font-semibold text-gray-900 dark:text-gray-50" numberOfLines={1}>
           {record.commonName}
         </Text>
-        <Text className="mt-0.5 text-xs italic text-gray-500 dark:text-gray-400" numberOfLines={1}>
-          {record.scientificName}
-        </Text>
+        {record.remote ? (
+          <Text className="mt-0.5 text-xs text-gray-500 dark:text-gray-400" numberOfLines={1}>
+            From Wildlife Network
+          </Text>
+        ) : (
+          <Text className="mt-0.5 text-xs italic text-gray-500 dark:text-gray-400" numberOfLines={1}>
+            {record.scientificName}
+          </Text>
+        )}
       </View>
       <View className="items-end gap-1.5">
         <Text className="text-xs font-medium text-gray-500 dark:text-gray-400">

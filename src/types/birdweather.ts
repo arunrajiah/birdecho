@@ -15,6 +15,8 @@ export interface Detection {
   confidence: number;
   soundscapeUrl?: string;
   imageUrl?: string;
+  /** Read from Wildlife Network because the station was out of reach: no recording or detail page. */
+  remote?: boolean;
 }
 
 export interface RecordsPage {
