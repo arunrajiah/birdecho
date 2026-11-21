@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- Base page: pause the email alerts Wildlife Network sends when a Base stops reporting, loses its microphone or runs hot, for a Base set up from this phone. Choose 1 day, 1 week, 1 month or until you turn them back on, and turn them back on at any time. Shows whether alerts are on or paused until when. Works over any internet connection, including mobile data; the phone does not need to be near the Base.
+- Base page: View its public page (the Base's station page on Wildlife Network, once BirdEcho knows where its detections are filed; not for test stations) and Manage it on Wildlife Network.
+
 ## [0.17.0] - 2026-11-21
 
 ### Added
