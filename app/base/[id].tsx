@@ -1,7 +1,19 @@
 import { useCallback, useEffect, useState } from 'react';
-import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, Pressable, ScrollView, ActivityIndicator, Alert, Linking } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
-import { getBases, removeBase, type ManagedBase } from '../../src/lib/secureStorage';
+import { getBaseDeployments, getBases, removeBase, saveBase, type ManagedBase } from '../../src/lib/secureStorage';
+import { deploymentFromInfo } from '../../src/lib/remoteFeed';
+import {
+  MY_STATIONS_URL,
+  PAUSE_CHOICES,
+  fetchDeviceSettings,
+  isPaused,
+  pauseLabel,
+  pauseUntil,
+  sendAlertPause,
+  stationPageUrl,
+  type PauseChoice,
+} from '../../src/lib/baseAlerts';
 import { BASE_HOTSPOT_URL, getBaseInfo, getBaseStatus, joinHotspot, leaveHotspot, routeToBase } from '../../src/lib/base';
 import { WILDNETWORK_BASE } from '../../src/lib/wildnetwork';
 import { useStationStore } from '../../src/stores/stationStore';
@@ -74,6 +86,56 @@ function fromCloudDevice(d: CloudDevice): BaseHealth {
   };
 }
 
+/** Pause the health emails for a Base this phone set up (it holds the Base's key). Over the internet, not the Base. */
+function AlertsPause({ base, onBaseChange }: { base: ManagedBase; onBaseChange: (b: ManagedBase) => void }) {
+  const [sending, setSending] = useState<PauseChoice | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const paused = isPaused(base.alertsPausedUntil);
+
+  const send = async (choice: PauseChoice) => {
+    setSending(choice);
+    setError(null);
+    const r = await sendAlertPause(base.deviceId, base.apiKey, pauseUntil(choice));
+    if (r.ok) {
+      const next = { ...base, alertsPausedUntil: r.until };
+      await saveBase(next);
+      onBaseChange(next);
+    } else {
+      setError(r.error);
+    }
+    setSending(null);
+  };
+
+  const button = (choice: PauseChoice, label: string, primary = false) => (
+    <Pressable
+      key={choice}
+      accessibilityRole="button"
+      className={`mt-2 items-center rounded-2xl py-3 active:opacity-75 ${primary ? 'bg-green-700' : 'border border-green-700 dark:border-green-400'}`}
+      disabled={sending != null}
+      onPress={() => void send(choice)}
+    >
+      {sending === choice ? (
+        <ActivityIndicator color={primary ? '#fff' : '#347F57'} />
+      ) : (
+        <Text className={`text-base font-semibold ${primary ? 'text-white' : 'text-green-700 dark:text-green-300'}`}>{label}</Text>
+      )}
+    </Pressable>
+  );
+
+  return (
+    <>
+      <Text className="ml-1 text-sm text-gray-700 dark:text-gray-200">{pauseLabel(base.alertsPausedUntil)}</Text>
+      <Text className="mt-1 ml-1 text-xs text-gray-500 dark:text-gray-400">
+        Switching the Base off for a while? Pause the emails about it. This works over any internet connection, the phone does not need to be near the Base.
+      </Text>
+      {error ? <Text className="mt-2 ml-1 text-sm text-red-600 dark:text-red-300">{error}</Text> : null}
+      {paused ? button('resume', 'Turn alerts back on', true) : null}
+      <Text className="mt-3 ml-1 text-xs font-semibold text-gray-500 dark:text-gray-400">{paused ? 'Or pause for' : 'Pause for'}</Text>
+      {PAUSE_CHOICES.map((c) => button(c.choice, c.label))}
+    </>
+  );
+}
+
 const heading = 'mt-6 mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400';
 
 /**
@@ -88,6 +150,9 @@ export default function BaseScreen() {
   const [local, setLocal] = useState<{ health: BaseHealth; test: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [remembered, setRemembered] = useState<string | null>(null);
+  const [infoDeployment, setInfoDeployment] = useState<string | null>(null);
+  const [cloudTest, setCloudTest] = useState<boolean | null>(null);
   // The Base's own BirdNET-Go station gives its home network address when none was saved at setup.
   const stationHost = useStationStore((s) => s.stations.find((st) => base && st.baseId === base.hardwareId)?.hostUrl);
 
@@ -95,7 +160,11 @@ export default function BaseScreen() {
   // Reloaded on focus, so a location changed on the next screen shows here.
   useFocusEffect(
     useCallback(() => {
-      void getBases().then((all) => setBase(all.find((b) => b.deviceId === id || b.hardwareId === id) ?? null));
+      void getBases().then(async (all) => {
+        const found = all.find((b) => b.deviceId === id || b.hardwareId === id) ?? null;
+        setBase(found);
+        if (found) setRemembered((await getBaseDeployments())[found.hardwareId] ?? null);
+      });
     }, [id]),
   );
 
@@ -121,6 +190,29 @@ export default function BaseScreen() {
     };
   }, [base, id]);
 
+  // Test mode and the alert pause as Wildlife Network has them (needs the Base's key). Keeps what this phone last
+  // sent when the server does not report the pause.
+  const deviceId = base?.deviceId;
+  const apiKey = base?.apiKey;
+  useEffect(() => {
+    if (!deviceId || !apiKey) return;
+    let live = true;
+    void fetchDeviceSettings(deviceId, apiKey).then(async (s) => {
+      if (!live || !s) return;
+      setCloudTest(s.test);
+      if (s.alertsPausedUntil === undefined) return;
+      const all = await getBases();
+      const cur = all.find((b) => b.deviceId === deviceId);
+      if (!live || !cur || (cur.alertsPausedUntil ?? null) === s.alertsPausedUntil) return;
+      const next = { ...cur, alertsPausedUntil: s.alertsPausedUntil };
+      await saveBase(next);
+      if (live) setBase(next);
+    });
+    return () => {
+      live = false;
+    };
+  }, [deviceId, apiKey]);
+
   // Straight from the Base when it is on the same network as the phone.
   // Also the address it answers at right now (home network, or its own Wi-Fi when the phone is joined to it),
   // which settings changes such as the location need.
@@ -138,6 +230,7 @@ export default function BaseScreen() {
         if (!live) return;
         if (info?.hardwareId === hardwareId) {
           setLocal({ health: healthFromLocal(info), test: isTestBase(info) });
+          setInfoDeployment(deploymentFromInfo(info, hardwareId));
           setReachUrl(url);
           return;
         }
@@ -158,6 +251,7 @@ export default function BaseScreen() {
       if (r === 'connected') routeToBase(true);
       const [info, status] = await Promise.all([getBaseInfo(BASE_HOTSPOT_URL).catch(() => null), getBaseStatus(BASE_HOTSPOT_URL)]);
       setLocal({ health: healthFromLocal(info, status), test: isTestBase(info) });
+      if (info) setInfoDeployment(deploymentFromInfo(info, base.hardwareId));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not reach the Base.');
     } finally {
@@ -173,6 +267,11 @@ export default function BaseScreen() {
       </View>
     );
   }
+
+  // Test stations have no public page.
+  const isTest = local?.test === true || cloudTest === true;
+  const deployment = base.deploymentId ?? remembered ?? infoDeployment;
+  const publicPage = deployment && !isTest ? stationPageUrl(deployment) : null;
 
   return (
     <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950" contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
@@ -248,6 +347,23 @@ export default function BaseScreen() {
       )}
 
       <CollectDetections base={base} onBaseChange={setBase} />
+
+      {base.deviceId && base.apiKey ? (
+        <>
+          <Text className={heading}>Email alerts</Text>
+          <AlertsPause base={base} onBaseChange={setBase} />
+        </>
+      ) : null}
+
+      <Text className={heading}>On Wildlife Network</Text>
+      {publicPage ? (
+        <Pressable accessibilityRole="link" className="ml-1 py-2 self-start" onPress={() => void Linking.openURL(publicPage)}>
+          <Text className="text-sm font-semibold text-green-700 dark:text-green-300">View its public page</Text>
+        </Pressable>
+      ) : null}
+      <Pressable accessibilityRole="link" className="ml-1 py-2 self-start" onPress={() => void Linking.openURL(MY_STATIONS_URL)}>
+        <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Manage it on Wildlife Network</Text>
+      </Pressable>
 
       <Pressable
         accessibilityRole="button"

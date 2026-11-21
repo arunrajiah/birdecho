@@ -196,6 +196,8 @@ export interface ManagedBase {
   address?: string;
   /** "<system>:<deploymentId>" its detections are filed under on Wildlife Network, once found (remoteFeed.ts). */
   deploymentId?: string;
+  /** Health emails paused until this time, as this phone last sent or read back (null = on). baseAlerts.ts */
+  alertsPausedUntil?: string | null;
   addedAt: string;
 }
 
