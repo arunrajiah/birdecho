@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-11-23
+
 ### Added
 - Share a BirdNET-Go station with Wildlife Network from this phone, with nothing to install on the station: Share with Wildlife Network > Share from this phone. When the app opens or comes back to the front and the phone can reach the station (same Wi-Fi), BirdEcho reads the detections made since the last one it sent from BirdNET-Go's API and uploads them with the station's own key, at most every 10 minutes; the first share goes back 7 days. BirdNET-Go keeps the detections, so nothing is queued on the phone and a phone that was away catches up. Same rules as wdx-agent: 70% confidence and up, nothing marked wrong or unlikely for the location, coordinates rounded to about 1 km. Shows how many were sent and when, Send now and Stop sharing; if the station has no location, it can use this phone's GPS. Installing the agent later carries on where the phone stopped (the install command passes the station id and the time of the last shared detection), so nothing is counted twice.
 
