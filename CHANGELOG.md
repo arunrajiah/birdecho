@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-11-22
+
 ### Added
 - Base page: pause the email alerts Wildlife Network sends when a Base stops reporting, loses its microphone or runs hot, for a Base set up from this phone. Choose 1 day, 1 week, 1 month or until you turn them back on, and turn them back on at any time. Shows whether alerts are on or paused until when. Works over any internet connection, including mobile data; the phone does not need to be near the Base.
-- Base page: View its public page (the Base's station page on Wildlife Network, once BirdEcho knows where its detections are filed; not for test stations) and Manage it on Wildlife Network.
+- Base page: View its public page (the Base's station page on Wildlife Network, once BirdEcho knows where its detections are filed; not for test stations).
+- Base page: Manage from anywhere, for a Base set up from this phone. Opens My stations on wlnw.org in the phone's browser with the Base already added, so you can check its health, switch test mode and pause alerts from any browser without finding the device key. The key is sent only to Wildlife Network in the request, never put in the link; the link works for 10 minutes.
 
 ## [0.17.0] - 2026-11-21
 
