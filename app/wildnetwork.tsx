@@ -3,6 +3,8 @@ import { View, Text, Pressable, ScrollView, Share, Linking, ActivityIndicator, T
 import { useStationStore } from '../src/stores/stationStore';
 import { getWildNetworkDevice, getWildNetworkKey, setWildNetworkDevice, setWildNetworkKey } from '../src/lib/secureStorage';
 import StationStatus from '../src/components/StationStatus';
+import PhoneShare from '../src/components/PhoneShare';
+import type { ShareState } from '../src/lib/phoneShare';
 import {
   fetchNear,
   WILDNETWORK_BASE,
@@ -72,6 +74,7 @@ export default function WildNetworkScreen() {
   const [uploadsToBirdWeather, setUploadsToBirdWeather] = useState<BirdWeatherAnswer>('unknown');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [share, setShare] = useState<ShareState | null>(null);
 
   const linkStationToBase = useStationStore((s) => s.linkStationToBase);
   const isBase = isBaseStation(station);
@@ -134,9 +137,8 @@ export default function WildNetworkScreen() {
     );
   }
 
-  async function handleRegister() {
-    if (!station || isBaseStation(station)) return;
-    setBusy(true);
+  async function registerStation(): Promise<{ apiKey: string; deviceId: string } | null> {
+    if (!station || isBaseStation(station)) return null;
     setError(null);
     try {
       const reg = await registerWithWildNetwork(station.stationName, station.connectionType);
@@ -144,14 +146,32 @@ export default function WildNetworkScreen() {
       await setWildNetworkDevice(station.id, reg.deviceId);
       setApiKey(reg.apiKey);
       setDeviceId(reg.deviceId);
+      return reg;
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Registration failed.');
-    } finally {
-      setBusy(false);
+      return null;
     }
   }
 
-  const command = apiKey ? installCommand(apiKey, deviceId, station?.connectionType) : null;
+  async function handleRegister() {
+    setBusy(true);
+    await registerStation();
+    setBusy(false);
+  }
+
+  const canPhoneShare = station.connectionType === 'birdnetgo' && !!station.hostUrl;
+  const command = apiKey ? installCommand(apiKey, deviceId, station.connectionType, share?.lastTime) : null;
+  const phoneShare = canPhoneShare ? (
+    <PhoneShare
+      stationId={station.id}
+      stationName={station.stationName}
+      hostUrl={station.hostUrl!}
+      apiKey={apiKey}
+      deviceId={deviceId}
+      register={registerStation}
+      onChange={setShare}
+    />
+  ) : null;
 
   return (
     <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950">
@@ -171,6 +191,12 @@ export default function WildNetworkScreen() {
           <ActivityIndicator />
         ) : command ? (
           <>
+            {phoneShare}
+            {canPhoneShare ? (
+              <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Or send around the clock
+              </Text>
+            ) : null}
             <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
               Run this on your Pi
             </Text>
@@ -230,6 +256,12 @@ export default function WildNetworkScreen() {
 
             {uploadsToBirdWeather === 'no' && (
               <>
+                {phoneShare}
+                {canPhoneShare ? (
+                  <Text className="mb-2 ml-1 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    Or install on the station, to send around the clock
+                  </Text>
+                ) : null}
                 <Pressable
                   className="mb-3 items-center rounded-2xl bg-green-700 py-3.5 active:opacity-75"
                   disabled={busy}

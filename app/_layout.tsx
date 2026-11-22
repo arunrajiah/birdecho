@@ -18,6 +18,19 @@ import { chrome } from '../src/theme/colors';
 import { StatusBar } from 'expo-status-bar';
 import { AppState } from 'react-native';
 import { flushOutbox } from '../src/lib/outbox';
+import Constants from 'expo-constants';
+import { sharePhoneStations } from '../src/lib/phoneShare';
+import { getWildNetworkDevice, getWildNetworkKey } from '../src/lib/secureStorage';
+
+/** BirdNET-Go stations shared from this phone: new detections go to Wildlife Network when the station is in reach. */
+function shareFromPhone() {
+  void sharePhoneStations({
+    stations: useStationStore.getState().stations,
+    getKey: getWildNetworkKey,
+    getDevice: getWildNetworkDevice,
+    appVersion: Constants.expoConfig?.version ?? '0.0.0',
+  });
+}
 
 initSentry();
 
@@ -60,11 +73,21 @@ export default function RootLayout() {
   // tried at start and whenever the app comes back to the foreground.
   useEffect(() => {
     void flushOutbox();
+    shareFromPhone();
     const sub = AppState.addEventListener('change', (st) => {
-      if (st === 'active') void flushOutbox();
+      if (st === 'active') {
+        void flushOutbox();
+        shareFromPhone();
+      }
     });
     return () => sub.remove();
   }, []);
+
+  // Stations load from storage after the first render: share once they are there.
+  const stationCount = useStationStore((st) => st.stations.length);
+  useEffect(() => {
+    if (stationCount) shareFromPhone();
+  }, [stationCount]);
 
   useEffect(() => {
     if (hydrated.current) return;
