@@ -96,9 +96,11 @@ export async function fetchNear(): Promise<{ lat: number; lon: number; city: str
  * The one-line installer for wdx-agent. With the station's kind it adds WDX_SOURCE, so the installer looks for that
  * database (in the usual folders, Docker volumes and NAS shares) instead of guessing.
  */
-export function installCommand(apiKey: string, deviceId?: string | null, kind?: string | null): string {
+export function installCommand(apiKey: string, deviceId?: string | null, kind?: string | null, sharedUntil?: string | null): string {
   const source = kind === 'birdnetgo' ? 'birdnet-go' : kind === 'birdnetpi' ? 'birdnet-pi' : null;
-  return `curl -fsSL ${WILDNETWORK_BASE}/agent/install.sh | WDX_KEY=${apiKey}${deviceId ? ` WDX_DEVICE_ID=${deviceId}` : ''}${source ? ` WDX_SOURCE=${source}` : ''} bash`;
+  // After sharing from the phone: same station id (the device id) and skip what the phone already sent.
+  const shared = sharedUntil && deviceId ? ` WDX_STATION_ID=${deviceId} WDX_START_AFTER=${sharedUntil}` : '';
+  return `curl -fsSL ${WILDNETWORK_BASE}/agent/install.sh | WDX_KEY=${apiKey}${deviceId ? ` WDX_DEVICE_ID=${deviceId}` : ''}${source ? ` WDX_SOURCE=${source}` : ''}${shared} bash`;
 }
 
 // ─── Read side: Wildlife Network context for the station's area ───────────────────
