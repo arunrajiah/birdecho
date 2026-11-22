@@ -136,3 +136,26 @@ export function stationPageUrl(deploymentId: string): string | null {
 }
 
 export const MY_STATIONS_URL = `${WILDNETWORK_BASE}/stations/mine`;
+
+export type ManageLinkResult = { ok: true; url: string } | { ok: false; error: string };
+
+/**
+ * "Manage from anywhere": proves the Base's key to Wildlife Network and gets back a link (valid 10 minutes) that adds the
+ * Base to "My stations" in the browser it is opened in. The key goes only in the request header, never in the link.
+ */
+export async function requestManageLink(apiKey: string, f: typeof fetch = fetch): Promise<ManageLinkResult> {
+  let res: Response;
+  try {
+    res = await f(`${WILDNETWORK_BASE}/api/v1/stations/mine/link`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${apiKey}`, accept: 'application/json' },
+    });
+  } catch {
+    return { ok: false, error: pauseError(null) };
+  }
+  if (res.status === 429) return { ok: false, error: 'Too many tries from this network. Wait an hour and try again.' };
+  if (!res.ok) return { ok: false, error: pauseError(res.status) };
+  const j = (await res.json().catch(() => null)) as { url?: unknown } | null;
+  const url = typeof j?.url === 'string' && j.url.startsWith(`${WILDNETWORK_BASE}/`) ? j.url : null;
+  return url ? { ok: true, url } : { ok: false, error: pauseError(404) };
+}
