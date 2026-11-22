@@ -10,6 +10,7 @@ import {
   isPaused,
   pauseLabel,
   pauseUntil,
+  requestManageLink,
   sendAlertPause,
   stationPageUrl,
   type PauseChoice,
@@ -84,6 +85,43 @@ function fromCloudDevice(d: CloudDevice): BaseHealth {
     storage: d.storage,
     battery: d.battery,
   };
+}
+
+/**
+ * Opens "My stations" on wlnw.org in the phone's browser with this Base already added, so the owner can check it and
+ * change its settings from any browser later without finding the device key.
+ */
+function ManageFromAnywhere({ apiKey }: { apiKey: string }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const open = async () => {
+    setBusy(true);
+    setError(null);
+    const r = await requestManageLink(apiKey);
+    setBusy(false);
+    if (r.ok) await Linking.openURL(r.url);
+    else setError(r.error);
+  };
+  return (
+    <View className="ml-1 mt-1">
+      <Text className="text-sm text-gray-600 dark:text-gray-300">
+        Check this Base, switch test mode and pause alerts from any browser, even away from its Wi-Fi. This opens My stations with the Base already added.
+      </Text>
+      <Pressable
+        accessibilityRole="button"
+        className="mt-2 items-center rounded-2xl border border-green-700 dark:border-green-400 py-3 active:opacity-75"
+        disabled={busy}
+        onPress={() => void open()}
+      >
+        {busy ? (
+          <ActivityIndicator color="#347F57" />
+        ) : (
+          <Text className="text-base font-semibold text-green-700 dark:text-green-300">Manage from anywhere</Text>
+        )}
+      </Pressable>
+      {error ? <Text className="mt-2 text-sm text-amber-700 dark:text-amber-300">{error}</Text> : null}
+    </View>
+  );
 }
 
 /** Pause the health emails for a Base this phone set up (it holds the Base's key). Over the internet, not the Base. */
@@ -361,9 +399,13 @@ export default function BaseScreen() {
           <Text className="text-sm font-semibold text-green-700 dark:text-green-300">View its public page</Text>
         </Pressable>
       ) : null}
-      <Pressable accessibilityRole="link" className="ml-1 py-2 self-start" onPress={() => void Linking.openURL(MY_STATIONS_URL)}>
-        <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Manage it on Wildlife Network</Text>
-      </Pressable>
+      {base.deviceId && base.apiKey ? (
+        <ManageFromAnywhere apiKey={base.apiKey} />
+      ) : (
+        <Pressable accessibilityRole="link" className="ml-1 py-2 self-start" onPress={() => void Linking.openURL(MY_STATIONS_URL)}>
+          <Text className="text-sm font-semibold text-green-700 dark:text-green-300">Manage it on Wildlife Network</Text>
+        </Pressable>
+      )}
 
       <Pressable
         accessibilityRole="button"

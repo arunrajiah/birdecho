@@ -8,6 +8,7 @@ import {
   pauseLabel,
   pauseRequest,
   pauseUntil,
+  requestManageLink,
   sendAlertPause,
   stationPageUrl,
   stationSlug,
@@ -121,5 +122,34 @@ describe('stationSlug', () => {
     assert.equal(stationSlug(':x'), null);
     assert.equal(stationSlug('x:'), null);
     assert.equal(stationPageUrl('nocolon'), null);
+  });
+});
+
+describe('requestManageLink', () => {
+  it('returns the link and sends the key only in the header', async () => {
+    let seen: { url: string; init?: RequestInit } | null = null;
+    const f = (async (url: string, init?: RequestInit) => {
+      seen = { url, init };
+      return new Response(JSON.stringify({ url: 'https://wlnw.org/stations/mine/link?t=abc.def' }), { status: 200 });
+    }) as unknown as typeof fetch;
+    const r = await requestManageLink('wn_secret', f);
+    assert.deepEqual(r, { ok: true, url: 'https://wlnw.org/stations/mine/link?t=abc.def' });
+    assert.equal(seen!.url, 'https://wlnw.org/api/v1/stations/mine/link');
+    assert.equal((seen!.init!.headers as Record<string, string>).authorization, 'Bearer wn_secret');
+    assert.ok(!seen!.url.includes('wn_secret'));
+  });
+  it('refuses a link to another site', async () => {
+    const f = (async () => new Response(JSON.stringify({ url: 'https://evil.example/x' }), { status: 200 })) as unknown as typeof fetch;
+    assert.equal((await requestManageLink('wn_k', f)).ok, false);
+  });
+  it('explains a rejected key, rate limit and no internet', async () => {
+    const st = (status: number) => (async () => new Response('{}', { status })) as unknown as typeof fetch;
+    const r401 = await requestManageLink('wn_k', st(401));
+    assert.ok(!r401.ok && r401.error.includes('key'));
+    const r429 = await requestManageLink('wn_k', st(429));
+    assert.ok(!r429.ok && r429.error.includes('hour'));
+    const off = (async () => { throw new TypeError('offline'); }) as unknown as typeof fetch;
+    const r0 = await requestManageLink('wn_k', off);
+    assert.ok(!r0.ok && r0.error.includes('internet'));
   });
 });
