@@ -174,6 +174,19 @@ describe('BirdNET-Pi parser safety net', () => {
     );
   });
 
+  it('asks for each finished day once, then only for today', async () => {
+    const requested = mockFetch([
+      { match: 'today_stats', body: fixture('pi-nachtzuster-stats.html') },
+      { match: 'play.php?date=', body: fixture('pi-nachtzuster-date.html') },
+    ]);
+    const adapter = createBirdNetPiAdapter(BASE);
+    const first = await adapter.fetchDailyCounts(3);
+    const second = await adapter.fetchDailyCounts(3);
+    assert.deepEqual(second, first);
+    assert.equal(requested.filter((u) => u.includes('play.php?date=')).length, 2);
+    assert.equal(requested.filter((u) => u.includes('today_stats')).length, 2);
+  });
+
   it('shows exact counts on the Species tab with one stats.php request', async () => {
     const requested = mockFetch([
       { match: 'play.php?byspecies', body: fixture('pi-nachtzuster-species-rounded.html') },

@@ -110,6 +110,8 @@ export function flushOutbox(): Promise<Record<string, UploadResult>> {
     const results: Record<string, UploadResult> = {};
     try {
       const counts = await waitingCounts();
+      // Nothing waiting (the usual case): skip reading the Bases from secure storage.
+      if (!Object.keys(counts).length) return results;
       const bases = await getBases();
       for (const baseId of Object.keys(counts)) {
         const key = bases.find((b) => b.hardwareId === baseId)?.apiKey;

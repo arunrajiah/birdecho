@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Share with Wildlife Network: the install command for a BirdNET-Go or BirdNET-Pi station now says which kind it is, so the installer looks for that database (including Docker and NAS setups) instead of guessing, and the page says to run it on the computer that runs BirdNET.
+- Faster: the Feed scrolls more smoothly (detection times no longer rebuild a date formatter for every card); on a BirdNET-Pi station the Stats chart asks the Pi for each finished day only once and at most 3 pages at a time, so it loads sooner and no longer swamps a small Pi with 14 requests; the app also does less work at start when no Base detections are waiting to upload.
 
 ## [0.18.0] - 2026-11-22
 

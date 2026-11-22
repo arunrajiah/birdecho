@@ -27,7 +27,9 @@ export function usePhoneNetwork(): PhoneNetwork | null {
     const update = async (s: { type?: string; isConnected?: boolean }) => {
       const wifi = s.type === N.NetworkStateType.WIFI || s.type === N.NetworkStateType.ETHERNET;
       const ip = wifi ? await N.getIpAddressAsync().catch(() => null) : null;
-      if (live) setNet({ type: s.type ?? null, isConnected: s.isConnected ?? null, ip });
+      const next = { type: s.type ?? null, isConnected: s.isConnected ?? null, ip };
+      // The listener can repeat the same state: keep the old object so the Feed does not re-render for nothing.
+      if (live) setNet((prev) => (prev && prev.type === next.type && prev.isConnected === next.isConnected && prev.ip === next.ip ? prev : next));
     };
     N.getNetworkStateAsync().then(update, () => {
       if (live) setNet({ type: 'UNKNOWN' });
