@@ -1,7 +1,7 @@
 import { WILDNETWORK_BASE } from './wildnetwork';
 
 /**
- * Health email pauses for a Base (Wildlife Network emails the owner when a Base stops reporting, loses its microphone
+ * Health email pauses for a Base (the Wildlife Network team is emailed when a running Base loses its microphone
  * or runs hot), and the links to the Base's station page. Pure apart from sendAlertPause, which takes a fetch.
  */
 
@@ -69,7 +69,7 @@ export function isPaused(until: string | null | undefined, now: Date = new Date(
 
 /** One line for the Base page. */
 export function pauseLabel(until: string | null | undefined, now: Date = new Date()): string {
-  if (!isPaused(until, now)) return 'Alerts are on. Wildlife Network emails you if this Base stops reporting, loses its microphone or runs hot.';
+  if (!isPaused(until, now)) return 'Alerts are on. If this Base loses its microphone or runs hot while it is running, the Wildlife Network team is told so they can help. Switching it off is never reported.';
   if (isOpenEnded(until!)) return 'Alerts are paused until you turn them back on.';
   const when = new Date(until!).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
   return `Alerts are paused until ${when}.`;
