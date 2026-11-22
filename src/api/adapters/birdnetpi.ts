@@ -410,6 +410,8 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
   }
 
   const approximate = new Set<string>();
+  /** Totals of finished days (date to count), filled by fetchDailyCounts. */
+  const pastDays = new Map<string, number>();
 
   // The species list backs the Species tab, every species page and every
   // favourite row, so share one load between callers that arrive together.
@@ -604,17 +606,21 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
         d.setDate(d.getDate() - (days - 1 - i));
         return ymd(d);
       });
-      const counts = await Promise.all(
-        dates.map(async (date) => {
-          try {
-            if (date === today) return (await this.fetchStats()).recordsToday;
-            const html = await bpiGetHtml(base, `/play.php?date=${date}&sort=occurrences`);
-            return parseSpeciesButtons(html).reduce((n, b) => n + (b.count ?? 0), 0);
-          } catch {
-            return 0;
-          }
-        }),
-      );
+      // A past day's total no longer changes, so it is asked for once per adapter; at most 3 pages are asked for
+      // at a time, since a small Pi renders PHP pages one or two at a time and 14 at once can run into the timeout.
+      const counts = await mapLimit(dates, 3, async (date) => {
+        try {
+          if (date === today) return (await this.fetchStats()).recordsToday;
+          const done = pastDays.get(date);
+          if (done !== undefined) return done;
+          const html = await bpiGetHtml(base, `/play.php?date=${date}&sort=occurrences`);
+          const n = parseSpeciesButtons(html).reduce((sum, b) => sum + (b.count ?? 0), 0);
+          pastDays.set(date, n);
+          return n;
+        } catch {
+          return 0;
+        }
+      });
       return dates.map((date, i) => ({ date, count: counts[i] ?? 0 }));
     },
   };
