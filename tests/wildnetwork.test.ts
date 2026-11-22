@@ -36,6 +36,8 @@ describe('Wildlife Network station status', () => {
   it('puts the device id in the install command when known', () => {
     assert.equal(installCommand('wn_k'), 'curl -fsSL https://wlnw.org/agent/install.sh | WDX_KEY=wn_k bash');
     assert.equal(installCommand('wn_k', 'dev_1'), 'curl -fsSL https://wlnw.org/agent/install.sh | WDX_KEY=wn_k WDX_DEVICE_ID=dev_1 bash');
+    assert.equal(installCommand('wn_k', 'dev_1', 'birdnetgo'), 'curl -fsSL https://wlnw.org/agent/install.sh | WDX_KEY=wn_k WDX_DEVICE_ID=dev_1 WDX_SOURCE=birdnet-go bash');
+    assert.equal(installCommand('wn_k', null, 'birdnetpi'), 'curl -fsSL https://wlnw.org/agent/install.sh | WDX_KEY=wn_k WDX_SOURCE=birdnet-pi bash');
   });
   it('reads the last report of this device only', async () => {
     const f = (async () => new Response(JSON.stringify({ devices: [{ id: 'a', lastReport: '2026-11-16T10:00:00Z' }, { id: 'b', lastReport: null }] }))) as unknown as typeof fetch;
