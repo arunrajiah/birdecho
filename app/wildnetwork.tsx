@@ -151,7 +151,7 @@ export default function WildNetworkScreen() {
     }
   }
 
-  const command = apiKey ? installCommand(apiKey, deviceId) : null;
+  const command = apiKey ? installCommand(apiKey, deviceId, station?.connectionType) : null;
 
   return (
     <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-950">
@@ -176,7 +176,8 @@ export default function WildNetworkScreen() {
             </Text>
             <Text className="mb-3 text-sm text-gray-600 dark:text-gray-300">
               Open a terminal on the Pi running {station.stationName} (for example over SSH) and
-              paste this command. It installs the agent and starts sending.
+              paste this command. It installs the agent and starts sending. Run it on the computer that runs
+              BirdNET, not on this phone. Below, this page shows when the first detections arrive.
             </Text>
             <View className="mb-3 rounded-2xl bg-white dark:bg-gray-900 p-4">
               <Text selectable className="font-mono text-xs text-gray-800 dark:text-gray-200">

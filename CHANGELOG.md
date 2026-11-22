@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Share with Wildlife Network: the install command for a BirdNET-Go or BirdNET-Pi station now says which kind it is, so the installer looks for that database (including Docker and NAS setups) instead of guessing, and the page says to run it on the computer that runs BirdNET.
+
 ## [0.18.0] - 2026-11-22
 
 ### Added

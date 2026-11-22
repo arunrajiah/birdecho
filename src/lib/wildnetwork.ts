@@ -92,8 +92,13 @@ export async function fetchNear(): Promise<{ lat: number; lon: number; city: str
  * Install command for the Pi. WDX_KEY and, when known, WDX_DEVICE_ID (turns on health reports) are set; the installer
  * detects the source and database path itself (setting WDX_SOURCE would skip path detection).
  */
-export function installCommand(apiKey: string, deviceId?: string | null): string {
-  return `curl -fsSL ${WILDNETWORK_BASE}/agent/install.sh | WDX_KEY=${apiKey}${deviceId ? ` WDX_DEVICE_ID=${deviceId}` : ''} bash`;
+/**
+ * The one-line installer for wdx-agent. With the station's kind it adds WDX_SOURCE, so the installer looks for that
+ * database (in the usual folders, Docker volumes and NAS shares) instead of guessing.
+ */
+export function installCommand(apiKey: string, deviceId?: string | null, kind?: string | null): string {
+  const source = kind === 'birdnetgo' ? 'birdnet-go' : kind === 'birdnetpi' ? 'birdnet-pi' : null;
+  return `curl -fsSL ${WILDNETWORK_BASE}/agent/install.sh | WDX_KEY=${apiKey}${deviceId ? ` WDX_DEVICE_ID=${deviceId}` : ''}${source ? ` WDX_SOURCE=${source}` : ''} bash`;
 }
 
 // ─── Read side: Wildlife Network context for the station's area ───────────────────
