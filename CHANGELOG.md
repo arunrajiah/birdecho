@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Species, Stats and Favorites now load in the background a few seconds after the Feed, one request at a time, so switching to them shows data straight away instead of waiting on the station.
+
+### Fixed
+- BirdNET-Pi (Nachtzuster): the Species tab showed counts rounded to three digits ("84,100") on stations with a lot of detections. The exact totals come from the station's stats page, which on a busy Pi can take longer than the app waited. The app now waits longer for it, asks for it alongside the species list once a station needs it, and keeps the last totals for the next load.
+
 ## [0.19.0] - 2026-11-23
 
 ### Added
