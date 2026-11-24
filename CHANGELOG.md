@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.19.1] - 2026-11-24
+
 ### Changed
 - Species, Stats and Favorites now load in the background a few seconds after the Feed, one request at a time, so switching to them shows data straight away instead of waiting on the station.
 

@@ -1,0 +1,1 @@
+Exact detection counts on the Species tab for busy BirdNET-Pi stations. Species, Stats and Favorites now load in the background, so switching tabs is instant.
