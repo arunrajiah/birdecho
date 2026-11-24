@@ -3,6 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'nativewind';
 import { useStationStore } from '../../src/stores/stationStore';
 import { chrome } from '../../src/theme/colors';
+import { usePrefetchTabs } from '../../src/hooks/usePrefetchTabs';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -18,6 +19,8 @@ export default function TabsLayout() {
   const stationName = useStationStore((s) => s.stationName);
   const stationsCount = useStationStore((s) => s.stations.length);
   const { colorScheme } = useColorScheme();
+  // Species, Stats and Favorites load in the background once the Feed is up.
+  usePrefetchTabs();
   const isDark = colorScheme === 'dark';
 
   // Show the active station name as the Feed tab title.

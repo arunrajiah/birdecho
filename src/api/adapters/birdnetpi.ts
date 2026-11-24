@@ -23,14 +23,19 @@ import type { Detection, RecordsPage, Species, Stats } from '../../types/birdwea
 
 // BirdNET-Pi renders PHP pages, slower than BirdNET-Go's API on a small Pi, so it gets a longer (still bounded) timeout.
 const BPI_TIMEOUT_MS = 10_000;
+// stats.php runs a GROUP BY over every detection and renders a player per species: on a station with a few hundred
+// thousand detections a small Pi needs well over 10 s for it.
+const STATS_TIMEOUT_MS = 45_000;
+// How long the species list waits for stats.php once the list itself is in. Later totals are kept for the next load.
+const STATS_GRACE_MS = 6_000;
 
 // ── Low-level fetch helpers ─────────────────────────────────────────────────
 
-async function bpiGetHtml(base: string, path: string): Promise<string> {
+async function bpiGetHtml(base: string, path: string, timeoutMs = BPI_TIMEOUT_MS): Promise<string> {
   const url = `${base}${path}`;
   let response: Response;
   try {
-    response = await fetchWithTimeout(url, {}, BPI_TIMEOUT_MS);
+    response = await fetchWithTimeout(url, {}, timeoutMs);
   } catch {
     throw new Error('Could not reach BirdNET-Pi station — check the host URL and your network.');
   }
@@ -341,6 +346,9 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
    * that page lacks on mcguirepr89 (scientific names, counts).
    */
   async function loadSpeciesList(): Promise<Species[]> {
+    // Once a station has needed stats.php, ask for it at the same time as the list, not after it, so a slow station
+    // pays for one wait. Stations whose list is already exact are never asked.
+    const early = totalsNeeded ? allTimeTotals() : undefined;
     const [listResult, todayResult] = await Promise.allSettled([
       bpiGetHtml(base, '/play.php?byspecies=1&sort=occurrences').then(parseSpeciesButtons),
       fetchAllTodaysDetections(base),
@@ -350,18 +358,18 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
 
     // stats.php has every all-time total in one request. mcguirepr89's buttons have no
     // counts, and Nachtzuster's round to "13.6k" from 1000 up.
-    if (buttons.some((b) => b.approximate) || (buttons.length > 0 && buttons.every((b) => b.count === undefined))) {
-      try {
-        const totals = parseOccurrences(await bpiGetHtml(base, '/stats.php'));
-        for (const b of buttons) {
-          const total = totals.get(b.commonName) ?? totals.get(b.value);
-          if (total !== undefined) {
-            b.count = total;
-            approximate.delete(b.commonName);
-          }
+    totalsNeeded = buttons.some((b) => b.approximate) || (buttons.length > 0 && buttons.every((b) => b.count === undefined));
+    if (totalsNeeded) {
+      const totals = await Promise.race([
+        early ?? allTimeTotals(),
+        new Promise<undefined>((r) => setTimeout(() => r(undefined), STATS_GRACE_MS)),
+      ]) ?? knownTotals?.totals;
+      for (const b of totals ? buttons : []) {
+        const total = totals!.get(b.commonName) ?? totals!.get(b.value);
+        if (total !== undefined) {
+          b.count = total;
+          approximate.delete(b.commonName);
         }
-      } catch {
-        // Older or customised stations without stats.php keep the fallback below.
       }
     }
     const today = todayResult.status === 'fulfilled' ? todayResult.value : [];
@@ -410,6 +418,27 @@ export function createBirdNetPiAdapter(hostUrl: string): StationAdapter {
   }
 
   const approximate = new Set<string>();
+
+  /**
+   * All-time totals per species from stats.php (exact, unlike the "13.6k" labels). One request at a time; the last
+   * answer is kept, so a station too slow for the grace period still gets exact counts on the next load.
+   */
+  let totalsNeeded = false;
+  let knownTotals: { at: number; totals: Map<string, number> } | undefined;
+  let totalsInFlight: Promise<Map<string, number> | undefined> | undefined;
+  function allTimeTotals(): Promise<Map<string, number> | undefined> {
+    if (knownTotals && Date.now() - knownTotals.at < 60_000) return Promise.resolve(knownTotals.totals);
+    totalsInFlight ??= bpiGetHtml(base, '/stats.php', STATS_TIMEOUT_MS)
+      .then((html) => {
+        const totals = parseOccurrences(html);
+        if (totals.size > 0) knownTotals = { at: Date.now(), totals };
+        return totals.size > 0 ? totals : undefined;
+      })
+      // Older or customised stations without stats.php keep the per-species fallback.
+      .catch(() => undefined)
+      .finally(() => { totalsInFlight = undefined; });
+    return totalsInFlight;
+  }
   /** Totals of finished days (date to count), filled by fetchDailyCounts. */
   const pastDays = new Map<string, number>();
 
