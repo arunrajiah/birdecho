@@ -155,6 +155,7 @@ export default function RootLayout() {
         <Stack.Screen name="wn-species/[name]" options={{ title: 'Species' }} />
         <Stack.Screen name="base/[id]" options={{ title: 'Base' }} />
         <Stack.Screen name="base-location" options={{ title: 'Change location' }} />
+        <Stack.Screen name="base-wifi" options={{ title: 'Change Wi-Fi' }} />
         <Stack.Screen name="record/[id]" options={{ title: 'Sighting' }} />
         <Stack.Screen name="species/[id]" options={{ title: 'Species' }} />
         <Stack.Screen name="wildnetwork" options={{ title: 'Wildlife Network' }} />
