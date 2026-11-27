@@ -1,0 +1,1 @@
+Moved your Wildlife Network Base? Change its Wi-Fi from the Base page: stand next to it, enter the new network, and the Base switches over by itself.
