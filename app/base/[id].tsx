@@ -384,6 +384,16 @@ export default function BaseScreen() {
         </>
       )}
 
+      <Text className={heading}>Wi-Fi</Text>
+      <Pressable
+        accessibilityRole="button"
+        className="items-center rounded-2xl border border-green-700 dark:border-green-400 py-3.5 active:opacity-75"
+        onPress={() => router.push({ pathname: '/base-wifi', params: { id: base.hardwareId, ...(reachUrl ? { url: reachUrl } : {}) } })}
+      >
+        <Text className="text-base font-semibold text-green-700 dark:text-green-300">Change Wi-Fi</Text>
+      </Pressable>
+      <Text className="mt-2 ml-1 text-xs text-gray-500 dark:text-gray-400">Moved the Base? Give it the Wi-Fi of its new place. Stand next to it.</Text>
+
       <CollectDetections base={base} onBaseChange={setBase} />
 
       {base.deviceId && base.apiKey ? (
