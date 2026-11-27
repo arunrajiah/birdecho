@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-11-27
+
+### Added
+- Base page: Change Wi-Fi, for a Base moved to a new place. At a new place the Base cannot find its old Wi-Fi and turns on its own Wi-Fi about 2 minutes after it starts. Stand next to it, enter the new Wi-Fi name and password, and the phone joins the Base's Wi-Fi (or shows how to join it by hand), saves the new network on the Base and leaves again. The Base moves to the new network within about 5 minutes. The password is only sent to the Base, never to Wildlife Network, and is not kept on the phone.
+
 ## [0.19.1] - 2026-11-24
 
 ### Changed
